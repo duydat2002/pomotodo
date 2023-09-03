@@ -36,11 +36,7 @@ const UInput: React.FC<IProps> = ({
 
   return (
     <View
-      style={[
-        style,
-        styles.wrapper,
-        {backgroundColor: activedColors.backgroundSec},
-      ]}>
+      style={[style, styles.wrapper, {backgroundColor: activedColors.input}]}>
       {children?.leftChild}
       <TextInput
         style={[
@@ -54,7 +50,7 @@ const UInput: React.FC<IProps> = ({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={activedColors.texSec}
+        placeholderTextColor={activedColors.textSec}
         keyboardType={keyboardType}
       />
       {children?.rightChild}

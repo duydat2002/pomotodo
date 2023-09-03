@@ -15,12 +15,7 @@ const LetsIn: React.FC = () => {
 
   return (
     <SafeView>
-      <Header
-        title={'Lets In'}
-        onPressLeft={() => {
-          console.log('cac');
-        }}
-      />
+      <Header title={'Lets In'} />
       <View style={[common.container, {justifyContent: 'space-between'}]}>
         <Text
           style={[common.title, {color: activedColors.text, marginTop: 150}]}>
@@ -74,7 +69,7 @@ const LetsIn: React.FC = () => {
           </UButton>
         </View>
         <View style={{flexDirection: 'row', marginBottom: 40}}>
-          <Text style={[common.text, {color: activedColors.texSec}]}>
+          <Text style={[common.text, {color: activedColors.textSec}]}>
             Don't have an account?{' '}
           </Text>
           <TouchableOpacity

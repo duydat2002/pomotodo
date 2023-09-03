@@ -1,51 +1,35 @@
-import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {ReactNode} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {FontAwesome} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
 import {useNavigation} from '@react-navigation/native';
 
 interface IProps {
-  leftIcon?: keyof typeof FontAwesome.glyphMap;
-  rightIcon?: keyof typeof FontAwesome.glyphMap;
   title?: string;
-  onPressLeft?: () => void;
-  onPressRight?: () => void;
+  children?: {
+    leftChild?: ReactNode;
+    rightChild?: ReactNode;
+  };
+  hasBack?: boolean;
 }
 
-const Header: React.FC<IProps> = ({
-  leftIcon,
-  rightIcon,
-  title,
-  onPressLeft,
-  onPressRight,
-}) => {
+const Header: React.FC<IProps> = ({title, children, hasBack = false}) => {
   const activedColors = useActivedColors();
   const navigation = useNavigation();
 
-  const onBack = () => {
-    navigation.goBack();
-  };
-
   return (
     <View style={styles.container}>
-      {leftIcon && (
-        <TouchableOpacity style={styles.button} onPress={onPressLeft || onBack}>
-          <FontAwesome
-            name={leftIcon}
-            style={{fontSize: 20, color: activedColors.text}}
-          />
-        </TouchableOpacity>
+      {children?.leftChild}
+      {hasBack && (
+        <FontAwesome
+          name="chevron-left"
+          style={{fontSize: 20, color: activedColors.text}}
+          onPress={() => navigation.goBack()}
+        />
       )}
       <Text style={[styles.title, {color: activedColors.text}]}>{title}</Text>
-      {rightIcon && (
-        <TouchableOpacity style={styles.button} onPress={onPressRight}>
-          <FontAwesome
-            name={rightIcon}
-            style={{fontSize: 20, color: activedColors.text}}
-          />
-        </TouchableOpacity>
-      )}
+      {children?.rightChild}
     </View>
   );
 };

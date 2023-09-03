@@ -65,7 +65,7 @@ const SignIn: React.FC = () => {
 
   return (
     <SafeView>
-      <Header leftIcon={'chevron-left'} title={'Sign In'} />
+      <Header title={'Sign In'} hasBack />
       <View style={[common.container, {justifyContent: 'space-between'}]}>
         <Text
           style={[
@@ -167,7 +167,7 @@ const SignIn: React.FC = () => {
           </UButton>
         </View>
         <View style={{flexDirection: 'row', marginBottom: 40}}>
-          <Text style={[common.text, {color: activedColors.texSec}]}>
+          <Text style={[common.text, {color: activedColors.textSec}]}>
             Don't have an account?{' '}
           </Text>
           <TouchableOpacity

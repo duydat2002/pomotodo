@@ -69,7 +69,7 @@ const SignUp = () => {
 
   return (
     <SafeView>
-      <Header leftIcon={'chevron-left'} title={'Sign Up'} />
+      <Header title={'Sign Up'} hasBack />
       <View style={[common.container, {justifyContent: 'space-between'}]}>
         <Text
           style={[
@@ -172,7 +172,7 @@ const SignUp = () => {
           </UButton>
         </View>
         <View style={{flexDirection: 'row', marginBottom: 40}}>
-          <Text style={[common.text, {color: activedColors.texSec}]}>
+          <Text style={[common.text, {color: activedColors.textSec}]}>
             Already have an account?{' '}
           </Text>
           <TouchableOpacity
