@@ -1,0 +1,4 @@
+Users (id, username, fullname, email, avatar)
+NProjects (id, name, color, totalTime, elapsedTime, totalTask, taskComplete)
+Projects (id, NProjectId, name, color, totalTime, elapsedTime, totalTask, taskComplete)
+Tasks (id, projectId, name, priority{none, lower, medium, hight}, isDone, totalPomodoro, longBreak, shortBreak, deadline)
