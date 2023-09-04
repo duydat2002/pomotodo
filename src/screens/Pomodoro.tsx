@@ -68,7 +68,6 @@ const Pomodoro: React.FC = () => {
           </Text>
         </View>
         <View style={{width: '100%', alignItems: 'center'}}>
-          {}
           <CountdownCircleTimer
             key={key}
             isPlaying={isPlaying}

@@ -7,6 +7,7 @@ export interface IProject {
   totalTask: number;
   taskComplete: number;
   ownerId: string; //Project owner ID
+  createdAt: any;
 }
 
 export interface ITask {
@@ -21,4 +22,5 @@ export interface ITask {
   shortBreak: number;
   deadline?: any;
   assignees?: string[]; // IDs of those assigned to the task
+  createdAt: any;
 }

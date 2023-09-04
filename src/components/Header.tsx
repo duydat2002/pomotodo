@@ -24,11 +24,17 @@ const Header: React.FC<IProps> = ({title, children, hasBack = false}) => {
       {hasBack && (
         <FontAwesome
           name="chevron-left"
-          style={{fontSize: 20, color: activedColors.text}}
+          style={{fontSize: 20, color: activedColors.text, marginRight: 10}}
           onPress={() => navigation.goBack()}
         />
       )}
-      <Text style={[styles.title, {color: activedColors.text}]}>{title}</Text>
+      <Text
+        style={[
+          styles.title,
+          {color: activedColors.text, marginLeft: children?.leftChild ? 10 : 0},
+        ]}>
+        {title}
+      </Text>
       {children?.rightChild}
     </View>
   );
@@ -42,17 +48,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch',
     height: 50,
-    paddingHorizontal: 20,
-  },
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 32,
-    height: 32,
+    paddingHorizontal: 16,
   },
   title: {
     flex: 1,
-    marginLeft: 10,
     ...common.subTitle,
   },
 });

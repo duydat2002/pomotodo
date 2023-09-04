@@ -7,7 +7,7 @@ export const common = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
   },
 
   // Title
