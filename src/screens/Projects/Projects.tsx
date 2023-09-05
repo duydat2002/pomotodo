@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
 import {AntDesign, Ionicons} from '@expo/vector-icons';
 import {useActivedColors, useProject} from '@/hooks';
@@ -24,9 +24,9 @@ const Projects = () => {
     setProjects(projectsTemp);
   };
 
-  useEffect(() => {
+  useFocusEffect(() => {
     getProjectsAsync();
-  }, []);
+  });
 
   return (
     <SafeView>

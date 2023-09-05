@@ -5,7 +5,13 @@ import {
   getAuth,
   Auth,
 } from 'firebase/auth';
-import {getFirestore} from 'firebase/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  CACHE_SIZE_UNLIMITED,
+  Firestore,
+  persistentLocalCache,
+} from 'firebase/firestore';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -18,18 +24,22 @@ const firebaseConfig = {
   measurementId: 'G-ZTQT4Y9W3E',
 };
 
-let app: FirebaseApp, auth: Auth;
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
 
 if (getApps().length <= 0) {
   app = initializeApp(firebaseConfig);
   auth = initializeAuth(app, {
     persistence: getReactNativePersistence(ReactNativeAsyncStorage),
   });
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({cacheSizeBytes: CACHE_SIZE_UNLIMITED}),
+  });
 } else {
   app = getApp();
   auth = getAuth(app);
+  db = getFirestore(app);
 }
-
-const db = getFirestore(app);
 
 export {auth, db};
