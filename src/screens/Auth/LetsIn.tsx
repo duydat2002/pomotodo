@@ -1,21 +1,42 @@
 import React from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useActivedColors} from '@/hooks';
+import {useActivedColors, useAppDispatch} from '@/hooks';
 import {EFontWeight} from '@/theme';
 import {common} from '@/assets/styles';
+import {setUser} from '@/store/user.slice';
 import Header from '@/components/Header';
 import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
 import SafeView from '@/components/SafeView';
+import {generatorId} from '@/utils';
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+
+  const noSignIn = () => {
+    dispatch(
+      setUser({
+        id: generatorId(),
+      }),
+    );
+  };
 
   return (
     <SafeView>
-      <Header title={'Lets In'} />
+      <Header title={'Lets In'}>
+        {{
+          rightChild: (
+            <TouchableOpacity activeOpacity={0.7} onPress={noSignIn}>
+              <Text style={[common.text, {color: activedColors.primaryDark}]}>
+                Skip
+              </Text>
+            </TouchableOpacity>
+          ),
+        }}
+      </Header>
       <View style={[common.container, {justifyContent: 'space-between'}]}>
         <Text
           style={[common.title, {color: activedColors.text, marginTop: 150}]}>

@@ -7,7 +7,7 @@ import {Zocial, AntDesign, FontAwesome} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import {EFontWeight} from '@/theme';
 import {validateEmail, validatePassword} from '@/utils';
-import {useAuth} from '@/hooks/useAuth';
+import {useAuth} from '@/hooks';
 import {setUser} from '@/store/user.slice';
 import Header from '@/components/Header';
 import UInput from '@/components/UInput';

@@ -6,7 +6,7 @@ import {common} from '@/assets/styles';
 import {IAuth} from '@/types';
 import {EFontWeight} from '@/theme';
 import {AntDesign, FontAwesome, Zocial} from '@expo/vector-icons';
-import {useAuth} from '@/hooks/useAuth';
+import {useAuth} from '@/hooks';
 import {setUser} from '@/store/user.slice';
 import {validateEmail, validatePassword} from '@/utils';
 import Header from '@/components/Header';

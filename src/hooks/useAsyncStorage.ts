@@ -16,3 +16,27 @@ export const getData = async (key: string) => {
     alert(error);
   }
 };
+
+export const deleteData = async (key: string) => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (error) {
+    alert(error);
+  }
+};
+
+export const deleteAllData = async (excludes?: string[]) => {
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+
+    if (excludes) {
+      const deleteKeys = allKeys.filter(key => !excludes.includes(key));
+
+      await AsyncStorage.multiRemove(deleteKeys);
+    } else {
+      await AsyncStorage.multiRemove(allKeys);
+    }
+  } catch (error) {
+    alert(error);
+  }
+};

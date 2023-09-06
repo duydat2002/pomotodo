@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
@@ -7,8 +7,9 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from '@expo/vector-icons';
-import {useActivedColors} from '@/hooks';
+import {useActivedColors, useAppSelector, useProject} from '@/hooks';
 import {HIDDEN_BOTTOM_TAB_ROUTER} from '@/constants';
+import auth from '@react-native-firebase/auth';
 import Home from '@/screens/Home';
 import Pomodoro from '@/screens/Pomodoro';
 import Statistic from '@/screens/Statistic';

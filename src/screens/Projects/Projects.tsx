@@ -3,7 +3,12 @@ import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
 import {AntDesign, Ionicons} from '@expo/vector-icons';
-import {useActivedColors, useProject} from '@/hooks';
+import {
+  useActivedColors,
+  useAppDispatch,
+  useAppSelector,
+  useProject,
+} from '@/hooks';
 import {IProject} from '@/types';
 import auth from '@react-native-firebase/auth';
 import SafeView from '@/components/SafeView';
@@ -14,19 +19,9 @@ import ProjectItem from '@/components/ProjectItem';
 const Projects = () => {
   const activedColors = useActivedColors();
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
 
-  const [projects, setProjects] = useState<IProject[] | null>(null);
-
-  const getProjectsAsync = async () => {
-    const {getProjects} = useProject();
-
-    const projectsTemp = await getProjects(auth().currentUser!.uid);
-    setProjects(projectsTemp);
-  };
-
-  useFocusEffect(() => {
-    getProjectsAsync();
-  });
+  const {projects, project} = useAppSelector(state => state.projects);
 
   return (
     <SafeView>
@@ -47,7 +42,7 @@ const Projects = () => {
               common.text,
               {color: activedColors.textSec, marginLeft: 10},
             ]}>
-            Search task... cặc
+            Search tasks...
           </Text>
         </UButton>
         <TouchableOpacity

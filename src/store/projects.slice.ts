@@ -18,6 +18,11 @@ export const projectsSlice = createSlice({
       state.projects = action.payload;
       storeData('projects', action.payload);
     },
+    addProject: (state, action: PayloadAction<IProject>) => {
+      if (!state.projects) state.projects = [action.payload];
+      else state.projects!.push(action.payload);
+      storeData('projects', action.payload);
+    },
     setProject: (state, action: PayloadAction<IProject | null>) => {
       state.project = action.payload;
       storeData('project', action.payload);
@@ -25,6 +30,6 @@ export const projectsSlice = createSlice({
   },
 });
 
-export const {setProjects, setProject} = projectsSlice.actions;
+export const {setProjects, setProject, addProject} = projectsSlice.actions;
 
 export default projectsSlice.reducer;

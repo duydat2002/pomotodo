@@ -1,6 +1,8 @@
 import {IProject} from '@/types';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import {useAppSelector} from './useStore';
+import {getData} from '@/hooks';
 
 export const useProject = () => {
   const addProject = async (name: string, color: string) => {

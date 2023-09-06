@@ -1,6 +1,11 @@
 import React, {useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {useActivedColors, useProject} from '@/hooks';
+import {
+  useActivedColors,
+  useAppDispatch,
+  useAppSelector,
+  useProject,
+} from '@/hooks';
 import {useNavigation} from '@react-navigation/native';
 import {Feather} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
@@ -9,10 +14,17 @@ import {COLORS_LIST} from '@/constants';
 import SafeView from '@/components/SafeView';
 import Header from '@/components/Header';
 import UInput from '@/components/UInput';
+import {addProject} from '@/store/projects.slice';
+import {generatorId} from '@/utils';
 
 const CreateProject = () => {
   const activedColors = useActivedColors();
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+
+  const {user} = useAppSelector(state => state.user);
+  const {netInfo} = useAppSelector(state => state.netInfo);
+  const {projects} = useAppSelector(state => state.projects);
 
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS_LIST[0]);
@@ -22,9 +34,19 @@ const CreateProject = () => {
     if (name == '') {
       setError('Please enter project name');
     } else {
-      const {addProject} = useProject();
-      setError('');
-      await addProject(name, color);
+      dispatch(
+        addProject({
+          id: generatorId(),
+          name,
+          color,
+          totalTime: 0,
+          elapsedTime: 0,
+          totalTask: 0,
+          taskComplete: 0,
+          ownerId: user!.id,
+          createdAt: new Date(),
+        }),
+      );
       navigation.navigate('Projects' as never);
     }
   };

@@ -1,3 +1,4 @@
+import {storeData} from '@/hooks';
 import {IUser} from '@/types';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
@@ -13,6 +14,7 @@ export const userSlice = createSlice({
   reducers: {
     setUser: (state, action: PayloadAction<IUser | null>) => {
       state.user = action.payload;
+      storeData('user', action.payload);
     },
   },
 });
