@@ -1,24 +1,11 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
-import {
-  collection,
-  doc,
-  getDocs,
-  or,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore';
-import {auth, db} from '@/configs/firebase';
 import {IAuth, IUser} from '@/types';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export const useAuth = () => {
   const signUp = async (email: string, password: string) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      const userCredential = await auth().createUserWithEmailAndPassword(
         email,
         password,
       );
@@ -30,7 +17,10 @@ export const useAuth = () => {
         avatar: '',
       };
 
-      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
+      await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .set(userData);
 
       return {
         user: {
@@ -62,30 +52,25 @@ export const useAuth = () => {
     }
   };
 
-  const signIn = async (
-    email: string,
-    password: string,
-  ): Promise<IUser | null> => {
+  const signIn = async (email: string, password: string) => {
     try {
-      const querySnapshot = await getDocs(
-        query(collection(db, 'users'), where('email', '==', email)),
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
       );
 
-      if (querySnapshot.empty) {
-        return null;
+      const doc = await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .get();
+
+      if (doc.exists) {
+        return {
+          id: doc.id,
+          ...doc.data(),
+        } as IUser;
       } else {
-        let userTemp: IUser | null = null;
-
-        querySnapshot.forEach(doc => {
-          userTemp = {
-            id: doc.id,
-            ...doc.data(),
-          } as IUser;
-        });
-
-        await signInWithEmailAndPassword(auth, email, password);
-
-        return userTemp;
+        return null;
       }
     } catch (error) {
       console.log(error);

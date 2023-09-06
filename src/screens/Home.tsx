@@ -1,12 +1,11 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {FontAwesome} from '@expo/vector-icons';
-import {signOut} from 'firebase/auth';
-import {auth} from '@/configs/firebase';
+import auth from '@react-native-firebase/auth';
 
 const Home: React.FC = () => {
   const test = async () => {
-    await signOut(auth);
+    await auth().signOut();
   };
 
   return (

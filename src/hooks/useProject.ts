@@ -1,28 +1,22 @@
-import {auth, db} from '@/configs/firebase';
 import {IProject} from '@/types';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  Timestamp,
-} from 'firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export const useProject = () => {
   const addProject = async (name: string, color: string) => {
     try {
-      await addDoc(collection(db, 'projects'), {
-        name,
-        color,
-        totalTime: 0,
-        elapsedTime: 0,
-        totalTask: 0,
-        taskComplete: 0,
-        ownerId: auth.currentUser?.uid,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
+      firestore()
+        .collection('projects')
+        .add({
+          name,
+          color,
+          totalTime: 0,
+          elapsedTime: 0,
+          totalTask: 0,
+          taskComplete: 0,
+          ownerId: auth().currentUser!.uid,
+          createdAt: firestore.Timestamp.fromDate(new Date()),
+        });
     } catch (error) {
       console.log(error);
     }
@@ -30,13 +24,11 @@ export const useProject = () => {
 
   const getProjects = async (userId: string) => {
     try {
-      const querySnapshot = await getDocs(
-        query(
-          collection(db, 'projects'),
-          where('ownerId', '==', userId),
-          orderBy('createdAt', 'asc'),
-        ),
-      );
+      const querySnapshot = await firestore()
+        .collection('projects')
+        .where('ownerId', '==', userId)
+        .orderBy('createdAt', 'asc')
+        .get();
 
       if (querySnapshot.empty) {
         return null;

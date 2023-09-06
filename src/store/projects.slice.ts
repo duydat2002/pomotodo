@@ -1,22 +1,30 @@
-import {IUser} from '@/types';
+import {storeData} from '@/hooks';
+import {IProject, IUser} from '@/types';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 interface IState {
-  user: IUser | null;
+  projects: IProject[] | null;
+  project: IProject | null;
 }
 
 export const projectsSlice = createSlice({
   name: 'projects',
   initialState: {
-    user: null,
+    projects: null,
+    project: null,
   } as IState,
   reducers: {
-    setUser: (state, action: PayloadAction<IUser | null>) => {
-      state.user = action.payload;
+    setProjects: (state, action: PayloadAction<IProject[] | null>) => {
+      state.projects = action.payload;
+      storeData('projects', action.payload);
+    },
+    setProject: (state, action: PayloadAction<IProject | null>) => {
+      state.project = action.payload;
+      storeData('project', action.payload);
     },
   },
 });
 
-export const {setUser} = projectsSlice.actions;
+export const {setProjects, setProject} = projectsSlice.actions;
 
 export default projectsSlice.reducer;

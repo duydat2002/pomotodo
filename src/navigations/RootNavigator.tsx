@@ -3,8 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {Appearance} from 'react-native';
 import {getData, useAppDispatch, useAppSelector} from '@/hooks';
 import {changeTheme} from '@/store/theme.slice';
-import {onAuthStateChanged} from 'firebase/auth';
-import {auth} from '@/configs/firebase';
+import auth from '@react-native-firebase/auth';
 import AuthNavigator from './AuthNavigator';
 import AppNavigator from './AppNavigator';
 import Splash from '@/screens/Splash';
@@ -42,10 +41,11 @@ const RootNavigator: React.FC = () => {
   }, [theme.system]);
 
   useEffect(() => {
-    onAuthStateChanged(auth, user => {
+    const subscriber = auth().onAuthStateChanged(user => {
       setHasUser(!!user);
       setLoadingSplash(false);
     });
+    return subscriber;
   }, []);
 
   if (loadingSplash) {

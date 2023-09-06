@@ -7,12 +7,12 @@ import {Zocial, AntDesign, FontAwesome} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import {EFontWeight} from '@/theme';
 import {validateEmail, validatePassword} from '@/utils';
+import {useAuth} from '@/hooks/useAuth';
+import {setUser} from '@/store/user.slice';
 import Header from '@/components/Header';
 import UInput from '@/components/UInput';
 import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
-import {useAuth} from '@/hooks/useAuth';
-import {setUser} from '@/store/user.slice';
 import SafeView from '@/components/SafeView';
 
 const SignIn: React.FC = () => {
@@ -51,9 +51,10 @@ const SignIn: React.FC = () => {
       const {signIn} = useAuth();
 
       const user = await signIn(authForm.email, authForm.password);
-
-      if (user) dispatch(setUser(user));
-      else {
+      if (user) {
+        dispatch(setUser(user));
+        console.log(user);
+      } else {
         setAuthErr({
           email: '',
           password:

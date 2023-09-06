@@ -42,4 +42,4 @@ if (getApps().length <= 0) {
   db = getFirestore(app);
 }
 
-export {auth, db};
+// export {auth, db};
