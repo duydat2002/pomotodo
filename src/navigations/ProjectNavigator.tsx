@@ -5,8 +5,19 @@ import Projects from '@/screens/Projects/Projects';
 import Tasks from '@/screens/Projects/Tasks';
 import CreateTask from '@/screens/Projects/CreateTask';
 import CreateProject from '@/screens/Projects/CreateProject';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack/lib/typescript/src/types';
 
-const Stack = createNativeStackNavigator();
+export type ProjectStackParamList = {
+  Projects: undefined;
+  Tasks: {projectId: string};
+  CreateTask: undefined;
+  CreateProject: undefined;
+};
+
+export type ProjectsStackNavigationProps =
+  NativeStackNavigationProp<ProjectStackParamList>;
+
+const Stack = createNativeStackNavigator<ProjectStackParamList>();
 
 const ProjectNavigator = () => {
   const config = {

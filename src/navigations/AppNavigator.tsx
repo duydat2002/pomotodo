@@ -1,22 +1,32 @@
-import React, {useCallback, useEffect} from 'react';
+import React from 'react';
 import {StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import {
+  NavigatorScreenParams,
+  getFocusedRouteNameFromRoute,
+} from '@react-navigation/native';
 import {
   FontAwesome,
   MaterialIcons,
   MaterialCommunityIcons,
 } from '@expo/vector-icons';
-import {useActivedColors, useAppSelector, useProject} from '@/hooks';
+import {useActivedColors} from '@/hooks';
 import {HIDDEN_BOTTOM_TAB_ROUTER} from '@/constants';
-import auth from '@react-native-firebase/auth';
 import Home from '@/screens/Home';
 import Pomodoro from '@/screens/Pomodoro';
 import Statistic from '@/screens/Statistic';
 import Setting from '@/screens/Setting';
-import ProjectNavigator from './ProjectNavigator';
+import ProjectNavigator, {ProjectStackParamList} from './ProjectNavigator';
 
-const Tab = createBottomTabNavigator();
+export type AppTabParamList = {
+  Home: undefined;
+  ProjectsStack: NavigatorScreenParams<ProjectStackParamList>;
+  Pomodoro: undefined;
+  Statistic: undefined;
+  Setting: undefined;
+};
+
+const Tab = createBottomTabNavigator<AppTabParamList>();
 
 const getTabBarVisibility = (route: any) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Projects';
@@ -55,7 +65,7 @@ const AppNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name="ProjectsNav"
+        name="ProjectsStack"
         component={ProjectNavigator}
         options={({route}) => ({
           tabBarStyle: {

@@ -10,7 +10,6 @@ const Home: React.FC = () => {
 
   const test = async () => {
     if (auth().currentUser) {
-      console.log('cac');
       await auth().signOut();
     }
     await deleteAllData(['theme', 'netInfo']);

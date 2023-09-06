@@ -15,13 +15,18 @@ import SafeView from '@/components/SafeView';
 import UButton from '@/components/UButton';
 import Header from '@/components/Header';
 import ProjectItem from '@/components/ProjectItem';
+import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
 
 const Projects = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProjectsStackNavigationProps>();
   const dispatch = useAppDispatch();
 
   const {projects, project} = useAppSelector(state => state.projects);
+
+  const handleClickProjectItem = (projectId: string) => {
+    navigation.navigate('Tasks', {projectId});
+  };
 
   return (
     <SafeView>
@@ -63,6 +68,7 @@ const Projects = () => {
           keyExtractor={(item, index) => item.name + index}
           renderItem={({item}) => (
             <ProjectItem
+              onPress={() => handleClickProjectItem(item.id)}
               color={item.color}
               name={item.name}
               totalTime={item.totalTime}

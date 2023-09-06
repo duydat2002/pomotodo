@@ -6,6 +6,16 @@ Tasks (id, projectId, name, priority{none, lower, medium, hight}, isDone, totalP
 
 Luồng xử lý offline-first 
 
-- Lưu trữ trong asyncStorage và redux
-- Nếu online thì gửi trực tiếp lên firebase 
-- 
+* No Account: (Online/ Offline)
+  - Lưu trữ local trong asyncStorage.
+    -> Auth Account: Đẩy dữ liệu local lên firebase của account đó.
+
+* Auth Account: (Online)
+  - Lưu trữ local trong asyncStorage.
+  - Lưu trữ trực tiếp trên firebase.
+    -> Sign out: Xóa toàn bộ dữ liệu local trong asyncStorage.
+* Auth Account: (Offline)
+  - Lưu trữ local trong asyncStorage
+    -> Online: Đẩy dữ liệu local lên firebase của account đó. 
+    -> Sign out: Xóa toàn bộ dữ liệu local trong asyncStorage.
+

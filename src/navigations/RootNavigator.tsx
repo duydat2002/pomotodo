@@ -1,5 +1,9 @@
 import React, {useEffect, useState, useCallback} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  CompositeScreenProps,
+  NavigationContainer,
+  NavigationProp,
+} from '@react-navigation/native';
 import {Appearance} from 'react-native';
 import {
   getData,
@@ -14,12 +18,15 @@ import auth from '@react-native-firebase/auth';
 import {setProjects} from '@/store/projects.slice';
 import NetInfo, {NetInfoState} from '@react-native-community/netinfo';
 import AuthNavigator from './AuthNavigator';
-import AppNavigator from './AppNavigator';
+import AppNavigator, {AppTabParamList} from './AppNavigator';
 import Splash from '@/screens/Splash';
 import {setNetInfo} from '@/store/netInfor.slice';
 import {IProject} from '@/types';
 import {setUser} from '@/store/user.slice';
 import {getConnection} from '@/utils';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ProjectStackParamList} from './ProjectNavigator';
+import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);
@@ -90,11 +97,11 @@ const RootNavigator: React.FC = () => {
     const isOnline = await getConnection();
 
     console.log(isOnline ? 'online' : 'offline');
-    if (isOnline) {
-      if (auth().currentUser) {
-        projectsTemp = await getProjects(auth().currentUser!.uid);
-      }
+    if (isOnline && auth().currentUser) {
+      console.log('firebase');
+      projectsTemp = await getProjects(auth().currentUser!.uid);
     } else {
+      console.log('local');
       projectsTemp = await getData('projects');
     }
     dispatch(setProjects(projectsTemp));

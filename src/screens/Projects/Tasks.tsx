@@ -1,11 +1,13 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import SafeView from '@/components/SafeView';
+import Header from '@/components/Header';
 
 const Tasks = () => {
   return (
-    <View>
-      <Text>Tasks</Text>
-    </View>
+    <SafeView>
+      <Header title="">{{}}</Header>
+    </SafeView>
   );
 };
 

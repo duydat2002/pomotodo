@@ -1,11 +1,23 @@
 import React from 'react';
 import {KeyboardAvoidingView} from 'react-native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 import LetsIn from '@/screens/Auth/LetsIn';
 import SignIn from '@/screens/Auth/SignIn';
 import SignUp from '@/screens/Auth/SignUp';
 
-const Stack = createNativeStackNavigator();
+export type AuthStackParamList = {
+  LetsIn: undefined;
+  SignIn: undefined;
+  SignUp: undefined;
+};
+
+export type AuthStackNavigationProp =
+  NativeStackNavigationProp<AuthStackParamList>;
+
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 const AuthNavigator: React.FC = () => {
   return (

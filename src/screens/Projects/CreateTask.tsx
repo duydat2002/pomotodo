@@ -7,10 +7,11 @@ import SafeView from '@/components/SafeView';
 import Header from '@/components/Header';
 import {common} from '@/assets/styles';
 import UInput from '@/components/UInput';
+import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProjectsStackNavigationProps>();
 
   return (
     <SafeView>

@@ -16,10 +16,11 @@ import Header from '@/components/Header';
 import UInput from '@/components/UInput';
 import {addProject} from '@/store/projects.slice';
 import {generatorId} from '@/utils';
+import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
 
 const CreateProject = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProjectsStackNavigationProps>();
   const dispatch = useAppDispatch();
 
   const {user} = useAppSelector(state => state.user);
@@ -47,7 +48,7 @@ const CreateProject = () => {
           createdAt: new Date(),
         }),
       );
-      navigation.navigate('Projects' as never);
+      navigation.navigate('Projects');
     }
   };
 

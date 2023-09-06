@@ -14,12 +14,13 @@ import UInput from '@/components/UInput';
 import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
 import SafeView from '@/components/SafeView';
+import {AuthStackNavigationProp} from '@/navigations/AuthNavigator';
 
 const SignUp = () => {
   const dispatch = useAppDispatch();
 
   const activedColors = useActivedColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<AuthStackNavigationProp>();
 
   const [authForm, setAuthForm] = useState<IAuth>({
     email: '',
@@ -178,7 +179,7 @@ const SignUp = () => {
           <TouchableOpacity
             activeOpacity={0.6}
             onPress={() => {
-              navigation.navigate('SignIn' as never);
+              navigation.navigate('SignIn');
             }}>
             <Text
               style={[

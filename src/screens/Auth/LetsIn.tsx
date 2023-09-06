@@ -10,16 +10,17 @@ import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
 import SafeView from '@/components/SafeView';
 import {generatorId} from '@/utils';
+import {AuthStackNavigationProp} from '@/navigations/AuthNavigator';
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<AuthStackNavigationProp>();
   const dispatch = useAppDispatch();
 
   const noSignIn = () => {
     dispatch(
       setUser({
-        id: generatorId(),
+        id: 'local',
       }),
     );
   };
@@ -82,7 +83,7 @@ const LetsIn: React.FC = () => {
             primary
             style={{borderRadius: 40}}
             onPress={() => {
-              navigation.navigate('SignIn' as never);
+              navigation.navigate('SignIn');
             }}>
             <Text style={[common.buttonText, {color: '#fff'}]}>
               Sign in with password
@@ -96,7 +97,7 @@ const LetsIn: React.FC = () => {
           <TouchableOpacity
             activeOpacity={0.6}
             onPress={() => {
-              navigation.navigate('SignUp' as never);
+              navigation.navigate('SignUp');
             }}>
             <Text
               style={[

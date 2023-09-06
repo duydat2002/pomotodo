@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {common} from '@/assets/styles';
 import {secondsFormatToHM} from '@/utils';
@@ -9,13 +9,20 @@ interface IProps {
   name: string;
   totalTime: number;
   totalTask: number;
+  onPress?: () => void;
 }
 
-const ProjectItem: React.FC<IProps> = ({color, name, totalTask, totalTime}) => {
+const ProjectItem: React.FC<IProps> = ({
+  color,
+  name,
+  totalTask,
+  totalTime,
+  onPress,
+}) => {
   const activedColors = useActivedColors();
 
   return (
-    <View style={styles.item}>
+    <TouchableOpacity style={styles.item} activeOpacity={0.8} onPress={onPress}>
       <View style={[styles.color, {backgroundColor: color}]} />
       <Text style={[common.text, {color: activedColors.text, flex: 1}]}>
         {name}
@@ -27,7 +34,7 @@ const ProjectItem: React.FC<IProps> = ({color, name, totalTask, totalTime}) => {
         style={[common.small, {color: activedColors.textSec, marginLeft: 10}]}>
         {totalTask}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 
