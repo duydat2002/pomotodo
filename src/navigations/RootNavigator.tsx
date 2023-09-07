@@ -1,32 +1,16 @@
 import React, {useEffect, useState, useCallback} from 'react';
-import {
-  CompositeScreenProps,
-  NavigationContainer,
-  NavigationProp,
-} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {Appearance} from 'react-native';
-import {
-  getData,
-  storeData,
-  useAppDispatch,
-  useAppSelector,
-  useProject,
-  useUser,
-} from '@/hooks';
+import {getData, useAppDispatch, useAppSelector, useProject} from '@/hooks';
 import {changeTheme} from '@/store/theme.slice';
 import auth from '@react-native-firebase/auth';
 import {setProjects} from '@/store/projects.slice';
-import NetInfo, {NetInfoState} from '@react-native-community/netinfo';
+import NetInfo from '@react-native-community/netinfo';
 import AuthNavigator from './AuthNavigator';
-import AppNavigator, {AppTabParamList} from './AppNavigator';
+import AppNavigator from './AppNavigator';
 import Splash from '@/screens/Splash';
-import {setNetInfo} from '@/store/netInfor.slice';
-import {IProject} from '@/types';
 import {setUser} from '@/store/user.slice';
 import {getConnection} from '@/utils';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {ProjectStackParamList} from './ProjectNavigator';
-import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);

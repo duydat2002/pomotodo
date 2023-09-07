@@ -16,11 +16,12 @@ import Header from '@/components/Header';
 import UInput from '@/components/UInput';
 import {addProject} from '@/store/projects.slice';
 import {generatorId} from '@/utils';
-import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
+import {ProjectsStackScreenProps} from '@/types/navigation';
 
 const CreateProject = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation<ProjectsStackNavigationProps>();
+  const navigation =
+    useNavigation<ProjectsStackScreenProps<'CreateProject'>['navigation']>();
   const dispatch = useAppDispatch();
 
   const {user} = useAppSelector(state => state.user);

@@ -1,10 +1,7 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {
-  NavigatorScreenParams,
-  getFocusedRouteNameFromRoute,
-} from '@react-navigation/native';
+import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import {
   FontAwesome,
   MaterialIcons,
@@ -16,17 +13,10 @@ import Home from '@/screens/Home';
 import Pomodoro from '@/screens/Pomodoro';
 import Statistic from '@/screens/Statistic';
 import Setting from '@/screens/Setting';
-import ProjectNavigator, {ProjectStackParamList} from './ProjectNavigator';
+import ProjectNavigator from './ProjectNavigator';
+import {AppStackParamList} from '@/types/navigation';
 
-export type AppTabParamList = {
-  Home: undefined;
-  ProjectsStack: NavigatorScreenParams<ProjectStackParamList>;
-  Pomodoro: undefined;
-  Statistic: undefined;
-  Setting: undefined;
-};
-
-const Tab = createBottomTabNavigator<AppTabParamList>();
+const Tab = createBottomTabNavigator<AppStackParamList>();
 
 const getTabBarVisibility = (route: any) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Projects';

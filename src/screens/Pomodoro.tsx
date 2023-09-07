@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import {useActivedColors} from '@/hooks';
+import {useActivedColors, useAppSelector} from '@/hooks';
 import {FontAwesome, MaterialIcons} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
 import {ITask} from '@/types';
@@ -10,27 +10,31 @@ import {
 } from 'react-native-countdown-circle-timer';
 import {EFontWeight} from '@/theme';
 import {secondsFormat} from '@/utils';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Header from '@/components/Header';
 import SafeView from '@/components/SafeView';
+import {AppStackScreenProps} from '@/types/navigation';
 
 const Pomodoro: React.FC = () => {
   const activedColors = useActivedColors();
+  const navigation =
+    useNavigation<AppStackScreenProps<'Pomodoro'>['navigation']>();
+  const route = useRoute<AppStackScreenProps<'Pomodoro'>['route']>();
+
+  const {tasks} = useAppSelector(state => state.projects);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(1500);
   const [key, setKey] = useState(0);
 
-  let task: ITask = {
-    id: 'string',
-    projectId: 'string',
-    name: 'Test name task',
-    priority: 'none',
-    isDone: false,
-    totalPomodoro: 6,
-    pomodoroCount: 3,
-    longBreak: 1200,
-    shortBreak: 300,
-  };
+  const [task, setTask] = useState<ITask | null>(null);
+
+  useEffect(() => {
+    if (route.params?.taskId) {
+      const taskTemp = tasks?.filter(item => item.id === route.params.taskId);
+      setTask(!taskTemp ? null : taskTemp[0]);
+    }
+  }, [route.params?.taskId]);
 
   const resetPomodoro = () => {
     setIsPlaying(false);
@@ -39,6 +43,14 @@ const Pomodoro: React.FC = () => {
 
   const playStopPomodoro = () => {
     setIsPlaying(!isPlaying);
+  };
+
+  const cancelTask = () => {
+    setTask(null);
+  };
+
+  const chooseTask = () => {
+    navigation.navigate('ProjectsStack', {screen: 'Projects'});
   };
 
   return (
@@ -56,16 +68,34 @@ const Pomodoro: React.FC = () => {
       </Header>
       <View style={[common.container, {justifyContent: 'space-around'}]}>
         <View style={{width: '100%', alignItems: 'center'}}>
-          <Text style={[common.text, {color: activedColors.textSec}]}>
-            CURRENT TASK
-          </Text>
-          <Text
-            style={[
-              common.subTitle,
-              {color: activedColors.text, fontWeight: EFontWeight.bold},
-            ]}>
-            {task.name}
-          </Text>
+          {task ? (
+            <>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                CURRENT TASK
+              </Text>
+              <Text
+                style={[
+                  common.subTitle,
+                  {color: activedColors.text, fontWeight: EFontWeight.bold},
+                ]}>
+                {task?.name}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                NO TASK
+              </Text>
+              <Text
+                style={[
+                  common.subTitle,
+                  {color: activedColors.text, fontWeight: EFontWeight.bold},
+                ]}
+                onPress={chooseTask}>
+                Click to start a task
+              </Text>
+            </>
+          )}
         </View>
         <View style={{width: '100%', alignItems: 'center'}}>
           <CountdownCircleTimer
@@ -88,7 +118,8 @@ const Pomodoro: React.FC = () => {
                   {secondsFormat(remainingTime)}
                 </Text>
                 <Text style={[common.text, {color: activedColors.textSec}]}>
-                  {task.pomodoroCount} of {task.totalPomodoro} sessions
+                  {task?.pomodoroCount || 0} of {task?.totalPomodoro || 0}{' '}
+                  sessions
                 </Text>
               </View>
             )}
@@ -127,10 +158,9 @@ const Pomodoro: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.secondaryButton,
-              {
-                backgroundColor: activedColors.backgroundSec,
-              },
+              {backgroundColor: activedColors.backgroundSec},
             ]}
+            onPress={cancelTask}
             activeOpacity={0.8}>
             <MaterialIcons name="stop" size={30} color={activedColors.text} />
           </TouchableOpacity>

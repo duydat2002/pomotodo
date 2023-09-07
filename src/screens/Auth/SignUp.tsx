@@ -14,13 +14,14 @@ import UInput from '@/components/UInput';
 import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
 import SafeView from '@/components/SafeView';
-import {AuthStackNavigationProp} from '@/navigations/AuthNavigator';
+import {AuthStackScreenProps} from '@/types/navigation';
 
 const SignUp = () => {
   const dispatch = useAppDispatch();
 
   const activedColors = useActivedColors();
-  const navigation = useNavigation<AuthStackNavigationProp>();
+  const navigation =
+    useNavigation<AuthStackScreenProps<'SignUp'>['navigation']>();
 
   const [authForm, setAuthForm] = useState<IAuth>({
     email: '',

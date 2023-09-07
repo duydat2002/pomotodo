@@ -6,12 +6,12 @@ import {useNavigation} from '@react-navigation/native';
 import SafeView from '@/components/SafeView';
 import Header from '@/components/Header';
 import {common} from '@/assets/styles';
-import UInput from '@/components/UInput';
-import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
+import {ProjectsStackScreenProps} from '@/types/navigation';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation<ProjectsStackNavigationProps>();
+  const navigation =
+    useNavigation<ProjectsStackScreenProps<'CreateTask'>['navigation']>();
 
   return (
     <SafeView>
@@ -28,11 +28,7 @@ const CreateTask = () => {
         }}
       </Header>
       <View style={[common.container]}>
-        <ScrollView>
-          <View>
-            <Text>Title</Text>
-          </View>
-        </ScrollView>
+        <ScrollView></ScrollView>
       </View>
     </SafeView>
   );

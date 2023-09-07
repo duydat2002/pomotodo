@@ -1,25 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
 import {AntDesign, Ionicons} from '@expo/vector-icons';
-import {
-  useActivedColors,
-  useAppDispatch,
-  useAppSelector,
-  useProject,
-} from '@/hooks';
-import {IProject} from '@/types';
-import auth from '@react-native-firebase/auth';
+import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import SafeView from '@/components/SafeView';
 import UButton from '@/components/UButton';
 import Header from '@/components/Header';
 import ProjectItem from '@/components/ProjectItem';
-import {ProjectsStackNavigationProps} from '@/navigations/ProjectNavigator';
+import {ProjectsStackScreenProps} from '@/types/navigation';
 
 const Projects = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation<ProjectsStackNavigationProps>();
+  const navigation =
+    useNavigation<ProjectsStackScreenProps<'Projects'>['navigation']>();
   const dispatch = useAppDispatch();
 
   const {projects, project} = useAppSelector(state => state.projects);
@@ -51,7 +45,7 @@ const Projects = () => {
           </Text>
         </UButton>
         <TouchableOpacity
-          onPress={() => navigation.navigate('CreateProject' as never)}
+          onPress={() => navigation.navigate('CreateProject')}
           style={{
             flexDirection: 'row',
             marginHorizontal: 16,

@@ -10,11 +10,12 @@ import UButton from '@/components/UButton';
 import Seperator from '@/components/Seperator';
 import SafeView from '@/components/SafeView';
 import {generatorId} from '@/utils';
-import {AuthStackNavigationProp} from '@/navigations/AuthNavigator';
+import {AuthStackScreenProps} from '@/types/navigation';
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();
-  const navigation = useNavigation<AuthStackNavigationProp>();
+  const navigation =
+    useNavigation<AuthStackScreenProps<'LetsIn'>['navigation']>();
   const dispatch = useAppDispatch();
 
   const noSignIn = () => {

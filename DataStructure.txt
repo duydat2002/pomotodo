@@ -5,7 +5,7 @@ Tasks (id, projectId, name, priority{none, lower, medium, hight}, isDone, totalP
 
 
 Luồng xử lý offline-first 
-
+-------------------------------
 * No Account: (Online/ Offline)
   - Lưu trữ local trong asyncStorage.
     -> Auth Account: Đẩy dữ liệu local lên firebase của account đó.
@@ -19,3 +19,7 @@ Luồng xử lý offline-first
     -> Online: Đẩy dữ liệu local lên firebase của account đó. 
     -> Sign out: Xóa toàn bộ dữ liệu local trong asyncStorage.
 
+-------------------------------
+1 -> Đồng bộ ngay khi đăng nhập
+2 -> Đồng bộ thủ công (bằng nút bấm)
+3 -> Đồng bộ liên tục (áp dụng khi đã đăng nhập)
