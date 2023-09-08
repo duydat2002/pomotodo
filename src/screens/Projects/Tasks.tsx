@@ -28,7 +28,7 @@ const Tasks = () => {
   }, [route.params?.projectId]);
 
   const clickCreateTask = () => {
-    navigation.navigate('CreateTask');
+    navigation.navigate('CreateTask', {projectId: project?.id || ''});
   };
 
   return (
@@ -46,7 +46,7 @@ const Tasks = () => {
           ),
         }}
       </Header>
-      <View style={{flex: 1, width: '100%', marginTop: 16}}>
+      <View style={{flex: 1, width: '100%', marginTop: 20}}>
         <View style={[styles.info, {backgroundColor: activedColors.input}]}>
           <ProjectInfoCard
             title="Time Remaining"

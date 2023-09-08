@@ -1,5 +1,5 @@
 export const PRIORITY_COLORS = {
-  hight: {
+  high: {
     default: '#ff3f3f',
     light: '#ff9595',
   },
@@ -7,7 +7,7 @@ export const PRIORITY_COLORS = {
     default: '#f58231',
     light: '#fde2ce',
   },
-  lower: {
+  low: {
     default: '#3cb44b',
     light: '#c5e7ca',
   },

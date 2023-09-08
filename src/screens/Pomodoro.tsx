@@ -33,6 +33,7 @@ const Pomodoro: React.FC = () => {
     if (route.params?.taskId) {
       const taskTemp = tasks?.filter(item => item.id === route.params.taskId);
       setTask(!taskTemp ? null : taskTemp[0]);
+      setKey(Math.random());
     }
   }, [route.params?.taskId]);
 
@@ -47,6 +48,7 @@ const Pomodoro: React.FC = () => {
 
   const cancelTask = () => {
     setTask(null);
+    setKey(Math.random());
   };
 
   const chooseTask = () => {
@@ -105,7 +107,7 @@ const Pomodoro: React.FC = () => {
             rotation={'counterclockwise'}
             strokeWidth={16}
             size={280}
-            duration={duration}
+            duration={task?.longBreak || 0}
             colors={activedColors.secondary as ColorFormat}
             trailColor={activedColors.backgroundSec as ColorFormat}>
             {({remainingTime}) => (

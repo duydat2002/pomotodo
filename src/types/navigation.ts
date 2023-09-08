@@ -31,7 +31,7 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> =
 export type ProjectsStackParamList = {
   Projects: undefined;
   Tasks: {projectId: string};
-  CreateTask: undefined;
+  CreateTask: {projectId: string};
   CreateProject: undefined;
 };
 
@@ -40,9 +40,3 @@ export type ProjectsStackScreenProps<T extends keyof ProjectsStackParamList> =
     BottomTabScreenProps<ProjectsStackParamList, T>,
     AppStackScreenProps<keyof AppStackParamList>
   >;
-
-// declare global {
-//   namespace ReactNavigation {
-//     interface RootParamList extends AppStackParamList {}
-//   }
-// }

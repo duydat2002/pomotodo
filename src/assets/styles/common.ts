@@ -35,4 +35,16 @@ export const common = StyleSheet.create({
     width: 24,
     height: 24,
   },
+
+  // Shadow
+  shadow: {
+    shadowColor: '#424242',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+    elevation: 16,
+  },
 });

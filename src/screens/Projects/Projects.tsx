@@ -27,14 +27,13 @@ const Projects = () => {
       <Header title="Your Projects">{{}}</Header>
       <View style={{flex: 1, width: '100%'}}>
         <UButton
-          style={{
-            borderColor: activedColors.border,
-            backgroundColor: activedColors.border,
-            borderRadius: 14,
-            marginHorizontal: 16,
-            marginBottom: 9,
-            width: 'auto',
-          }}>
+          style={[
+            styles.searchButton,
+            {
+              borderColor: activedColors.border,
+              backgroundColor: activedColors.border,
+            },
+          ]}>
           <Ionicons name="search" size={22} color={activedColors.textSec} />
           <Text
             style={[
@@ -46,11 +45,7 @@ const Projects = () => {
         </UButton>
         <TouchableOpacity
           onPress={() => navigation.navigate('CreateProject')}
-          style={{
-            flexDirection: 'row',
-            marginHorizontal: 16,
-            marginVertical: 10,
-          }}>
+          style={styles.addProject}>
           <AntDesign name="plus" size={24} color={activedColors.text} />
           <Text
             style={[common.text, {color: activedColors.text, marginLeft: 10}]}>
@@ -78,4 +73,16 @@ const Projects = () => {
 
 export default Projects;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  searchButton: {
+    borderRadius: 14,
+    marginHorizontal: 16,
+    marginBottom: 9,
+    width: 'auto',
+  },
+  addProject: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
+});
