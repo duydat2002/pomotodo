@@ -21,6 +21,9 @@ import UInput from '@/components/UI/UInput';
 import PriorityDropdown from '@/components/Task/PriorityDropdown';
 import AssigneeUserItem from '@/components/Task/AssigneeUserItem';
 import PomodoroPicker from '@/components/Modal/PomodoroPicker';
+import BreaktimePicker from '@/components/Modal/BreaktimePicker';
+import MCalendarPicker from '@/components/Modal/MCalendarPicker';
+import moment from 'moment';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -33,6 +36,8 @@ const CreateTask = () => {
   const [assignee, setAssignee] = useState('');
   const [activePriority, setActivePriority] = useState(false);
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
+  const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
+  const [activeCalendarPicker, setActiveCalendarPicker] = useState(false);
   const [task, setTask] = useState<ITask>({
     id: generatorId(),
     projectId: route.params.projectId,
@@ -65,14 +70,29 @@ const CreateTask = () => {
     });
   };
 
-  const getPomodoro = (pomodoros: number, pomodoroLength: number) => {
+  const savePomodoro = (pomodoros: number, pomodoroLength: number) => {
     setTask({
       ...task,
       pomodoroCount: pomodoros,
       longBreak: pomodoroLength,
     });
-    console.log(pomodoroLength);
     setActivePomodoroPicker(false);
+  };
+
+  const saveBreaktime = (breakLength: number) => {
+    setTask({
+      ...task,
+      shortBreak: breakLength,
+    });
+    setActiveBreaktimePicker(false);
+  };
+
+  const saveDeadline = (date: Date | null) => {
+    setTask({
+      ...task,
+      deadline: date,
+    });
+    setActiveCalendarPicker(false);
   };
 
   return (
@@ -190,7 +210,7 @@ const CreateTask = () => {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => {}}
+            onPress={() => setActiveBreaktimePicker(true)}
             style={[styles.item, {backgroundColor: activedColors.input}]}>
             <MaterialCommunityIcons
               name="party-popper"
@@ -207,7 +227,7 @@ const CreateTask = () => {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => {}}
+            onPress={() => setActiveCalendarPicker(true)}
             style={[styles.item, {backgroundColor: activedColors.input}]}>
             <FontAwesome
               name="calendar"
@@ -219,7 +239,9 @@ const CreateTask = () => {
               Deadline
             </Text>
             <Text style={[common.text, {color: activedColors.textSec}]}>
-              {task.deadline || 'Ngày nào đó'}
+              {task.deadline
+                ? moment(task.deadline).format('dddd, D MMMM')
+                : 'Someday'}
             </Text>
           </TouchableOpacity>
           <View
@@ -302,7 +324,19 @@ const CreateTask = () => {
         visible={activePomodoroPicker}
         onClickOutside={() => setActivePomodoroPicker(false)}
         onClose={() => setActivePomodoroPicker(false)}
-        onSave={getPomodoro}
+        onSave={savePomodoro}
+      />
+      <BreaktimePicker
+        visible={activeBreaktimePicker}
+        onClickOutside={() => setActiveBreaktimePicker(false)}
+        onClose={() => setActiveBreaktimePicker(false)}
+        onSave={saveBreaktime}
+      />
+      <MCalendarPicker
+        visible={activeCalendarPicker}
+        onClickOutside={() => setActiveCalendarPicker(false)}
+        onClose={() => setActiveCalendarPicker(false)}
+        onSave={saveDeadline}
       />
     </SafeView>
   );

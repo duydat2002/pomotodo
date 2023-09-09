@@ -1,16 +1,28 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import SafeView from '@/components/Layout/SafeView';
+import UModal from './UModal';
+import {common} from '@/assets/styles';
+import {useActivedColors, useAppSelector} from '@/hooks';
+import UButton from '../UI/UButton';
+import {Feather, MaterialCommunityIcons} from '@expo/vector-icons';
 import CalendarPicker, {
-  CustomDatesStylesFunc,
   DateChangedCallback,
 } from 'react-native-calendar-picker';
-import {useActivedColors, useAppSelector} from '@/hooks';
-import {common} from '@/assets/styles';
-import {Feather, MaterialCommunityIcons} from '@expo/vector-icons';
 import moment, {Moment} from 'moment';
 
-const Statistic = () => {
+interface IProps {
+  visible: boolean;
+  onClickOutside?: () => void;
+  onClose: () => void;
+  onSave: (date: Date | null) => void;
+}
+
+const MCalendarPicker: React.FC<IProps> = ({
+  visible,
+  onClickOutside,
+  onClose,
+  onSave,
+}) => {
   const activedColors = useActivedColors();
   const {theme} = useAppSelector(state => state.theme);
 
@@ -26,7 +38,7 @@ const Statistic = () => {
   }, [theme]);
 
   return (
-    <SafeView>
+    <UModal visible={visible} onClickOutside={onClickOutside}>
       <View
         style={[
           common.shadow,
@@ -48,25 +60,12 @@ const Statistic = () => {
             {selectedDate?.format('dddd, D MMMM') || 'Someday'}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 15,
-          }}>
+        <View style={[styles.pickContainer]}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setSelectedDate(moment())}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#3cb44b',
-              }}>
+            style={[styles.flexCenter]}>
+            <View style={[styles.pickItem, {backgroundColor: '#3cb44b'}]}>
               <Feather name="sun" size={20} color="#fff" />
             </View>
             <Text style={{color: activedColors.text}}>Today</Text>
@@ -74,16 +73,8 @@ const Statistic = () => {
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setSelectedDate(moment().add(1, 'day'))}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#f58231',
-              }}>
+            style={[styles.flexCenter]}>
+            <View style={[styles.pickItem, {backgroundColor: '#f58231'}]}>
               <MaterialCommunityIcons
                 name="weather-sunset"
                 size={20}
@@ -95,16 +86,8 @@ const Statistic = () => {
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setSelectedDate(moment().add(7, 'day'))}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#93b0f3',
-              }}>
+            style={[styles.flexCenter]}>
+            <View style={[styles.pickItem, {backgroundColor: '#93b0f3'}]}>
               <MaterialCommunityIcons
                 name="calendar-arrow-right"
                 size={20}
@@ -116,16 +99,8 @@ const Statistic = () => {
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setSelectedDate(null)}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#5249ca',
-              }}>
+            style={[styles.flexCenter]}>
+            <View style={[styles.pickItem, {backgroundColor: '#5249ca'}]}>
               <MaterialCommunityIcons
                 name="calendar-month"
                 size={20}
@@ -162,11 +137,44 @@ const Statistic = () => {
             }
           />
         </View>
+        <View style={{flexDirection: 'row', gap: 20, marginTop: 20}}>
+          <UButton style={{flex: 1, backgroundColor: '#fff'}} onPress={onClose}>
+            <Text style={[common.text, {color: activedColors.error}]}>
+              Cancel
+            </Text>
+          </UButton>
+          <UButton
+            primary
+            style={{flex: 1}}
+            onPress={() => onSave(selectedDate?.toDate() || null)}>
+            <Text style={[common.text, {color: '#fff'}]}>Done</Text>
+          </UButton>
+        </View>
       </View>
-    </SafeView>
+    </UModal>
   );
 };
 
-export default Statistic;
+export default MCalendarPicker;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  flexCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 15,
+    marginBottom: 20,
+  },
+  pickItem: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+});

@@ -28,6 +28,7 @@
     "expo-system-ui": "~2.4.0",
     "firebase": "^10.3.0",
     "lottie-react-native": "5.1.6",
+    "moment": "^2.29.4",
     "nanoid": "^4.0.2",
     "react": "18.2.0",
     "react-native": "0.72.4",
@@ -45,6 +46,7 @@
     "@react-native-community/datetimepicker": "^7.5.0",
     "@react-native-picker/picker": "^2.5.0",
     "@types/react": "~18.2.14",
+    "@types/react-native-calendar-picker": "^7.0.3",
     "prettier": "^3.0.2",
     "react-native-wheel-pick": "^1.2.2",
     "typescript": "^5.1.3"

@@ -36,8 +36,8 @@ const PomodoroPicker: React.FC<IProps> = ({
         style={[
           common.shadow,
           {
-            borderRadius: 16,
             padding: 24,
+            borderRadius: 16,
             backgroundColor: activedColors.input,
           },
         ]}>
