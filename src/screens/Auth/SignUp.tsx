@@ -9,11 +9,11 @@ import {AntDesign, FontAwesome, Zocial} from '@expo/vector-icons';
 import {useAuth} from '@/hooks';
 import {setUser} from '@/store/user.slice';
 import {validateEmail, validatePassword} from '@/utils';
-import Header from '@/components/Header';
-import UInput from '@/components/UInput';
-import UButton from '@/components/UButton';
-import Seperator from '@/components/Seperator';
-import SafeView from '@/components/SafeView';
+import Header from '@/components/Layout/Header';
+import UInput from '@/components/UI/UInput';
+import UButton from '@/components/UI/UButton';
+import Seperator from '@/components/Layout/Seperator';
+import SafeView from '@/components/Layout/SafeView';
 import {AuthStackScreenProps} from '@/types/navigation';
 
 const SignUp = () => {

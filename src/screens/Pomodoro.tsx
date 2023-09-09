@@ -11,9 +11,9 @@ import {
 import {EFontWeight} from '@/theme';
 import {secondsFormat} from '@/utils';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import Header from '@/components/Header';
-import SafeView from '@/components/SafeView';
 import {AppStackScreenProps} from '@/types/navigation';
+import Header from '@/components/Layout/Header';
+import SafeView from '@/components/Layout/SafeView';
 
 const Pomodoro: React.FC = () => {
   const activedColors = useActivedColors();

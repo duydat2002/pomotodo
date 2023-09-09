@@ -1,17 +1,12 @@
 import React, {useState} from 'react';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native';
-import {
+  AntDesign,
   Feather,
+  FontAwesome,
   Fontisto,
-  Ionicons,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from '@expo/vector-icons';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -19,49 +14,13 @@ import {common} from '@/assets/styles';
 import {ProjectsStackScreenProps} from '@/types/navigation';
 import {PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
-import {generatorId} from '@/utils';
-import UModal from '@/components/UModal';
-import SafeView from '@/components/SafeView';
-import Header from '@/components/Header';
-import SelectDropdown from 'react-native-select-dropdown';
-import UDropdown from '@/components/UDropdown';
-import UInput from '@/components/UInput';
-
-interface IPriorityItemProps {
-  level?: IPriority;
-  onPress: () => void;
-}
-
-const PriorityItem: React.FC<IPriorityItemProps> = ({
-  level = 'none',
-  onPress,
-}) => {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={onPress}
-      style={{
-        flexDirection: 'row',
-        width: '100%',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-      }}>
-      <Ionicons name="flag" size={24} color={PRIORITY_COLORS[level].default} />
-      <Text
-        numberOfLines={1}
-        style={[
-          common.text,
-          {
-            color: PRIORITY_COLORS[level].default,
-            textTransform: 'capitalize',
-            marginLeft: 10,
-          },
-        ]}>
-        {level} Priority
-      </Text>
-    </TouchableOpacity>
-  );
-};
+import {generatorId, secondsToMinutes} from '@/utils';
+import SafeView from '@/components/Layout/SafeView';
+import Header from '@/components/Layout/Header';
+import UInput from '@/components/UI/UInput';
+import PriorityDropdown from '@/components/Task/PriorityDropdown';
+import AssigneeUserItem from '@/components/Task/AssigneeUserItem';
+import PomodoroPicker from '@/components/Modal/PomodoroPicker';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -71,9 +30,9 @@ const CreateTask = () => {
 
   const {user} = useAppSelector(state => state.user);
 
-  const prioritys: IPriority[] = ['high', 'medium', 'low', 'none'];
-
+  const [assignee, setAssignee] = useState('');
   const [activePriority, setActivePriority] = useState(false);
+  const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
   const [task, setTask] = useState<ITask>({
     id: generatorId(),
     projectId: route.params.projectId,
@@ -106,12 +65,18 @@ const CreateTask = () => {
     });
   };
 
-  const clickOutSide = () => {
-    setActivePriority(false);
+  const getPomodoro = (pomodoros: number, pomodoroLength: number) => {
+    setTask({
+      ...task,
+      pomodoroCount: pomodoros,
+      longBreak: pomodoroLength,
+    });
+    console.log(pomodoroLength);
+    setActivePomodoroPicker(false);
   };
 
   return (
-    <SafeView clickOutSide={clickOutSide}>
+    <SafeView clickOutSide={() => setActivePriority(false)}>
       <Header title="Create Task">
         {{
           leftChild: (
@@ -131,6 +96,7 @@ const CreateTask = () => {
             {
               zIndex: 1,
               paddingVertical: 0,
+              marginVertical: 20,
               backgroundColor: activedColors.input,
             },
           ]}>
@@ -152,46 +118,17 @@ const CreateTask = () => {
             placeholder="Task name"
             style={{flex: 1, width: 'auto'}}
           />
-          <UDropdown active={activePriority} style={{right: 0, zIndex: 1000}}>
-            {{
-              header: (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setActivePriority(!activePriority)}>
-                  <Ionicons
-                    name="flag"
-                    size={24}
-                    color={PRIORITY_COLORS[task.priority].default}
-                  />
-                </TouchableOpacity>
-              ),
-              dropdown: (
-                <View
-                  style={[
-                    common.shadow,
-                    {
-                      width: 200,
-                      backgroundColor: activedColors.modal,
-                      alignItems: 'center',
-                      borderRadius: 8,
-                    },
-                  ]}>
-                  {prioritys.map(level => (
-                    <PriorityItem
-                      key={level}
-                      level={level}
-                      onPress={() => setPriority(level)}
-                    />
-                  ))}
-                </View>
-              ),
-            }}
-          </UDropdown>
+          <PriorityDropdown
+            activePriority={activePriority}
+            setActivePriority={setActivePriority}
+            priority={task.priority}
+            setPriority={setPriority}
+          />
         </View>
-        <View style={{}}>
+        <View style={{marginTop: 10}}>
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => {}}
+            onPress={() => setActivePomodoroPicker(true)}
             style={[
               styles.item,
               {
@@ -204,7 +141,8 @@ const CreateTask = () => {
               size={20}
               color={activedColors.textSec}
             />
-            <Text style={[common.text, {flex: 1, marginLeft: 20}]}>
+            <Text
+              style={[common.text, styles.title, {color: activedColors.text}]}>
               Pomodoro
             </Text>
             <View>
@@ -245,13 +183,127 @@ const CreateTask = () => {
                 />
                 <Text style={[common.small, {color: activedColors.textSec}]}>
                   {' '}
-                  = {task.longBreak}m
+                  = {secondsToMinutes(task.longBreak)}
                 </Text>
               </View>
             </View>
           </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {}}
+            style={[styles.item, {backgroundColor: activedColors.input}]}>
+            <MaterialCommunityIcons
+              name="party-popper"
+              size={20}
+              color={activedColors.textSec}
+            />
+            <Text
+              style={[common.text, styles.title, {color: activedColors.text}]}>
+              Breaktime
+            </Text>
+            <Text style={[common.text, {color: activedColors.textSec}]}>
+              {secondsToMinutes(task.shortBreak)}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {}}
+            style={[styles.item, {backgroundColor: activedColors.input}]}>
+            <FontAwesome
+              name="calendar"
+              size={20}
+              color={activedColors.textSec}
+            />
+            <Text
+              style={[common.text, styles.title, {color: activedColors.text}]}>
+              Deadline
+            </Text>
+            <Text style={[common.text, {color: activedColors.textSec}]}>
+              {task.deadline || 'Ngày nào đó'}
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={[
+              styles.assigneeWrap,
+              {backgroundColor: activedColors.input},
+            ]}>
+            <View
+              style={[
+                {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: 8,
+                },
+              ]}>
+              <MaterialIcons
+                name="groups"
+                size={20}
+                color={activedColors.textSec}
+              />
+              <Text
+                style={[
+                  common.text,
+                  styles.title,
+                  {color: activedColors.text},
+                ]}>
+                Assignees
+              </Text>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                {task.assignees.length}
+              </Text>
+            </View>
+            <View
+              style={{
+                width: '100%',
+                height: 2,
+                marginTop: 4,
+                backgroundColor: activedColors.background,
+              }}
+            />
+            <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
+              <AntDesign
+                name="adduser"
+                size={20}
+                color={activedColors.textSec}
+              />
+              <UInput
+                value={assignee}
+                onChangeText={setAssignee}
+                placeholder="Add user..."
+                style={{flex: 1, width: 'auto', marginLeft: 8}}
+              />
+              <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+                <Text style={[common.text, {color: activedColors.primary}]}>
+                  Add
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                {
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: 10,
+                  backgroundColor: activedColors.background,
+                  padding: 16,
+                  borderRadius: 8,
+                },
+              ]}>
+              <AssigneeUserItem id="local" />
+              <AssigneeUserItem id="local" username={'User 1'} />
+              <AssigneeUserItem id="local" username={'User 2'} />
+              <AssigneeUserItem id="local" username={'User blabla'} />
+              <AssigneeUserItem id="local" username={'User'} />
+            </View>
+          </View>
         </View>
       </View>
+      <PomodoroPicker
+        visible={activePomodoroPicker}
+        onClickOutside={() => setActivePomodoroPicker(false)}
+        onClose={() => setActivePomodoroPicker(false)}
+        onSave={getPomodoro}
+      />
     </SafeView>
   );
 };
@@ -260,13 +312,14 @@ export default CreateTask;
 
 const styles = StyleSheet.create({
   item: {
-    marginVertical: 20,
+    marginVertical: 4,
     marginHorizontal: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
+    height: 50,
   },
   check: {
     width: 24,
@@ -275,5 +328,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  title: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  assigneeWrap: {
+    marginVertical: 4,
+    marginHorizontal: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
 });

@@ -1,7 +1,12 @@
 Users (id, username, fullname, email, avatar)
+
 NProjects (id, name, color, totalTime, elapsedTime, totalTask, taskComplete)
+
 Projects (id, NProjectId, ownerId, name, color, totalTime, elapsedTime, totalTask, taskComplete, createdAt)
+
 Tasks (id, projectId, name, priority{none, low, medium, high}, isDone, totalPomodoro, longBreak, shortBreak, deadline,assignees, createdAt)
+
+Assignees (id, taskId, userId, username, userAvatar)
 
 
 Luồng xử lý offline-first 

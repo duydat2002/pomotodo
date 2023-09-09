@@ -4,13 +4,13 @@ import {useNavigation} from '@react-navigation/native';
 import {useActivedColors, useAppDispatch} from '@/hooks';
 import {EFontWeight} from '@/theme';
 import {common} from '@/assets/styles';
-import {setUser} from '@/store/user.slice';
-import Header from '@/components/Header';
-import UButton from '@/components/UButton';
-import Seperator from '@/components/Seperator';
-import SafeView from '@/components/SafeView';
 import {generatorId} from '@/utils';
 import {AuthStackScreenProps} from '@/types/navigation';
+import {setUser} from '@/store/user.slice';
+import Header from '@/components/Layout/Header';
+import UButton from '@/components/UI/UButton';
+import Seperator from '@/components/Layout/Seperator';
+import SafeView from '@/components/Layout/SafeView';
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();

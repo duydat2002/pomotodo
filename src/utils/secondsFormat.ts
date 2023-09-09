@@ -22,3 +22,7 @@ export const secondsToHM = (seconds: number) => {
 
   return {hours, minutes};
 };
+
+export const secondsToMinutes = (seconds: number) => {
+  return `${Math.floor(seconds / 60)}m`;
+};

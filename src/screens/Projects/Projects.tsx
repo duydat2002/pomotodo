@@ -4,10 +4,10 @@ import {useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
 import {AntDesign, Ionicons} from '@expo/vector-icons';
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
-import SafeView from '@/components/SafeView';
-import UButton from '@/components/UButton';
-import Header from '@/components/Header';
-import ProjectItem from '@/components/ProjectItem';
+import SafeView from '@/components/Layout/SafeView';
+import UButton from '@/components/UI/UButton';
+import Header from '@/components/Layout/Header';
+import ProjectItem from '@/components/Project/ProjectItem';
 import {ProjectsStackScreenProps} from '@/types/navigation';
 
 const Projects = () => {

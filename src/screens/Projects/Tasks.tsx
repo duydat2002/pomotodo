@@ -2,12 +2,12 @@ import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {IProject} from '@/types';
-import SafeView from '@/components/SafeView';
-import Header from '@/components/Header';
+import SafeView from '@/components/Layout/SafeView';
+import Header from '@/components/Layout/Header';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import ProjectInfoCard from '@/components/ProjectInfoCard';
-import TaskItem from '@/components/TaskItem';
+import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
+import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types/navigation';
 
 const Tasks = () => {

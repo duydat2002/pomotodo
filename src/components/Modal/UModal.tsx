@@ -1,4 +1,5 @@
-import React, {ReactNode} from 'react';
+import {common} from '@/assets/styles';
+import React, {ReactNode, useState} from 'react';
 import {
   Modal,
   StyleProp,
@@ -7,6 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import SafeView from '@/components/Layout/SafeView';
 
 interface IProps {
   visible: boolean;
@@ -15,7 +17,7 @@ interface IProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   onRequestClose?: () => void;
-  dismiss: () => void;
+  onClickOutside?: () => void;
 }
 
 const UModal: React.FC<IProps> = ({
@@ -25,21 +27,22 @@ const UModal: React.FC<IProps> = ({
   children,
   style,
   onRequestClose,
-  dismiss,
+  onClickOutside,
 }) => {
   return (
-    <View>
+    <SafeView>
       <Modal
+        statusBarTranslucent={true}
         visible={visible}
         transparent={transparent}
         onRequestClose={onRequestClose}
         animationType={animationType}>
-        <TouchableWithoutFeedback onPress={dismiss}>
+        <TouchableWithoutFeedback onPress={onClickOutside}>
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
         <View style={[styles.modalContent, style]}>{children}</View>
       </Modal>
-    </View>
+    </SafeView>
   );
 };
 
@@ -56,8 +59,6 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     justifyContent: 'center',
-    backgroundColor: '#f3f',
-    height: 200,
     marginTop: 'auto',
   },
 });

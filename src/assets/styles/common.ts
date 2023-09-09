@@ -22,6 +22,9 @@ export const common = StyleSheet.create({
   text: {
     fontSize: EFontSize.base,
   },
+  medium: {
+    fontSize: 14,
+  },
   small: {
     fontSize: EFontSize.xs,
   },
@@ -38,7 +41,7 @@ export const common = StyleSheet.create({
 
   // Shadow
   shadow: {
-    shadowColor: '#424242',
+    shadowColor: '#000000',
     shadowOffset: {
       width: 0,
       height: 8,
