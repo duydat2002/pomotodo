@@ -14,7 +14,7 @@ import UInput from '@/components/UI/UInput';
 import UButton from '@/components/UI/UButton';
 import Seperator from '@/components/Layout/Seperator';
 import SafeView from '@/components/Layout/SafeView';
-import {AuthStackScreenProps} from '@/types/navigation';
+import {AuthStackScreenProps} from '@/types';
 
 const SignUp = () => {
   const dispatch = useAppDispatch();

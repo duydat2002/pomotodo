@@ -4,9 +4,13 @@ NProjects (id, name, color, totalTime, elapsedTime, totalTask, taskComplete)
 
 Projects (id, NProjectId, ownerId, name, color, totalTime, elapsedTime, totalTask, taskComplete, createdAt)
 
-Tasks (id, projectId, name, priority{none, low, medium, high}, isDone, totalPomodoro, longBreak, shortBreak, deadline,assignees, createdAt)
+Tasks (id, projectId, name, priority{none, low, medium, high}, isDone, totalPomodoro, longBreak, shortBreak, deadline, createdAt)
 
+// Những người được thêm vào task
 Assignees (id, taskId, userId, username, userAvatar)
+
+// NHững người dũng cũ đã từng làm việc với bạn
+FormerColleagues (id, userId, colleagueId, colleagueUsername, colleagueAvatar)
 
 
 Luồng xử lý offline-first 

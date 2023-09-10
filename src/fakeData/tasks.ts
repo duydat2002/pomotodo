@@ -1,0 +1,28 @@
+export const TASKS = [
+  {
+    id: 'task1',
+    projectId: 'project1',
+    name: 'Task 1',
+    priority: 'none',
+    isDone: false,
+    totalPomodoro: 4,
+    pomodoroCount: 1,
+    longBreak: 5 * 60,
+    shortBreak: 60,
+    deadline: null,
+    createdAt: new Date(),
+  },
+  {
+    id: 'task2',
+    projectId: 'project1',
+    name: 'Task 2',
+    priority: 'low',
+    isDone: false,
+    totalPomodoro: 6,
+    pomodoroCount: 2,
+    longBreak: 5 * 60,
+    shortBreak: 60,
+    deadline: new Date(),
+    createdAt: new Date(),
+  },
+];

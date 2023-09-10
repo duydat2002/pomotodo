@@ -11,7 +11,7 @@ import {
 import {EFontWeight} from '@/theme';
 import {secondsFormat} from '@/utils';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {AppStackScreenProps} from '@/types/navigation';
+import {AppStackScreenProps} from '@/types';
 import Header from '@/components/Layout/Header';
 import SafeView from '@/components/Layout/SafeView';
 

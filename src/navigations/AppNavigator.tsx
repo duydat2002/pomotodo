@@ -14,7 +14,7 @@ import Pomodoro from '@/screens/Pomodoro';
 import Statistic from '@/screens/Statistic';
 import Setting from '@/screens/Setting';
 import ProjectNavigator from './ProjectNavigator';
-import {AppStackParamList} from '@/types/navigation';
+import {AppStackParamList} from '@/types';
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
 

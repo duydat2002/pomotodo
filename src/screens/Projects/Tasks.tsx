@@ -8,7 +8,7 @@ import {useActivedColors, useAppSelector} from '@/hooks';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
-import {ProjectsStackScreenProps} from '@/types/navigation';
+import {ProjectsStackScreenProps} from '@/types';
 
 const Tasks = () => {
   const activedColors = useActivedColors();

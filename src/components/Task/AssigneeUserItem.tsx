@@ -34,7 +34,15 @@ const AssigneeUserItem: React.FC<IProps> = ({
         style={{width: 25, height: 25, borderRadius: 25}}
       />
       <Text
-        style={[{marginLeft: 4, marginRight: 8, color: activedColors.text}]}
+        style={[
+          {
+            flexGrow: 1,
+            flexShrink: 1,
+            marginLeft: 4,
+            marginRight: 8,
+            color: activedColors.text,
+          },
+        ]}
         numberOfLines={1}>
         {username}
       </Text>

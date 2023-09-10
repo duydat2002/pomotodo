@@ -11,7 +11,7 @@ import {ITask} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
 import {common} from '@/assets/styles';
 import {useNavigation} from '@react-navigation/native';
-import {AppStackScreenProps} from '@/types/navigation';
+import {AppStackScreenProps} from '@/types';
 
 interface IProps {
   task: ITask;

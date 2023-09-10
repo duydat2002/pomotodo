@@ -5,7 +5,7 @@ import {useActivedColors, useAppDispatch} from '@/hooks';
 import {EFontWeight} from '@/theme';
 import {common} from '@/assets/styles';
 import {generatorId} from '@/utils';
-import {AuthStackScreenProps} from '@/types/navigation';
+import {AuthStackScreenProps} from '@/types';
 import {setUser} from '@/store/user.slice';
 import Header from '@/components/Layout/Header';
 import UButton from '@/components/UI/UButton';

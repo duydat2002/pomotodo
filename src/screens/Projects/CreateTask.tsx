@@ -1,17 +1,26 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import {
   AntDesign,
   Feather,
   FontAwesome,
   Fontisto,
+  Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from '@expo/vector-icons';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {ProjectsStackScreenProps} from '@/types/navigation';
+import {ProjectsStackScreenProps} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -24,6 +33,7 @@ import PomodoroPicker from '@/components/Modal/PomodoroPicker';
 import BreaktimePicker from '@/components/Modal/BreaktimePicker';
 import MCalendarPicker from '@/components/Modal/MCalendarPicker';
 import moment from 'moment';
+import QRModal from '@/components/Modal/QRModal';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -38,6 +48,7 @@ const CreateTask = () => {
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
   const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
   const [activeCalendarPicker, setActiveCalendarPicker] = useState(false);
+  const [activeQRCode, setActiveQRCode] = useState(false);
   const [task, setTask] = useState<ITask>({
     id: generatorId(),
     projectId: route.params.projectId,
@@ -52,6 +63,37 @@ const CreateTask = () => {
     assignees: [user!.id],
     createdAt: new Date(),
   });
+
+  const fake = [
+    {
+      id: '1',
+      username: 'User 1',
+    },
+    {
+      id: '2',
+      username: 'User user user uesr 2',
+    },
+    {
+      id: '3',
+      username: 'User 3',
+    },
+    {
+      id: '4',
+      username: 'User 4',
+    },
+    {
+      id: '5',
+      username: 'User 5',
+    },
+    {
+      id: '6',
+      username: 'User 6',
+    },
+    {
+      id: '7',
+      username: 'User 7',
+    },
+  ];
 
   const checkTask = () => {};
 
@@ -73,7 +115,7 @@ const CreateTask = () => {
   const savePomodoro = (pomodoros: number, pomodoroLength: number) => {
     setTask({
       ...task,
-      pomodoroCount: pomodoros,
+      totalPomodoro: pomodoros,
       longBreak: pomodoroLength,
     });
     setActivePomodoroPicker(false);
@@ -106,6 +148,17 @@ const CreateTask = () => {
               color={activedColors.text}
               onPress={() => navigation.goBack()}
             />
+          ),
+          rightChild: (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setActiveQRCode(true)}>
+              <Ionicons
+                name="qr-code-outline"
+                size={24}
+                color={activedColors.text}
+              />
+            </TouchableOpacity>
           ),
         }}
       </Header>
@@ -300,26 +353,37 @@ const CreateTask = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <View
-              style={[
-                {
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                  backgroundColor: activedColors.background,
-                  padding: 16,
-                  borderRadius: 8,
-                },
-              ]}>
-              <AssigneeUserItem id="local" />
-              <AssigneeUserItem id="local" username={'User 1'} />
-              <AssigneeUserItem id="local" username={'User 2'} />
-              <AssigneeUserItem id="local" username={'User blabla'} />
-              <AssigneeUserItem id="local" username={'User'} />
-            </View>
+            <ScrollView style={{height: 150}}>
+              <View
+                onStartShouldSetResponder={() => true}
+                style={[
+                  {
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 10,
+                    backgroundColor: activedColors.background,
+                    padding: 16,
+                    borderRadius: 8,
+                  },
+                ]}>
+                {fake.map(user => (
+                  <AssigneeUserItem
+                    key={user.id}
+                    id={user.id}
+                    username={user.username}
+                  />
+                ))}
+              </View>
+            </ScrollView>
           </View>
         </View>
       </View>
+      <QRModal
+        visible={activeQRCode}
+        value={JSON.stringify({taskId: task.id, ownerId: user?.id})}
+        onClickOutside={() => setActiveQRCode(false)}
+        onClose={() => setActiveQRCode(false)}
+      />
       <PomodoroPicker
         visible={activePomodoroPicker}
         onClickOutside={() => setActivePomodoroPicker(false)}

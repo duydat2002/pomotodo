@@ -8,7 +8,7 @@ import SafeView from '@/components/Layout/SafeView';
 import UButton from '@/components/UI/UButton';
 import Header from '@/components/Layout/Header';
 import ProjectItem from '@/components/Project/ProjectItem';
-import {ProjectsStackScreenProps} from '@/types/navigation';
+import {ProjectsStackScreenProps} from '@/types';
 
 const Projects = () => {
   const activedColors = useActivedColors();

@@ -16,7 +16,7 @@ import Header from '@/components/Layout/Header';
 import UInput from '@/components/UI/UInput';
 import {addProject} from '@/store/projects.slice';
 import {generatorId} from '@/utils';
-import {ProjectsStackScreenProps} from '@/types/navigation';
+import {ProjectsStackScreenProps} from '@/types';
 
 const CreateProject = () => {
   const activedColors = useActivedColors();

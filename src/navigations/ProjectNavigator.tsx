@@ -5,7 +5,7 @@ import Projects from '@/screens/Projects/Projects';
 import Tasks from '@/screens/Projects/Tasks';
 import CreateTask from '@/screens/Projects/CreateTask';
 import CreateProject from '@/screens/Projects/CreateProject';
-import {ProjectsStackParamList} from '@/types/navigation';
+import {ProjectsStackParamList} from '@/types';
 
 const Stack = createNativeStackNavigator<ProjectsStackParamList>();
 
