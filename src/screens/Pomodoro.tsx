@@ -21,7 +21,7 @@ const Pomodoro: React.FC = () => {
     useNavigation<AppStackScreenProps<'Pomodoro'>['navigation']>();
   const route = useRoute<AppStackScreenProps<'Pomodoro'>['route']>();
 
-  const {tasks} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(1500);

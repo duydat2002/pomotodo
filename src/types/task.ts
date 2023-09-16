@@ -10,7 +10,6 @@ export interface ITask {
   pomodoroCount: number;
   longBreak: number;
   shortBreak: number;
-  deadline?: any;
-  assignees: string[]; // IDs of those assigned to the task
-  createdAt: any;
+  deadline: string | null;
+  createdAt: string;
 }

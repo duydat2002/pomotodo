@@ -5,7 +5,6 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 interface IState {
   projects: IProject[] | null;
   project: IProject | null;
-  tasks: ITask[] | null;
 }
 
 export const projectsSlice = createSlice({
@@ -13,37 +12,9 @@ export const projectsSlice = createSlice({
   initialState: {
     projects: null,
     project: null,
-    tasks: [
-      {
-        id: '123',
-        projectId: '1',
-        name: 'Task 1',
-        priority: 'medium',
-        isDone: false,
-        totalPomodoro: 6,
-        pomodoroCount: 1,
-        longBreak: 30,
-        shortBreak: 5 * 60,
-        assignees: ['local'],
-        createdAt: new Date(),
-      },
-      {
-        id: '124',
-        projectId: '1',
-        name: 'Task 2',
-        priority: 'high',
-        isDone: true,
-        totalPomodoro: 4,
-        pomodoroCount: 1,
-        longBreak: 3 * 60,
-        shortBreak: 5 * 60,
-        assignees: ['local'],
-        createdAt: new Date(),
-      },
-    ],
   } as IState,
   reducers: {
-    // Project
+    // Projects
     setProjects: (state, action: PayloadAction<IProject[] | null>) => {
       state.projects = action.payload;
       storeData('projects', action.payload);
@@ -53,62 +24,38 @@ export const projectsSlice = createSlice({
       else state.projects!.push(action.payload);
       storeData('projects', state.projects);
     },
-    setProject: (state, action: PayloadAction<IProject | null>) => {
-      state.project = action.payload;
-      storeData('project', action.payload);
-    },
-    updateProject: (state, action: PayloadAction<{id: string; datas: any}>) => {
+    updateProject: (
+      state,
+      action: PayloadAction<{id: string; datas: Partial<IProject>}>,
+    ) => {
       if (state.projects) {
         const {id, datas} = action.payload;
 
-        const updatedProjects = state.projects?.map(project => {
+        const updatedProjects: IProject[] = state.projects?.map(project => {
           if (project.id == id) {
             return {
               ...project,
               ...datas,
-            };
+            } as IProject;
           } else {
             return project;
           }
         });
 
         state.projects = updatedProjects;
+
+        storeData('projects', state.projects);
       }
     },
 
-    // Task
-    setTasks: (state, action: PayloadAction<ITask[] | null>) => {
-      state.tasks = action.payload;
-      storeData('tasks', action.payload);
-    },
-    updateTask: (state, action: PayloadAction<{id: string; datas: any}>) => {
-      if (state.tasks) {
-        const {id, datas} = action.payload;
-
-        const updatedTasks: ITask[] = state.tasks?.map(task => {
-          if (task.id == id) {
-            return {
-              ...task,
-              ...datas,
-            };
-          } else {
-            return task;
-          }
-        });
-
-        state.tasks = updatedTasks;
-      }
+    // Project
+    setProject: (state, action: PayloadAction<IProject | null>) => {
+      state.project = action.payload;
     },
   },
 });
 
-export const {
-  setProjects,
-  addProject,
-  setProject,
-  updateProject,
-  setTasks,
-  updateTask,
-} = projectsSlice.actions;
+export const {setProjects, addProject, updateProject, setProject} =
+  projectsSlice.actions;
 
 export default projectsSlice.reducer;

@@ -46,7 +46,7 @@ const CreateProject = () => {
           totalTask: 0,
           taskComplete: 0,
           ownerId: user!.id,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
         }),
       );
       navigation.navigate('Projects');

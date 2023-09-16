@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {common} from '@/assets/styles';
@@ -9,6 +9,8 @@ import UButton from '../UI/UButton';
 
 interface IProps {
   visible: boolean;
+  initPomodoro: number;
+  initPomodoroLength: number;
   onClickOutside?: () => void;
   onClose: () => void;
   onSave: (pomodoros: number, pomodoroLength: number) => void;
@@ -16,6 +18,8 @@ interface IProps {
 
 const PomodoroPicker: React.FC<IProps> = ({
   visible,
+  initPomodoro,
+  initPomodoroLength,
   onClickOutside,
   onClose,
   onSave,
@@ -27,8 +31,14 @@ const PomodoroPicker: React.FC<IProps> = ({
     return {label: `${i + 1}m`, value: i + 1};
   });
 
-  const [selectedPomodoro, setSelectedPomodoro] = useState(1);
-  const [selectedPomodoroLength, setSelectedPomodoroLength] = useState(1);
+  const [selectedPomodoro, setSelectedPomodoro] = useState(initPomodoro);
+  const [selectedPomodoroLength, setSelectedPomodoroLength] =
+    useState(initPomodoroLength);
+
+  useEffect(() => {
+    setSelectedPomodoro(initPomodoro);
+    setSelectedPomodoroLength(initPomodoroLength);
+  }, [initPomodoro, initPomodoroLength]);
 
   return (
     <UModal visible={visible} onClickOutside={onClickOutside}>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import UModal from './UModal';
 import {common} from '@/assets/styles';
@@ -8,6 +8,7 @@ import UButton from '../UI/UButton';
 
 interface IProps {
   visible: boolean;
+  initShortBreak: number;
   onClickOutside?: () => void;
   onClose: () => void;
   onSave: (breakLength: number) => void;
@@ -15,6 +16,7 @@ interface IProps {
 
 const BreaktimePicker: React.FC<IProps> = ({
   visible,
+  initShortBreak,
   onClickOutside,
   onClose,
   onSave,
@@ -25,7 +27,12 @@ const BreaktimePicker: React.FC<IProps> = ({
     return {label: `${i + 1}m`, value: i + 1};
   });
 
-  const [selectedBreakLength, setSelectedBreakLength] = useState(1);
+  const [selectedBreakLength, setSelectedBreakLength] =
+    useState(initShortBreak);
+
+  useEffect(() => {
+    setSelectedBreakLength(initShortBreak);
+  }, [initShortBreak]);
 
   return (
     <UModal visible={visible} onClickOutside={onClickOutside}>

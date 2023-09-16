@@ -1,34 +1,43 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {IProject} from '@/types';
+import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
+import {IProject, ITask} from '@/types';
 import SafeView from '@/components/Layout/SafeView';
 import Header from '@/components/Layout/Header';
-import {useActivedColors, useAppSelector} from '@/hooks';
+import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types';
+import {setProject} from '@/store/projects.slice';
 
 const Tasks = () => {
   const activedColors = useActivedColors();
+  const isFocused = useIsFocused();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'Tasks'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'Tasks'>['route']>();
+  const dispatch = useAppDispatch();
 
-  const {projects, tasks} = useAppSelector(state => state.projects);
+  const {projects, project} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
 
-  const [project, setProject] = useState<IProject | null>(null);
+  const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
 
   useEffect(() => {
-    const projectTemp = projects?.filter(
+    const projectTemp = projects!.filter(
       item => item.id === route.params?.projectId,
     );
-    setProject(!projectTemp ? null : projectTemp[0]);
-  }, [route.params?.projectId]);
+    dispatch(setProject(projectTemp[0]));
+
+    const tasksTemp = tasks?.filter(
+      task => task.projectId == route.params?.projectId,
+    );
+    setProjectTasks(tasksTemp || null);
+  }, [isFocused]);
 
   const clickCreateTask = () => {
-    navigation.navigate('CreateTask', {projectId: project?.id || ''});
+    navigation.navigate('CreateTask', {projectId: project!.id, task: null});
   };
 
   return (
@@ -64,13 +73,16 @@ const Tasks = () => {
         </View>
         <FlatList
           style={{marginTop: 20}}
-          data={tasks}
+          data={projectTasks}
           keyExtractor={(item, index) => item.name + index}
           renderItem={({item}) => (
             <TaskItem
               task={item}
               onPress={() => {
-                console.log('Task item');
+                navigation.navigate('CreateTask', {
+                  projectId: item.projectId,
+                  task: item,
+                });
               }}
             />
           )}

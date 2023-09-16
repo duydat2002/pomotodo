@@ -16,7 +16,7 @@ const Projects = () => {
     useNavigation<ProjectsStackScreenProps<'Projects'>['navigation']>();
   const dispatch = useAppDispatch();
 
-  const {projects, project} = useAppSelector(state => state.projects);
+  const {projects} = useAppSelector(state => state.projects);
 
   const handleClickProjectItem = (projectId: string) => {
     navigation.navigate('Tasks', {projectId});

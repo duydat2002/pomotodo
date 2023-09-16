@@ -8,7 +8,7 @@ export const PROJECTS = [
     totalTask: 2,
     taskComplete: 0,
     ownerId: 'user1',
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   },
   {
     id: 'project2',
@@ -19,7 +19,7 @@ export const PROJECTS = [
     totalTask: 4,
     taskComplete: 0,
     ownerId: 'user1',
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   },
   {
     id: 'project3',
@@ -30,6 +30,6 @@ export const PROJECTS = [
     totalTask: 6,
     taskComplete: 2,
     ownerId: 'user2',
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   },
 ];

@@ -7,5 +7,5 @@ export interface IProject {
   totalTask: number;
   taskComplete: number;
   ownerId: string; //Project owner ID
-  createdAt: any;
+  createdAt: string;
 }

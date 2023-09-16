@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {Appearance} from 'react-native';
-import {ITheme, IMode} from '@/types';
+import {ITheme} from '@/types';
 import {storeData} from '@/hooks';
 
 interface IState {

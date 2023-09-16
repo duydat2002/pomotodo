@@ -4,6 +4,7 @@ import type {
 } from '@react-navigation/native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
+import {ITask} from './task';
 
 // Auth
 export type AuthStackParamList = {
@@ -31,7 +32,7 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> =
 export type ProjectsStackParamList = {
   Projects: undefined;
   Tasks: {projectId: string};
-  CreateTask: {projectId: string};
+  CreateTask: {projectId: string; task: ITask | null};
   CreateProject: undefined;
 };
 

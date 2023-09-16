@@ -36,7 +36,7 @@ const PriorityDropdown: React.FC<IProps> = ({
   return (
     <UDropdown
       active={activePriority}
-      style={[style, {right: 0, zIndex: 1000}]}>
+      style={[{right: 0, zIndex: 1000}, style]}>
       {{
         header: (
           <TouchableOpacity

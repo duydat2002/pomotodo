@@ -1,12 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  FlatList,
   ScrollView,
-  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {
   AntDesign,
@@ -17,10 +16,10 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from '@expo/vector-icons';
-import {useActivedColors, useAppSelector} from '@/hooks';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
+import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {ProjectsStackScreenProps} from '@/types';
+import {IAssignee, IFormerColleagues, ProjectsStackScreenProps} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -34,16 +33,31 @@ import BreaktimePicker from '@/components/Modal/BreaktimePicker';
 import MCalendarPicker from '@/components/Modal/MCalendarPicker';
 import moment from 'moment';
 import QRModal from '@/components/Modal/QRModal';
+import {FORMER_COLLEAGUES} from '@/fakeData';
+import FindColleague from '@/components/Task/FindColleague';
+import UButton from '@/components/UI/UButton';
+import {addTask, updateTask} from '@/store/tasks.slice';
+import {updateProject} from '@/store/projects.slice';
+import {addAssignees} from '@/store/assignees.slice';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
+  const isFocused = useIsFocused();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'CreateTask'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'CreateTask'>['route']>();
 
+  const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.user);
+  const {project} = useAppSelector(state => state.projects);
+  const {assignees: assigneesStore} = useAppSelector(state => state.assignees);
 
   const [assignee, setAssignee] = useState('');
+  const [assignees, setAssignees] = useState<IAssignee[]>([]);
+  const [findColleague, setFindColleague] = useState<
+    IFormerColleagues[] | null
+  >(null);
+
   const [activePriority, setActivePriority] = useState(false);
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
   const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
@@ -55,47 +69,79 @@ const CreateTask = () => {
     name: '',
     priority: 'none',
     isDone: false,
-    totalPomodoro: 0,
+    totalPomodoro: 1,
     pomodoroCount: 0,
-    longBreak: 0,
-    shortBreak: 0,
+    longBreak: 25 * 60,
+    shortBreak: 5 * 60,
     deadline: null,
-    assignees: [user!.id],
-    createdAt: new Date(),
+    createdAt: '',
   });
+  const [errorName, setErrorName] = useState('');
 
-  const fake = [
-    {
-      id: '1',
-      username: 'User 1',
-    },
-    {
-      id: '2',
-      username: 'User user user uesr 2',
-    },
-    {
-      id: '3',
-      username: 'User 3',
-    },
-    {
-      id: '4',
-      username: 'User 4',
-    },
-    {
-      id: '5',
-      username: 'User 5',
-    },
-    {
-      id: '6',
-      username: 'User 6',
-    },
-    {
-      id: '7',
-      username: 'User 7',
-    },
-  ];
+  useEffect(() => {
+    if (route.params.task) {
+      setTask(route.params.task);
 
-  const checkTask = () => {};
+      const assigneesTemp = assigneesStore?.filter(
+        assignee => assignee.taskId == route.params.task?.id,
+      );
+
+      setAssignees(assigneesTemp || []);
+    }
+  }, [isFocused]);
+
+  const handleSaveTask = () => {
+    if (task.name.trim() == '') {
+      setErrorName('Please enter task name.');
+    } else {
+      setErrorName('');
+
+      // Update or create task
+      if (route.params.task) {
+        // Edit
+        dispatch(
+          updateTask({
+            id: task.id,
+            datas: {
+              ...task,
+            },
+          }),
+        );
+      } else {
+        // Create
+        dispatch(
+          addTask({
+            ...task,
+            createdAt: new Date().toISOString(),
+          }),
+        );
+      }
+
+      // Update project
+      dispatch(
+        updateProject({
+          id: task.projectId,
+          datas: {
+            totalTask: project!.totalTask + 1,
+            totalTime: project!.totalTime + task.totalPomodoro * task.longBreak,
+          },
+        }),
+      );
+
+      if (assignees.length > 0) {
+        dispatch(addAssignees(assignees));
+      }
+
+      navigation.goBack();
+    }
+  };
+
+  const checkTask = () => {
+    setTask({
+      ...task,
+      isDone: !task.isDone,
+    });
+  };
 
   const setPriority = (level: IPriority) => {
     setTask({
@@ -132,186 +178,136 @@ const CreateTask = () => {
   const saveDeadline = (date: Date | null) => {
     setTask({
       ...task,
-      deadline: date,
+      deadline: date?.toISOString() || null,
     });
     setActiveCalendarPicker(false);
   };
 
+  const onDeleteAssignee = (id: string) => {
+    const assigneesTemp = assignees.filter(assignee => assignee.id != id);
+
+    setAssignees(assigneesTemp);
+  };
+
+  const onClickColleague = (colleague: IFormerColleagues) => {
+    const check = assignees.findIndex(item => item.userId == colleague.userId);
+
+    if (check == -1) {
+      setAssignees([
+        ...assignees,
+        {
+          id: generatorId(),
+          taskId: task.id,
+          userId: colleague.colleagueId,
+          username: colleague.colleagueUsername,
+          userAvatar: colleague.colleagueAvatar,
+        } as IAssignee,
+      ]);
+    }
+
+    setAssignee('');
+    setFindColleague(null);
+  };
+
+  useEffect(() => {
+    const colleaguesTemp = FORMER_COLLEAGUES.filter(item => {
+      if (assignee.trim() != '') {
+        return (
+          item.colleagueId == assignee ||
+          item.colleagueUsername
+            .toLowerCase()
+            .includes(assignee.trim().toLowerCase())
+        );
+      } else {
+        return false;
+      }
+    });
+
+    setFindColleague(colleaguesTemp.length > 0 ? colleaguesTemp : null);
+  }, [assignee]);
+
   return (
-    <SafeView clickOutSide={() => setActivePriority(false)}>
-      <Header title="Create Task">
-        {{
-          leftChild: (
-            <Feather
-              name="x"
-              size={24}
-              color={activedColors.text}
-              onPress={() => navigation.goBack()}
-            />
-          ),
-          rightChild: (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setActiveQRCode(true)}>
-              <Ionicons
-                name="qr-code-outline"
+    <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
+      <SafeView clickOutSide={() => setActivePriority(false)}>
+        <Header title="Create Task">
+          {{
+            leftChild: (
+              <Feather
+                name="x"
                 size={24}
                 color={activedColors.text}
+                onPress={() => navigation.goBack()}
               />
-            </TouchableOpacity>
-          ),
-        }}
-      </Header>
-      <View style={{flex: 1, width: '100%'}}>
-        <View
-          style={[
-            styles.item,
-            {
-              zIndex: 1,
-              paddingVertical: 0,
-              marginVertical: 20,
-              backgroundColor: activedColors.input,
-            },
-          ]}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={checkTask}
-            style={[
-              styles.check,
-              {
-                borderColor: PRIORITY_COLORS[task.priority].default,
-                backgroundColor: PRIORITY_COLORS[task.priority].light,
-              },
-            ]}>
-            {task.isDone && <Feather name="check" size={16} color="#fff" />}
-          </TouchableOpacity>
-          <UInput
-            value={task.name}
-            onChangeText={setName}
-            placeholder="Task name"
-            style={{flex: 1, width: 'auto'}}
-          />
-          <PriorityDropdown
-            activePriority={activePriority}
-            setActivePriority={setActivePriority}
-            priority={task.priority}
-            setPriority={setPriority}
-          />
-        </View>
-        <View style={{marginTop: 10}}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setActivePomodoroPicker(true)}
+            ),
+            rightChild: (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setActiveQRCode(true)}>
+                <Ionicons
+                  name="qr-code-outline"
+                  size={24}
+                  color={activedColors.text}
+                />
+              </TouchableOpacity>
+            ),
+          }}
+        </Header>
+        <View style={{flex: 1, width: '100%'}}>
+          <View
             style={[
               styles.item,
               {
-                flexDirection: 'row',
+                zIndex: 1,
+                paddingVertical: 0,
+                marginTop: 20,
                 backgroundColor: activedColors.input,
               },
             ]}>
-            <Fontisto
-              name="stopwatch"
-              size={20}
-              color={activedColors.textSec}
-            />
-            <Text
-              style={[common.text, styles.title, {color: activedColors.text}]}>
-              Pomodoro
-            </Text>
-            <View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 'auto',
-                }}>
-                <MaterialCommunityIcons
-                  name="clock-time-four"
-                  size={16}
-                  color={activedColors.primary}
-                />
-                <Text style={[common.small, {color: activedColors.primary}]}>
-                  {task.pomodoroCount} /
-                </Text>
-                <MaterialCommunityIcons
-                  name="clock-time-four"
-                  size={16}
-                  color={activedColors.primaryLight}
-                />
-                <Text
-                  style={[common.small, {color: activedColors.primaryLight}]}>
-                  {task.totalPomodoro}
-                </Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 'auto',
-                }}>
-                <MaterialCommunityIcons
-                  name="clock-time-four"
-                  size={14}
-                  color={activedColors.primary}
-                />
-                <Text style={[common.small, {color: activedColors.textSec}]}>
-                  {' '}
-                  = {secondsToMinutes(task.longBreak)}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setActiveBreaktimePicker(true)}
-            style={[styles.item, {backgroundColor: activedColors.input}]}>
-            <MaterialCommunityIcons
-              name="party-popper"
-              size={20}
-              color={activedColors.textSec}
-            />
-            <Text
-              style={[common.text, styles.title, {color: activedColors.text}]}>
-              Breaktime
-            </Text>
-            <Text style={[common.text, {color: activedColors.textSec}]}>
-              {secondsToMinutes(task.shortBreak)}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setActiveCalendarPicker(true)}
-            style={[styles.item, {backgroundColor: activedColors.input}]}>
-            <FontAwesome
-              name="calendar"
-              size={20}
-              color={activedColors.textSec}
-            />
-            <Text
-              style={[common.text, styles.title, {color: activedColors.text}]}>
-              Deadline
-            </Text>
-            <Text style={[common.text, {color: activedColors.textSec}]}>
-              {task.deadline
-                ? moment(task.deadline).format('dddd, D MMMM')
-                : 'Someday'}
-            </Text>
-          </TouchableOpacity>
-          <View
-            style={[
-              styles.assigneeWrap,
-              {backgroundColor: activedColors.input},
-            ]}>
-            <View
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={checkTask}
               style={[
+                styles.check,
                 {
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingVertical: 8,
+                  borderColor: PRIORITY_COLORS[task.priority].default,
+                  backgroundColor: PRIORITY_COLORS[task.priority].light,
                 },
               ]}>
-              <MaterialIcons
-                name="groups"
+              {task.isDone && <Feather name="check" size={16} color="#fff" />}
+            </TouchableOpacity>
+            <UInput
+              value={task.name}
+              onChangeText={setName}
+              placeholder="Task name"
+              style={{flex: 1, width: 'auto'}}
+            />
+            <PriorityDropdown
+              activePriority={activePriority}
+              setActivePriority={setActivePriority}
+              priority={task.priority}
+              setPriority={setPriority}
+            />
+          </View>
+          <Text
+            style={[
+              common.small,
+              {marginLeft: 70, color: activedColors.error},
+            ]}>
+            {errorName}
+          </Text>
+          <View style={{marginTop: 10, flex: 1}}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setActivePomodoroPicker(true)}
+              style={[
+                styles.item,
+                {
+                  flexDirection: 'row',
+                  backgroundColor: activedColors.input,
+                },
+              ]}>
+              <Fontisto
+                name="stopwatch"
                 size={20}
                 color={activedColors.textSec}
               />
@@ -321,88 +317,227 @@ const CreateTask = () => {
                   styles.title,
                   {color: activedColors.text},
                 ]}>
-                Assignees
+                Pomodoro
               </Text>
-              <Text style={[common.text, {color: activedColors.textSec}]}>
-                {task.assignees.length}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: '100%',
-                height: 2,
-                marginTop: 4,
-                backgroundColor: activedColors.background,
-              }}
-            />
-            <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
-              <AntDesign
-                name="adduser"
+              <View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 'auto',
+                  }}>
+                  <MaterialCommunityIcons
+                    name="clock-time-four"
+                    size={16}
+                    color={activedColors.primary}
+                  />
+                  <Text style={[common.small, {color: activedColors.primary}]}>
+                    {task.pomodoroCount} /
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="clock-time-four"
+                    size={16}
+                    color={activedColors.primaryLight}
+                  />
+                  <Text
+                    style={[common.small, {color: activedColors.primaryLight}]}>
+                    {task.totalPomodoro}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 'auto',
+                  }}>
+                  <MaterialCommunityIcons
+                    name="clock-time-four"
+                    size={14}
+                    color={activedColors.primary}
+                  />
+                  <Text style={[common.small, {color: activedColors.textSec}]}>
+                    {' '}
+                    = {secondsToMinutes(task.longBreak)}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setActiveBreaktimePicker(true)}
+              style={[styles.item, {backgroundColor: activedColors.input}]}>
+              <MaterialCommunityIcons
+                name="party-popper"
                 size={20}
                 color={activedColors.textSec}
               />
-              <UInput
-                value={assignee}
-                onChangeText={setAssignee}
-                placeholder="Add user..."
-                style={{flex: 1, width: 'auto', marginLeft: 8}}
+              <Text
+                style={[
+                  common.text,
+                  styles.title,
+                  {color: activedColors.text},
+                ]}>
+                Breaktime
+              </Text>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                {secondsToMinutes(task.shortBreak)}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setActiveCalendarPicker(true)}
+              style={[styles.item, {backgroundColor: activedColors.input}]}>
+              <FontAwesome
+                name="calendar"
+                size={20}
+                color={activedColors.textSec}
               />
-              <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
-                <Text style={[common.text, {color: activedColors.primary}]}>
-                  Add
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{height: 150}}>
+              <Text
+                style={[
+                  common.text,
+                  styles.title,
+                  {color: activedColors.text},
+                ]}>
+                Deadline
+              </Text>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                {task.deadline
+                  ? moment(new Date(task.deadline)).format('dddd, D MMMM')
+                  : 'Someday'}
+              </Text>
+            </TouchableOpacity>
+            <View
+              style={[
+                styles.assigneeWrap,
+                {backgroundColor: activedColors.input},
+              ]}>
               <View
-                onStartShouldSetResponder={() => true}
                 style={[
                   {
                     flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: 10,
-                    backgroundColor: activedColors.background,
-                    padding: 16,
-                    borderRadius: 8,
+                    alignItems: 'center',
+                    paddingVertical: 8,
                   },
                 ]}>
-                {fake.map(user => (
-                  <AssigneeUserItem
-                    key={user.id}
-                    id={user.id}
-                    username={user.username}
-                  />
-                ))}
+                <MaterialIcons
+                  name="groups"
+                  size={20}
+                  color={activedColors.textSec}
+                />
+                <Text
+                  style={[
+                    common.text,
+                    styles.title,
+                    {color: activedColors.text},
+                  ]}>
+                  Assignees
+                </Text>
+                <Text style={[common.text, {color: activedColors.textSec}]}>
+                  {assignees.length}
+                </Text>
               </View>
-            </ScrollView>
+              <View
+                style={{
+                  width: '100%',
+                  height: 2,
+                  marginTop: 4,
+                  backgroundColor: activedColors.background,
+                }}
+              />
+              <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
+                <AntDesign
+                  name="adduser"
+                  size={20}
+                  color={activedColors.textSec}
+                />
+                <View style={{flex: 1, width: 'auto', marginLeft: 8}}>
+                  <UInput
+                    value={assignee}
+                    onChangeText={setAssignee}
+                    placeholder="Add user..."
+                  />
+                  {findColleague && (
+                    <FindColleague
+                      findColleague={findColleague}
+                      onClickColleague={onClickColleague}
+                    />
+                  )}
+                </View>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+                  <Text style={[common.text, {color: activedColors.primary}]}>
+                    Add
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                style={{
+                  height: 150,
+                  borderRadius: 8,
+                  backgroundColor: activedColors.background,
+                }}>
+                <View
+                  onStartShouldSetResponder={() => true}
+                  style={[
+                    {
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      gap: 10,
+                      padding: 16,
+                    },
+                  ]}>
+                  {assignees.map(assignee => (
+                    <AssigneeUserItem
+                      key={assignee.id}
+                      assignee={assignee}
+                      onDelete={onDeleteAssignee}
+                    />
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
           </View>
+          <UButton
+            primary
+            style={{
+              width: 'auto',
+              marginHorizontal: 16,
+              marginBottom: 40,
+            }}
+            onPress={handleSaveTask}>
+            <Text style={[common.text, {color: '#fff'}]}>Save</Text>
+          </UButton>
         </View>
-      </View>
-      <QRModal
-        visible={activeQRCode}
-        value={JSON.stringify({taskId: task.id, ownerId: user?.id})}
-        onClickOutside={() => setActiveQRCode(false)}
-        onClose={() => setActiveQRCode(false)}
-      />
-      <PomodoroPicker
-        visible={activePomodoroPicker}
-        onClickOutside={() => setActivePomodoroPicker(false)}
-        onClose={() => setActivePomodoroPicker(false)}
-        onSave={savePomodoro}
-      />
-      <BreaktimePicker
-        visible={activeBreaktimePicker}
-        onClickOutside={() => setActiveBreaktimePicker(false)}
-        onClose={() => setActiveBreaktimePicker(false)}
-        onSave={saveBreaktime}
-      />
-      <MCalendarPicker
-        visible={activeCalendarPicker}
-        onClickOutside={() => setActiveCalendarPicker(false)}
-        onClose={() => setActiveCalendarPicker(false)}
-        onSave={saveDeadline}
-      />
-    </SafeView>
+        <View style={{position: 'absolute'}}>
+          <QRModal
+            visible={activeQRCode}
+            value={JSON.stringify({taskId: task.id, ownerId: user?.id})}
+            onClickOutside={() => setActiveQRCode(false)}
+            onClose={() => setActiveQRCode(false)}
+          />
+          <PomodoroPicker
+            visible={activePomodoroPicker}
+            initPomodoro={task.totalPomodoro}
+            initPomodoroLength={task.longBreak / 60}
+            onClickOutside={() => setActivePomodoroPicker(false)}
+            onClose={() => setActivePomodoroPicker(false)}
+            onSave={savePomodoro}
+          />
+          <BreaktimePicker
+            visible={activeBreaktimePicker}
+            initShortBreak={task.shortBreak / 60}
+            onClickOutside={() => setActiveBreaktimePicker(false)}
+            onClose={() => setActiveBreaktimePicker(false)}
+            onSave={saveBreaktime}
+          />
+          <MCalendarPicker
+            visible={activeCalendarPicker}
+            onClickOutside={() => setActiveCalendarPicker(false)}
+            onClose={() => setActiveCalendarPicker(false)}
+            onSave={saveDeadline}
+          />
+        </View>
+      </SafeView>
+    </KeyboardAvoidingView>
   );
 };
 

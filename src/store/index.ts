@@ -3,6 +3,9 @@ import themeSlice from './theme.slice';
 import userSlice from './user.slice';
 import projectsSlice from './projects.slice';
 import netInforSlice from './netInfor.slice';
+import assigneesSlice from './assignees.slice';
+import colleaguesSlice from './colleagues.slice';
+import tasksSlice from './tasks.slice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +13,9 @@ export const store = configureStore({
     netInfo: netInforSlice,
     user: userSlice,
     projects: projectsSlice,
+    tasks: tasksSlice,
+    assignees: assigneesSlice,
+    colleagues: colleaguesSlice,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
