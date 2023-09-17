@@ -1,5 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ToastAndroid,
+} from 'react-native';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {FontAwesome, MaterialIcons} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
@@ -14,6 +20,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {AppStackScreenProps} from '@/types';
 import Header from '@/components/Layout/Header';
 import SafeView from '@/components/Layout/SafeView';
+import {useTask} from '@/hooks/useTask';
 
 const Pomodoro: React.FC = () => {
   const activedColors = useActivedColors();
@@ -21,21 +28,23 @@ const Pomodoro: React.FC = () => {
     useNavigation<AppStackScreenProps<'Pomodoro'>['navigation']>();
   const route = useRoute<AppStackScreenProps<'Pomodoro'>['route']>();
 
-  const {tasks} = useAppSelector(state => state.tasks);
+  const {updateTask} = useTask();
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(1500);
+  const [isLongBreak, setIsLongBreak] = useState(true);
+  const [duration, setDuration] = useState(0);
   const [key, setKey] = useState(0);
 
   const [task, setTask] = useState<ITask | null>(null);
 
   useEffect(() => {
-    if (route.params?.taskId) {
-      const taskTemp = tasks?.filter(item => item.id === route.params.taskId);
-      setTask(!taskTemp ? null : taskTemp[0]);
+    if (route.params?.task) {
       setKey(Math.random());
+      setTask(route.params?.task);
+      setIsPlaying(false);
+      setDuration(route.params.task.longBreak);
     }
-  }, [route.params?.taskId]);
+  }, [route.params?.task]);
 
   const resetPomodoro = () => {
     setIsPlaying(false);
@@ -53,6 +62,37 @@ const Pomodoro: React.FC = () => {
 
   const chooseTask = () => {
     navigation.navigate('ProjectsStack', {screen: 'Projects'});
+  };
+
+  const onCompleteTimer = () => {
+    if (task) {
+      setIsPlaying(false);
+
+      if (isLongBreak) {
+        const isDone = task.pomodoroCount + 1 >= task.totalPomodoro;
+
+        const newTask = {
+          ...task,
+          isDone,
+          pomodoroCount: task.pomodoroCount + 1,
+        };
+
+        setTask(newTask);
+        updateTask(newTask);
+
+        if (isDone) {
+          ToastAndroid.show('Task is done!', ToastAndroid.SHORT);
+        }
+
+        setKey(Math.random());
+        setDuration(task.shortBreak);
+        setIsLongBreak(false);
+      } else {
+        setKey(Math.random());
+        setDuration(task.longBreak);
+        setIsLongBreak(true);
+      }
+    }
   };
 
   return (
@@ -107,9 +147,10 @@ const Pomodoro: React.FC = () => {
             rotation={'counterclockwise'}
             strokeWidth={16}
             size={280}
-            duration={task?.longBreak || 0}
+            duration={duration}
             colors={activedColors.secondary as ColorFormat}
-            trailColor={activedColors.backgroundSec as ColorFormat}>
+            trailColor={activedColors.backgroundSec as ColorFormat}
+            onComplete={onCompleteTimer}>
             {({remainingTime}) => (
               <View style={{alignItems: 'center'}}>
                 <Text
@@ -119,16 +160,20 @@ const Pomodoro: React.FC = () => {
                   ]}>
                   {secondsFormat(remainingTime)}
                 </Text>
-                <Text style={[common.text, {color: activedColors.textSec}]}>
-                  {task?.pomodoroCount || 0} of {task?.totalPomodoro || 0}{' '}
-                  sessions
-                </Text>
+                {isLongBreak && (
+                  <Text style={[common.text, {color: activedColors.textSec}]}>
+                    {task?.pomodoroCount || 0} of {task?.totalPomodoro || 0}{' '}
+                    sessions
+                  </Text>
+                )}
               </View>
             )}
           </CountdownCircleTimer>
         </View>
         <Text style={[common.text, {color: activedColors.textSec}]}>
-          Stay forcus for 25 minutes
+          {isLongBreak
+            ? 'Stay forcus for 25 minutes'
+            : `Take a break for ${task ? task?.shortBreak / 60 : 0} minutes`}
         </Text>
         <View style={styles.buttons}>
           <TouchableOpacity

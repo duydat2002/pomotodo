@@ -1,9 +1,9 @@
 import {storeData} from '@/hooks';
-import {IFormerColleagues} from '@/types';
+import {IColleagues} from '@/types';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 interface IState {
-  colleagues: IFormerColleagues[] | null;
+  colleagues: IColleagues[] | null;
 }
 
 export const colleaguesSlice = createSlice({
@@ -12,10 +12,7 @@ export const colleaguesSlice = createSlice({
     colleagues: null,
   } as IState,
   reducers: {
-    setColleagues: (
-      state,
-      action: PayloadAction<IFormerColleagues[] | null>,
-    ) => {
+    setColleagues: (state, action: PayloadAction<IColleagues[] | null>) => {
       state.colleagues = action.payload;
       storeData('colleagues', action.payload);
     },

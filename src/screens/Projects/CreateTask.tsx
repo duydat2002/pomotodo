@@ -19,7 +19,7 @@ import {
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {IAssignee, IFormerColleagues, ProjectsStackScreenProps} from '@/types';
+import {IColleagues, ProjectsStackScreenProps} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -33,12 +33,10 @@ import BreaktimePicker from '@/components/Modal/BreaktimePicker';
 import MCalendarPicker from '@/components/Modal/MCalendarPicker';
 import moment from 'moment';
 import QRModal from '@/components/Modal/QRModal';
-import {FORMER_COLLEAGUES} from '@/fakeData';
+import {COLLEAGUES} from '@/fakeData';
 import FindColleague from '@/components/Task/FindColleague';
 import UButton from '@/components/UI/UButton';
-import {addTask, updateTask} from '@/store/tasks.slice';
-import {updateProject} from '@/store/projects.slice';
-import {addAssignees} from '@/store/assignees.slice';
+import {useTask} from '@/hooks/useTask';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -50,13 +48,15 @@ const CreateTask = () => {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.user);
   const {project} = useAppSelector(state => state.projects);
-  const {assignees: assigneesStore} = useAppSelector(state => state.assignees);
+  const {colleagues} = useAppSelector(state => state.colleagues);
+
+  const {createTask, updateTask} = useTask();
 
   const [assignee, setAssignee] = useState('');
-  const [assignees, setAssignees] = useState<IAssignee[]>([]);
-  const [findColleague, setFindColleague] = useState<
-    IFormerColleagues[] | null
-  >(null);
+  const [assignees, setAssignees] = useState<IColleagues[]>([]);
+  const [findColleague, setFindColleague] = useState<IColleagues[] | null>(
+    null,
+  );
 
   const [activePriority, setActivePriority] = useState(false);
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
@@ -74,19 +74,24 @@ const CreateTask = () => {
     longBreak: 25 * 60,
     shortBreak: 5 * 60,
     deadline: null,
+    assignees: [],
     createdAt: '',
   });
   const [errorName, setErrorName] = useState('');
 
   useEffect(() => {
     if (route.params.task) {
-      setTask(route.params.task);
+      const task = route.params.task;
+      setTask(task);
 
-      const assigneesTemp = assigneesStore?.filter(
-        assignee => assignee.taskId == route.params.task?.id,
-      );
+      // Get assignees info in list colleagues
+      if (task.assignees) {
+        const assigneesTemp = colleagues?.filter(colleague =>
+          task.assignees.includes(colleague.colleagueId),
+        );
 
-      setAssignees(assigneesTemp || []);
+        setAssignees(assigneesTemp || []);
+      }
     }
   }, [isFocused]);
 
@@ -96,40 +101,17 @@ const CreateTask = () => {
     } else {
       setErrorName('');
 
+      const assigneesIds = assignees.map(item => item.colleagueId);
+      setTask({
+        ...task,
+        assignees: assigneesIds,
+      });
+
       // Update or create task
       if (route.params.task) {
-        // Edit
-        dispatch(
-          updateTask({
-            id: task.id,
-            datas: {
-              ...task,
-            },
-          }),
-        );
+        updateTask(task);
       } else {
-        // Create
-        dispatch(
-          addTask({
-            ...task,
-            createdAt: new Date().toISOString(),
-          }),
-        );
-      }
-
-      // Update project
-      dispatch(
-        updateProject({
-          id: task.projectId,
-          datas: {
-            totalTask: project!.totalTask + 1,
-            totalTime: project!.totalTime + task.totalPomodoro * task.longBreak,
-          },
-        }),
-      );
-
-      if (assignees.length > 0) {
-        dispatch(addAssignees(assignees));
+        createTask(task);
       }
 
       navigation.goBack();
@@ -159,11 +141,22 @@ const CreateTask = () => {
   };
 
   const savePomodoro = (pomodoros: number, pomodoroLength: number) => {
-    setTask({
-      ...task,
-      totalPomodoro: pomodoros,
-      longBreak: pomodoroLength,
-    });
+    if (pomodoros <= task.pomodoroCount) {
+      setTask({
+        ...task,
+        isDone: true,
+        pomodoroCount: pomodoros,
+        totalPomodoro: pomodoros,
+        longBreak: pomodoroLength,
+      });
+    } else {
+      setTask({
+        ...task,
+        isDone: false,
+        totalPomodoro: pomodoros,
+        longBreak: pomodoroLength,
+      });
+    }
     setActivePomodoroPicker(false);
   };
 
@@ -189,20 +182,11 @@ const CreateTask = () => {
     setAssignees(assigneesTemp);
   };
 
-  const onClickColleague = (colleague: IFormerColleagues) => {
-    const check = assignees.findIndex(item => item.userId == colleague.userId);
+  const onClickColleague = (colleague: IColleagues) => {
+    const check = assignees.findIndex(item => item.id == colleague.id);
 
     if (check == -1) {
-      setAssignees([
-        ...assignees,
-        {
-          id: generatorId(),
-          taskId: task.id,
-          userId: colleague.colleagueId,
-          username: colleague.colleagueUsername,
-          userAvatar: colleague.colleagueAvatar,
-        } as IAssignee,
-      ]);
+      setAssignees([...assignees, colleague]);
     }
 
     setAssignee('');
@@ -210,7 +194,7 @@ const CreateTask = () => {
   };
 
   useEffect(() => {
-    const colleaguesTemp = FORMER_COLLEAGUES.filter(item => {
+    const colleaguesTemp = COLLEAGUES.filter(item => {
       if (assignee.trim() != '') {
         return (
           item.colleagueId == assignee ||

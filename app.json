@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "pomodoro",
+    "name": "Pomodoro",
     "slug": "pomodoro",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/logo1.png",
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",

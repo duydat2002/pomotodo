@@ -19,35 +19,6 @@ export const tasksSlice = createSlice({
       state.tasks = action.payload;
       storeData('tasks', action.payload);
     },
-    addTask: (state, action: PayloadAction<ITask>) => {
-      if (state.tasks) state.tasks = [...state.tasks, action.payload];
-      else state.tasks = [action.payload];
-
-      storeData('tasks', state.tasks);
-    },
-    updateTask: (
-      state,
-      action: PayloadAction<{id: string; datas: Partial<ITask>}>,
-    ) => {
-      if (state.tasks) {
-        const {id, datas} = action.payload;
-
-        const updatedTasks: ITask[] = state.tasks.map(task => {
-          if (task.id == id) {
-            return {
-              ...task,
-              ...datas,
-            };
-          } else {
-            return task;
-          }
-        });
-
-        state.tasks = updatedTasks;
-
-        storeData('tasks', state.tasks);
-      }
-    },
 
     // Task
     setTask: (state, action: PayloadAction<ITask | null>) => {
@@ -56,6 +27,6 @@ export const tasksSlice = createSlice({
   },
 });
 
-export const {setTasks, addTask, updateTask, setTask} = tasksSlice.actions;
+export const {setTasks, setTask} = tasksSlice.actions;
 
 export default tasksSlice.reducer;

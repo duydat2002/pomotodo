@@ -1,14 +1,14 @@
-export const FORMER_COLLEAGUES = [
+export const COLLEAGUES = [
   {
     id: 'former1',
-    userId: 'user2',
+    userId: 'user1',
     colleagueId: 'user2',
     colleagueUsername: 'user2',
     colleagueAvatar: '',
   },
   {
     id: 'former2',
-    userId: 'user3',
+    userId: 'user1',
     colleagueId: 'user3',
     colleagueUsername: 'user3',
     colleagueAvatar:

@@ -9,9 +9,10 @@ export const TASKS = [
     isDone: false,
     totalPomodoro: 4,
     pomodoroCount: 1,
-    longBreak: 5 * 60,
-    shortBreak: 60,
+    longBreak: 5,
+    shortBreak: 3,
     deadline: null,
+    assignees: ['user3', 'user2'],
     createdAt: new Date().toISOString(),
   },
   {
@@ -25,6 +26,7 @@ export const TASKS = [
     longBreak: 5 * 60,
     shortBreak: 60,
     deadline: new Date().toISOString(),
+    assignees: ['user2'],
     createdAt: new Date().toISOString(),
   },
 ];

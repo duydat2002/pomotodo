@@ -1,8 +1,12 @@
-import {IProject} from '@/types';
+import {IProject, ITask} from '@/types';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import {useAppSelector, useAppDispatch} from './useStore';
+import {updateProject} from '@/store/projects.slice';
 
 export const useProject = () => {
+  const dispatch = useAppDispatch();
+
   const addProject = async (name: string, color: string) => {
     try {
       firestore()
@@ -48,5 +52,33 @@ export const useProject = () => {
     }
   };
 
-  return {addProject, getProjects};
+  const updateProjectInfo = (projectId: string, tasks: ITask[]) => {
+    let totalTime = 0,
+      elapsedTime = 0,
+      totalTask = 0,
+      taskComplete = 0;
+
+    tasks.forEach(task => {
+      if (task.projectId == projectId) {
+        totalTime += task.totalPomodoro * task.longBreak;
+        totalTask++;
+        elapsedTime += task.pomodoroCount * task.longBreak;
+        if (task.isDone) taskComplete++;
+      }
+    });
+
+    dispatch(
+      updateProject({
+        id: projectId,
+        datas: {
+          totalTime,
+          elapsedTime,
+          totalTask,
+          taskComplete,
+        },
+      }),
+    );
+  };
+
+  return {addProject, getProjects, updateProjectInfo};
 };

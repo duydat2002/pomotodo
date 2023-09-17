@@ -2,10 +2,10 @@ import React from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {MaterialIcons} from '@expo/vector-icons';
-import {IAssignee} from '@/types';
+import {IColleagues} from '@/types';
 
 interface IProps {
-  assignee: IAssignee;
+  assignee: IColleagues;
   onDelete: (id: string) => void;
 }
 
@@ -25,9 +25,9 @@ const AssigneeUserItem: React.FC<IProps> = ({assignee, onDelete}) => {
       }}>
       <Image
         source={
-          assignee.userAvatar
+          assignee.colleagueAvatar
             ? {
-                uri: assignee.userAvatar,
+                uri: assignee.colleagueAvatar,
               }
             : require('@/assets/images/default-avatar.png')
         }
@@ -44,7 +44,7 @@ const AssigneeUserItem: React.FC<IProps> = ({assignee, onDelete}) => {
           },
         ]}
         numberOfLines={1}>
-        {assignee.username}
+        {assignee.colleagueUsername}
       </Text>
       <TouchableOpacity
         activeOpacity={0.7}

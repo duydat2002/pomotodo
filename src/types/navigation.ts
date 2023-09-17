@@ -20,7 +20,7 @@ export type AuthStackScreenProps<T extends keyof AuthStackParamList> =
 export type AppStackParamList = {
   Home: undefined;
   ProjectsStack: NavigatorScreenParams<ProjectsStackParamList>;
-  Pomodoro: {taskId: string};
+  Pomodoro: {task: ITask} | undefined;
   Statistic: undefined;
   Setting: undefined;
 };

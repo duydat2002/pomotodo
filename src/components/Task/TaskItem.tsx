@@ -28,7 +28,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   };
 
   const clickPlayTask = () => {
-    navigation.navigate('Pomodoro', {taskId: task.id});
+    navigation.navigate('Pomodoro', {task: task});
   };
 
   return (

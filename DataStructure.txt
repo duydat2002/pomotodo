@@ -10,7 +10,7 @@ Tasks (id, projectId, name, priority{none, low, medium, high}, isDone, totalPomo
 Assignees (id, taskId, userId, username, userAvatar)
 
 // NHững người dũng cũ đã từng làm việc với bạn
-FormerColleagues (id, userId, colleagueId, colleagueUsername, colleagueAvatar)
+Colleagues (id, userId, colleagueId, colleagueUsername, colleagueAvatar)
 
 
 Luồng xử lý offline-first 

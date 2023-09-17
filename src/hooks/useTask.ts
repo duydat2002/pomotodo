@@ -1,27 +1,36 @@
 import {ITask} from '@/types';
 import {useAppDispatch, useAppSelector} from './useStore';
-import {updateProject} from '@/store/projects.slice';
+import {setTasks} from '@/store/tasks.slice';
+import {useProject} from '@/hooks/useProject';
 
-export const useTasks = () => {
+export const useTask = () => {
   const dispatch = useAppDispatch();
   const {projects, project} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
+  const {updateProjectInfo} = useProject();
 
-  const createTask = (task: ITask) => {};
+  const createTask = (task: ITask) => {
+    const newTasks = tasks ? [...tasks, task] : [task];
 
-  const updateOtherForTask = (task: ITask) => {
-    dispatch(
-      updateProject({
-        id: task.projectId,
-        datas: {
-          totalTask: project!.totalTask + 1,
-          totalTime: project!.totalTime + task.totalPomodoro * task.longBreak,
-        },
-      }),
-    );
+    dispatch(setTasks(newTasks));
+
+    updateProjectInfo(task.projectId, newTasks);
+  };
+
+  const updateTask = (task: ITask) => {
+    if (tasks) {
+      const updatedTasks: ITask[] = tasks.map(item => {
+        return item.id == task.id ? task : item;
+      });
+
+      dispatch(setTasks(updatedTasks));
+
+      updateProjectInfo(task.projectId, updatedTasks);
+    }
   };
 
   return {
     createTask,
-    updateOtherForTask,
+    updateTask,
   };
 };

@@ -11,8 +11,7 @@ import AppNavigator from './AppNavigator';
 import Splash from '@/screens/Splash';
 import {setUser} from '@/store/user.slice';
 import {getConnection} from '@/utils';
-import {ASSIGNEES, FORMER_COLLEAGUES, PROJECTS, TASKS} from '@/fakeData';
-import {setAssignees} from '@/store/assignees.slice';
+import {COLLEAGUES, PROJECTS, TASKS} from '@/fakeData';
 import {setColleagues} from '@/store/colleagues.slice';
 import {setTasks} from '@/store/tasks.slice';
 
@@ -119,15 +118,8 @@ const RootNavigator: React.FC = () => {
       const tasks = TASKS.filter(task => projectIds.includes(task.projectId));
       dispatch(setTasks(tasks));
 
-      // Assignees
-      const taskIds = tasks.map(task => task.id);
-      const assignees = ASSIGNEES.filter(assignee =>
-        taskIds.includes(assignee.taskId),
-      );
-      dispatch(setAssignees(assignees));
-
       // Former Colleagues
-      const colleagues = FORMER_COLLEAGUES.filter(
+      const colleagues = COLLEAGUES.filter(
         colleague => colleague.userId == user.id,
       );
       dispatch(setColleagues(colleagues));
