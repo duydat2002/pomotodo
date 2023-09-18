@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {Appearance} from 'react-native';
-import {getData, useAppDispatch, useAppSelector, useProject} from '@/hooks';
+import {getData, useAppDispatch, useAppSelector} from '@/hooks';
 import {changeTheme} from '@/store/theme.slice';
 import auth from '@react-native-firebase/auth';
 import {setProjects} from '@/store/projects.slice';
@@ -14,6 +14,7 @@ import {getConnection} from '@/utils';
 import {COLLEAGUES, PROJECTS, TASKS} from '@/fakeData';
 import {setColleagues} from '@/store/colleagues.slice';
 import {setTasks} from '@/store/tasks.slice';
+import {useProject} from '@/hooks/useProject';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);
@@ -76,8 +77,8 @@ const RootNavigator: React.FC = () => {
     setLoadingUser(false);
   }, []);
 
-  const getProjectsFB = useCallback(async () => {
-    const {getProjects} = useProject();
+  const getProjectsOnline = useCallback(async () => {
+    const {getProjectsFB} = useProject();
 
     let projectsTemp = null;
 
@@ -86,7 +87,7 @@ const RootNavigator: React.FC = () => {
     console.log(isOnline ? 'online' : 'offline');
     if (isOnline && auth().currentUser) {
       console.log('firebase');
-      projectsTemp = await getProjects(auth().currentUser!.uid);
+      projectsTemp = await getProjectsFB(auth().currentUser!.uid);
     } else {
       console.log('local');
       projectsTemp = await getData('projects');
@@ -100,30 +101,48 @@ const RootNavigator: React.FC = () => {
     initUser();
   }, []);
 
+  useEffect(() => {
+    if (user) initData();
+  }, [user]);
+
   // Get Data when user change
   // useEffect(() => {
-  //   if (user) getProjectsFB();
+  //   if (user) getProjectsOnline();
   // }, [user]);
 
   // Fake data
-  useEffect(() => {
-    if (user) {
-      // Projects
-      const projects = PROJECTS.filter(project => project.ownerId == user.id);
-      dispatch(setProjects(projects));
+  // useEffect(() => {
+  //   if (user) {
+  //     // Projects
+  //     const projects = PROJECTS.filter(project => project.ownerId == user.id);
+  //     dispatch(setProjects(projects));
 
-      // Tasks
-      const projectIds = projects.map(project => project.id);
+  //     // Tasks
+  //     const projectIds = projects.map(project => project.id);
 
-      const tasks = TASKS.filter(task => projectIds.includes(task.projectId));
-      dispatch(setTasks(tasks));
+  //     const tasks = TASKS.filter(task => projectIds.includes(task.projectId));
+  //     dispatch(setTasks(tasks));
 
-      // Former Colleagues
-      const colleagues = COLLEAGUES.filter(
-        colleague => colleague.userId == user.id,
-      );
-      dispatch(setColleagues(colleagues));
-    }
+  //     // Former Colleagues
+  //     const colleagues = COLLEAGUES.filter(
+  //       colleague => colleague.userId == user.id,
+  //     );
+  //     dispatch(setColleagues(colleagues));
+  //   }
+  // }, [user]);
+
+  // Init data
+  const initData = useCallback(async () => {
+    const projectsTemp = await getData('projects');
+    dispatch(setProjects(projectsTemp));
+
+    const tasksTemp = await getData('tasks');
+    dispatch(setTasks(tasksTemp));
+
+    const colleaguesTemp = await getData('colleagues');
+    dispatch(setColleagues(colleaguesTemp));
+
+    setLoadingData(false);
   }, [user]);
 
   if (loadingUser && loadingData) {

@@ -2,12 +2,13 @@ import {IProject, ITask} from '@/types';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {useAppSelector, useAppDispatch} from './useStore';
-import {updateProject} from '@/store/projects.slice';
+import {setProjects} from '@/store/projects.slice';
 
 export const useProject = () => {
   const dispatch = useAppDispatch();
+  const {projects} = useAppSelector(state => state.projects);
 
-  const addProject = async (name: string, color: string) => {
+  const addProjectFB = async (name: string, color: string) => {
     try {
       firestore()
         .collection('projects')
@@ -26,7 +27,7 @@ export const useProject = () => {
     }
   };
 
-  const getProjects = async (userId: string) => {
+  const getProjectsFB = async (userId: string) => {
     try {
       const querySnapshot = await firestore()
         .collection('projects')
@@ -52,6 +53,48 @@ export const useProject = () => {
     }
   };
 
+  // Local
+  const createProject = (project: IProject) => {
+    let updatedProjects: IProject[];
+
+    if (projects) {
+      const check = projects.findIndex(item => item.id == project.id);
+
+      updatedProjects = check == -1 ? [...projects, project] : projects;
+    } else {
+      updatedProjects = [project];
+    }
+
+    dispatch(setProjects(updatedProjects));
+  };
+
+  const updateProject = (project: IProject) => {
+    if (projects) {
+      const updatedProjects: IProject[] = projects.map(item => {
+        return item.id == project.id ? project : item;
+      });
+
+      dispatch(setProjects(updatedProjects));
+    }
+  };
+
+  const updateProjectById = (projectId: string, datas: Partial<IProject>) => {
+    if (projects) {
+      const updatedProjects: IProject[] = projects.map(item => {
+        if (item.id == projectId) {
+          return {
+            ...item,
+            ...datas,
+          } as IProject;
+        } else {
+          return item;
+        }
+      });
+
+      dispatch(setProjects(updatedProjects));
+    }
+  };
+
   const updateProjectInfo = (projectId: string, tasks: ITask[]) => {
     let totalTime = 0,
       elapsedTime = 0,
@@ -67,18 +110,20 @@ export const useProject = () => {
       }
     });
 
-    dispatch(
-      updateProject({
-        id: projectId,
-        datas: {
-          totalTime,
-          elapsedTime,
-          totalTask,
-          taskComplete,
-        },
-      }),
-    );
+    updateProjectById(projectId, {
+      totalTime,
+      elapsedTime,
+      totalTask,
+      taskComplete,
+    });
   };
 
-  return {addProject, getProjects, updateProjectInfo};
+  return {
+    addProjectFB,
+    getProjectsFB,
+    createProject,
+    updateProject,
+    updateProjectById,
+    updateProjectInfo,
+  };
 };

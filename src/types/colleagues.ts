@@ -1,4 +1,4 @@
-export interface IColleagues {
+export interface IColleague {
   id: string;
   userId: string;
   colleagueId: string;

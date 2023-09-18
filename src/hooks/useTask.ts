@@ -5,16 +5,22 @@ import {useProject} from '@/hooks/useProject';
 
 export const useTask = () => {
   const dispatch = useAppDispatch();
-  const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
   const {updateProjectInfo} = useProject();
 
   const createTask = (task: ITask) => {
-    const newTasks = tasks ? [...tasks, task] : [task];
+    let updatedTasks: ITask[];
 
-    dispatch(setTasks(newTasks));
+    if (tasks) {
+      const check = tasks.findIndex(item => item.id == task.id);
 
-    updateProjectInfo(task.projectId, newTasks);
+      updatedTasks = check == -1 ? [...tasks, task] : tasks;
+    } else {
+      updatedTasks = [task];
+    }
+
+    dispatch(setTasks(updatedTasks));
+    updateProjectInfo(task.projectId, updatedTasks);
   };
 
   const updateTask = (task: ITask) => {
@@ -24,7 +30,6 @@ export const useTask = () => {
       });
 
       dispatch(setTasks(updatedTasks));
-
       updateProjectInfo(task.projectId, updatedTasks);
     }
   };

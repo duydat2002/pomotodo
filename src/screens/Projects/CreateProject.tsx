@@ -1,11 +1,6 @@
 import React, {useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {
-  useActivedColors,
-  useAppDispatch,
-  useAppSelector,
-  useProject,
-} from '@/hooks';
+import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {useNavigation} from '@react-navigation/native';
 import {Feather} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
@@ -14,19 +9,18 @@ import {COLORS_LIST} from '@/constants';
 import SafeView from '@/components/Layout/SafeView';
 import Header from '@/components/Layout/Header';
 import UInput from '@/components/UI/UInput';
-import {addProject} from '@/store/projects.slice';
 import {generatorId} from '@/utils';
 import {ProjectsStackScreenProps} from '@/types';
+import {useProject} from '@/hooks/useProject';
 
 const CreateProject = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'CreateProject'>['navigation']>();
-  const dispatch = useAppDispatch();
 
   const {user} = useAppSelector(state => state.user);
-  const {netInfo} = useAppSelector(state => state.netInfo);
-  const {projects} = useAppSelector(state => state.projects);
+
+  const {createProject} = useProject();
 
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS_LIST[0]);
@@ -36,19 +30,18 @@ const CreateProject = () => {
     if (name == '') {
       setError('Please enter project name');
     } else {
-      dispatch(
-        addProject({
-          id: generatorId(),
-          name,
-          color,
-          totalTime: 0,
-          elapsedTime: 0,
-          totalTask: 0,
-          taskComplete: 0,
-          ownerId: user!.id,
-          createdAt: new Date().toISOString(),
-        }),
-      );
+      console.log('create');
+      createProject({
+        id: generatorId(),
+        name,
+        color,
+        totalTime: 0,
+        elapsedTime: 0,
+        totalTask: 0,
+        taskComplete: 0,
+        ownerId: user!.id,
+        createdAt: new Date().toISOString(),
+      });
       navigation.navigate('Projects');
     }
   };

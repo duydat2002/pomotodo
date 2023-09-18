@@ -10,7 +10,7 @@ import {
 import {common} from '@/assets/styles';
 import SafeView from '@/components/Layout/SafeView';
 import * as ImagePicker from 'expo-image-picker';
-import {useActivedColors} from '@/hooks';
+import {useActivedColors, useAppSelector} from '@/hooks';
 import {Feather, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {IQR, ProjectsStackScreenProps} from '@/types';
@@ -23,12 +23,22 @@ import {
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import JoinTaskModal from '@/components/Modal/JoinTaskModal';
 import {APP_QR_ID} from '@/constants';
+import {useProject} from '@/hooks/useProject';
+import {useTask} from '@/hooks/useTask';
+import {useColleague} from '@/hooks/useColleague';
+import {generatorId} from '@/utils';
 
 const JoinTask = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'JoinTask'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'JoinTask'>['route']>();
+
+  const {createProject} = useProject();
+  const {createTask} = useTask();
+  const {addColleague} = useColleague();
+
+  const {user} = useAppSelector(state => state.user);
 
   const [data, setData] = useState<IQR | null>(null);
   const [type, setType] = useState(CameraType.back);
@@ -85,6 +95,24 @@ const JoinTask = () => {
     }
   };
 
+  const join = () => {
+    if (data) {
+      console.log('join');
+      createTask(data.task);
+      createProject(data.project);
+      // Add project owner to colleague
+      addColleague({
+        id: generatorId(),
+        userId: user!.id,
+        colleagueId: data.owner.id,
+        colleagueUsername: data.owner.username || '',
+        colleagueAvatar: data.owner.avatar,
+      });
+
+      navigation.navigate('Projects');
+    }
+  };
+
   function toggleCameraType() {
     setType(type == CameraType.back ? CameraType.front : CameraType.back);
   }
@@ -108,10 +136,24 @@ const JoinTask = () => {
     // Camera permissions are not granted yet
     return (
       <SafeView>
-        <Text style={{textAlign: 'center'}}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+          }}>
+          <Text
+            style={[
+              common.text,
+              {
+                textAlign: 'center',
+                marginBottom: 20,
+                color: activedColors.text,
+              },
+            ]}>
+            We need your permission to show the camera
+          </Text>
+          <Button onPress={requestPermission} title="grant permission" />
+        </View>
       </SafeView>
     );
   }
@@ -172,6 +214,7 @@ const JoinTask = () => {
           <JoinTaskModal
             visible={activeModal}
             value={data}
+            onJoin={join}
             onClickOutside={() => setActiveModal(false)}
             onClose={() => setActiveModal(false)}
           />

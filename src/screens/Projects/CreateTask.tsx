@@ -19,7 +19,7 @@ import {
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {IColleagues, ProjectsStackScreenProps} from '@/types';
+import {IColleague, ProjectsStackScreenProps} from '@/types';
 import {APP_QR_ID, PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -33,10 +33,10 @@ import BreaktimePicker from '@/components/Modal/BreaktimePicker';
 import MCalendarPicker from '@/components/Modal/MCalendarPicker';
 import moment from 'moment';
 import QRModal from '@/components/Modal/QRModal';
-import {COLLEAGUES} from '@/fakeData';
 import FindColleague from '@/components/Task/FindColleague';
 import UButton from '@/components/UI/UButton';
 import {useTask} from '@/hooks/useTask';
+import {useColleague} from '@/hooks/useColleague';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -50,14 +50,13 @@ const CreateTask = () => {
   const {colleagues} = useAppSelector(state => state.colleagues);
 
   const {createTask, updateTask} = useTask();
+  const {addColleagues} = useColleague();
 
   const [isReady, setIsReady] = useState(false);
   const [QRValue, setQRValue] = useState('');
   const [assignee, setAssignee] = useState('');
-  const [assignees, setAssignees] = useState<IColleagues[]>([]);
-  const [findColleague, setFindColleague] = useState<IColleagues[] | null>(
-    null,
-  );
+  const [assignees, setAssignees] = useState<IColleague[]>([]);
+  const [findColleague, setFindColleague] = useState<IColleague[] | null>(null);
 
   const [activePriority, setActivePriority] = useState(false);
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
@@ -130,6 +129,9 @@ const CreateTask = () => {
         createTask(task);
       }
 
+      // Add colleagues
+      addColleagues(assignees);
+
       navigation.goBack();
     }
   };
@@ -198,7 +200,7 @@ const CreateTask = () => {
     setAssignees(assigneesTemp);
   };
 
-  const onClickColleague = (colleague: IColleagues) => {
+  const onClickColleague = (colleague: IColleague) => {
     const check = assignees.findIndex(item => item.id == colleague.id);
 
     if (check == -1) {
@@ -210,7 +212,7 @@ const CreateTask = () => {
   };
 
   useEffect(() => {
-    const colleaguesTemp = COLLEAGUES.filter(item => {
+    const colleaguesTemp = colleagues?.filter(item => {
       if (assignee.trim() != '') {
         return (
           item.colleagueId == assignee ||
@@ -223,7 +225,9 @@ const CreateTask = () => {
       }
     });
 
-    setFindColleague(colleaguesTemp.length > 0 ? colleaguesTemp : null);
+    setFindColleague(
+      colleaguesTemp && colleaguesTemp.length > 0 ? colleaguesTemp : null,
+    );
   }, [assignee]);
 
   return (

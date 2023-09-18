@@ -2,10 +2,10 @@ import React from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {MaterialIcons} from '@expo/vector-icons';
-import {IColleagues} from '@/types';
+import {IColleague} from '@/types';
 
 interface IProps {
-  assignee: IColleagues;
+  assignee: IColleague;
   onDelete: (id: string) => void;
 }
 

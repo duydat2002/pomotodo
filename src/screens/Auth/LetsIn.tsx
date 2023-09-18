@@ -21,7 +21,7 @@ const LetsIn: React.FC = () => {
   const noSignIn = () => {
     dispatch(
       setUser({
-        id: 'user1',
+        id: generatorId(),
       }),
     );
   };

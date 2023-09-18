@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import {common} from '@/assets/styles';
 import {useActivedColors} from '@/hooks';
-import {IColleagues} from '@/types';
+import {IColleague} from '@/types';
 
 interface IProps {
-  findColleague: IColleagues[];
-  onClickColleague: (colleague: IColleagues) => void;
+  findColleague: IColleague[];
+  onClickColleague: (colleague: IColleague) => void;
 }
 
 const FindColleague: React.FC<IProps> = ({findColleague, onClickColleague}) => {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import UModal from './UModal';
 import {common} from '@/assets/styles';
@@ -9,6 +9,7 @@ import {IQR} from '@/types';
 interface IProps {
   visible: boolean;
   value: IQR | null;
+  onJoin: () => void;
   onClickOutside?: () => void;
   onClose: () => void;
 }
@@ -16,14 +17,11 @@ interface IProps {
 const JoinTaskModal: React.FC<IProps> = ({
   visible,
   value,
+  onJoin,
   onClickOutside,
   onClose,
 }) => {
   const activedColors = useActivedColors();
-
-  const join = () => {
-    console.log(value);
-  };
 
   if (!value) {
     return null;
@@ -54,21 +52,21 @@ const JoinTaskModal: React.FC<IProps> = ({
                 common.text,
                 {textAlign: 'left', color: activedColors.text},
               ]}>
-              Project: {value?.project.name}
+              Project: {value.project.name}
             </Text>
             <Text
               style={[
                 common.text,
                 {textAlign: 'left', color: activedColors.text},
               ]}>
-              Task: {value?.task.name}
+              Task: {value.task.name}
             </Text>
             <Text
               style={[
                 common.text,
                 {textAlign: 'left', color: activedColors.text},
               ]}>
-              Owner: {value?.owner.username}
+              Owner: {value.owner.username}
             </Text>
           </View>
         </View>
@@ -78,7 +76,7 @@ const JoinTaskModal: React.FC<IProps> = ({
               Cancel
             </Text>
           </UButton>
-          <UButton primary style={{flex: 1}} onPress={join}>
+          <UButton primary style={{flex: 1}} onPress={onJoin}>
             <Text style={[common.text, {color: '#fff'}]}>Join</Text>
           </UButton>
         </View>

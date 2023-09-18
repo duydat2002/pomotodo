@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, ToastAndroid} from 'react-native';
 import {common} from '@/assets/styles';
 import {useActivedColors} from '@/hooks';
 import UButton from '../UI/UButton';
@@ -26,8 +26,18 @@ const QRModal: React.FC<IProps> = ({
   const viewToSnapshot = useRef<View>(null);
 
   const snapshot = async () => {
-    const uri = await captureRef(viewToSnapshot);
-    MediaLibrary.saveToLibraryAsync(uri);
+    try {
+      const {status} = await MediaLibrary.requestPermissionsAsync();
+
+      if (status === 'granted') {
+        const uri = await captureRef(viewToSnapshot);
+        MediaLibrary.saveToLibraryAsync(uri);
+
+        ToastAndroid.show('QR Saved!', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.debug(error);
+    }
   };
 
   return (

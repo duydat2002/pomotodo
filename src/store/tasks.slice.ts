@@ -18,6 +18,7 @@ export const tasksSlice = createSlice({
     setTasks: (state, action: PayloadAction<ITask[] | null>) => {
       state.tasks = action.payload;
       storeData('tasks', action.payload);
+      console.log('tasks', state.tasks);
     },
 
     // Task
