@@ -1,49 +1,44 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {Button} from 'react-native';
-import {BarCodeScanner, BarCodeScannerResult} from 'expo-barcode-scanner';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Button,
+  ToastAndroid,
+} from 'react-native';
+import {common} from '@/assets/styles';
+import SafeView from '@/components/Layout/SafeView';
 import * as ImagePicker from 'expo-image-picker';
+import {useActivedColors} from '@/hooks';
+import {Feather, Ionicons, MaterialIcons} from '@expo/vector-icons';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {IQR, ProjectsStackScreenProps} from '@/types';
 import {
   BarCodeScanningResult,
   Camera,
   CameraType,
   FlashMode,
 } from 'expo-camera';
-import {TouchableOpacity} from 'react-native';
-import {Feather, Ionicons, MaterialIcons} from '@expo/vector-icons';
-import {useActivedColors} from '@/hooks';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {ProjectsStackScreenProps} from '@/types';
-import SafeView from '@/components/Layout/SafeView';
-import {common} from '@/assets/styles';
+import {BarCodeScanner} from 'expo-barcode-scanner';
+import JoinTaskModal from '@/components/Modal/JoinTaskModal';
+import {APP_QR_ID} from '@/constants';
 
-const Setting = () => {
+const JoinTask = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'JoinTask'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'JoinTask'>['route']>();
 
-  const [data, setData] = useState('');
+  const [data, setData] = useState<IQR | null>(null);
   const [type, setType] = useState(CameraType.back);
   const [flashMode, setFlashMode] = useState(FlashMode.off);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [activeModal, setActiveModal] = useState(false);
 
-  if (!permission) {
-    // Camera permissions are still loading
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet
-    return (
-      <View style={styles.container}>
-        <Text style={{textAlign: 'center'}}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-  }
+  const handleBarCodeScanned = ({data}: BarCodeScanningResult) => {
+    checkData(data);
+  };
 
   const openImage = async () => {
     try {
@@ -58,11 +53,35 @@ const Setting = () => {
           const uri = result.assets[0].uri;
 
           const results = await BarCodeScanner.scanFromURLAsync(uri);
-          setData(results[0].data);
+          checkData(results[0].data);
         }
       }
     } catch (error) {
       console.debug(error);
+    }
+  };
+
+  const checkData = (data: string) => {
+    try {
+      const value = JSON.parse(data);
+
+      if (
+        typeof value == 'object' &&
+        'id' in value &&
+        value.id == APP_QR_ID &&
+        'project' in value &&
+        'task' in value &&
+        'owner' in value
+      ) {
+        setData(value);
+        setActiveModal(true);
+      } else {
+        setActiveModal(false);
+        ToastAndroid.show('Invalid QR Code!', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      setActiveModal(false);
+      ToastAndroid.show('Invalid QR Code!', ToastAndroid.SHORT);
     }
   };
 
@@ -80,9 +99,22 @@ const Setting = () => {
     }
   };
 
-  const handleBarCodeScanned = ({data}: BarCodeScanningResult) => {
-    setData(data);
-  };
+  if (!permission) {
+    // Camera permissions are still loading
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet
+    return (
+      <SafeView>
+        <Text style={{textAlign: 'center'}}>
+          We need your permission to show the camera
+        </Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </SafeView>
+    );
+  }
 
   return (
     <View style={{flex: 1, width: '100%'}}>
@@ -95,19 +127,8 @@ const Setting = () => {
           barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
         }}
         onBarCodeScanned={handleBarCodeScanned}></Camera>
-      <SafeView
-        style={{
-          paddingHorizontal: 16,
-          justifyContent: 'space-between',
-          backgroundColor: 'transparent',
-        }}>
-        <View
-          style={{
-            width: '100%',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: 20,
-          }}>
+      <SafeView style={[styles.container]}>
+        <View style={[styles.buttonsTop]}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => navigation.goBack()}
@@ -129,21 +150,12 @@ const Setting = () => {
             />
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            width: '100%',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignSelf: 'flex-end',
-            marginBottom: 20,
-          }}>
+        <View style={[styles.buttonsBottom]}>
           <TouchableOpacity activeOpacity={0.8} onPress={openImage} style={{}}>
             <View style={[styles.button]}>
               <MaterialIcons name="photo-library" size={24} color="#fff" />
             </View>
-            <Text style={[common.small, {color: '#fff', textAlign: 'center'}]}>
-              Library
-            </Text>
+            <Text style={[styles.text]}>Library</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} onPress={toggleCameraType}>
             <View style={[styles.button]}>
@@ -153,22 +165,29 @@ const Setting = () => {
                 color="#fff"
               />
             </View>
-            <Text style={[common.small, {color: '#fff', textAlign: 'center'}]}>
-              Reverse
-            </Text>
+            <Text style={[styles.text]}>Reverse</Text>
           </TouchableOpacity>
+        </View>
+        <View style={{position: 'absolute'}}>
+          <JoinTaskModal
+            visible={activeModal}
+            value={data}
+            onClickOutside={() => setActiveModal(false)}
+            onClose={() => setActiveModal(false)}
+          />
         </View>
       </SafeView>
     </View>
   );
 };
 
-export default Setting;
+export default JoinTask;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
   },
   camera: {
     flex: 1,
@@ -178,11 +197,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-  },
   button: {
     width: 40,
     height: 40,
@@ -191,9 +205,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  buttonsTop: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  buttonsBottom: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
   text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    ...common.small,
+    color: '#fff',
+    textAlign: 'center',
   },
 });

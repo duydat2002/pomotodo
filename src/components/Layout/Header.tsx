@@ -24,7 +24,12 @@ const Header: React.FC<IProps> = ({title, children, hasBack = false}) => {
       {hasBack && (
         <FontAwesome
           name="chevron-left"
-          style={{fontSize: 20, color: activedColors.text, marginRight: 10}}
+          style={{
+            fontSize: 20,
+            color: activedColors.text,
+            marginRight: 10,
+            padding: 4,
+          }}
           onPress={() => navigation.goBack()}
         />
       )}

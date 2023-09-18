@@ -34,6 +34,7 @@ export type ProjectsStackParamList = {
   Tasks: {projectId: string};
   CreateTask: {projectId: string; task: ITask | null};
   CreateProject: undefined;
+  JoinTask: undefined;
 };
 
 export type ProjectsStackScreenProps<T extends keyof ProjectsStackParamList> =

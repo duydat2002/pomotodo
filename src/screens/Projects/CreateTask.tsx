@@ -20,7 +20,7 @@ import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
 import {IColleagues, ProjectsStackScreenProps} from '@/types';
-import {PRIORITY_COLORS} from '@/constants';
+import {APP_QR_ID, PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
 import SafeView from '@/components/Layout/SafeView';
@@ -45,13 +45,14 @@ const CreateTask = () => {
     useNavigation<ProjectsStackScreenProps<'CreateTask'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'CreateTask'>['route']>();
 
-  const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.user);
   const {project} = useAppSelector(state => state.projects);
   const {colleagues} = useAppSelector(state => state.colleagues);
 
   const {createTask, updateTask} = useTask();
 
+  const [isReady, setIsReady] = useState(false);
+  const [QRValue, setQRValue] = useState('');
   const [assignee, setAssignee] = useState('');
   const [assignees, setAssignees] = useState<IColleagues[]>([]);
   const [findColleague, setFindColleague] = useState<IColleagues[] | null>(
@@ -92,8 +93,23 @@ const CreateTask = () => {
 
         setAssignees(assigneesTemp || []);
       }
+
+      setIsReady(true);
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    if (isReady) {
+      setQRValue(
+        JSON.stringify({
+          id: APP_QR_ID, // ID của riêng project
+          project: project,
+          task: task,
+          owner: user,
+        }),
+      );
+    }
+  }, [isReady]);
 
   const handleSaveTask = () => {
     if (task.name.trim() == '') {
@@ -213,7 +229,7 @@ const CreateTask = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
       <SafeView clickOutSide={() => setActivePriority(false)}>
-        <Header title="Create Task">
+        <Header title={route.params.task ? 'Edit Task' : 'Create Task'}>
           {{
             leftChild: (
               <Feather
@@ -447,11 +463,6 @@ const CreateTask = () => {
                     />
                   )}
                 </View>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
-                  <Text style={[common.text, {color: activedColors.primary}]}>
-                    Add
-                  </Text>
-                </TouchableOpacity>
               </View>
               <ScrollView
                 style={{
@@ -494,7 +505,7 @@ const CreateTask = () => {
         <View style={{position: 'absolute'}}>
           <QRModal
             visible={activeQRCode}
-            value={JSON.stringify({taskId: task.id, ownerId: user?.id})}
+            value={QRValue}
             onClickOutside={() => setActiveQRCode(false)}
             onClose={() => setActiveQRCode(false)}
           />

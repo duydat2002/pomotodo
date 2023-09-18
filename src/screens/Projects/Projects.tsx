@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {AntDesign, Ionicons} from '@expo/vector-icons';
+import {AntDesign, Ionicons, MaterialCommunityIcons} from '@expo/vector-icons';
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import SafeView from '@/components/Layout/SafeView';
 import UButton from '@/components/UI/UButton';
@@ -24,7 +24,20 @@ const Projects = () => {
 
   return (
     <SafeView>
-      <Header title="Your Projects">{{}}</Header>
+      <Header title="Your Projects">
+        {{
+          rightChild: (
+            <MaterialCommunityIcons
+              name="qrcode-scan"
+              size={22}
+              color={activedColors.text}
+              onPress={() => {
+                navigation.navigate('JoinTask');
+              }}
+            />
+          ),
+        }}
+      </Header>
       <View style={{flex: 1, width: '100%'}}>
         <UButton
           style={[
