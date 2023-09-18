@@ -8,7 +8,9 @@ export const useColleague = () => {
 
   const addColleague = (colleague: IColleague) => {
     if (colleagues) {
-      const check = colleagues.findIndex(item => item.id == colleague.id);
+      const check = colleagues.findIndex(
+        item => item.colleagueId == colleague.colleagueId,
+      );
 
       if (check == -1) {
         dispatch(setColleagues([...colleagues, colleague]));

@@ -7,7 +7,6 @@ import {Zocial, AntDesign, FontAwesome} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import {EFontWeight} from '@/theme';
 import {validateEmail, validatePassword} from '@/utils';
-import {useAuth} from '@/hooks';
 import {setUser} from '@/store/user.slice';
 import Header from '@/components/Layout/Header';
 import UInput from '@/components/UI/UInput';
@@ -15,6 +14,7 @@ import UButton from '@/components/UI/UButton';
 import Seperator from '@/components/Layout/Seperator';
 import SafeView from '@/components/Layout/SafeView';
 import {AuthStackScreenProps} from '@/types';
+import {useAuth} from '@/hooks/useAuth';
 
 const SignIn: React.FC = () => {
   const dispatch = useAppDispatch();

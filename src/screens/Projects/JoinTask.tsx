@@ -96,7 +96,7 @@ const JoinTask = () => {
   };
 
   const join = () => {
-    if (data) {
+    if (data && data.owner.id != user!.id) {
       console.log('join');
       createTask(data.task);
       createProject(data.project);
@@ -108,9 +108,8 @@ const JoinTask = () => {
         colleagueUsername: data.owner.username || '',
         colleagueAvatar: data.owner.avatar,
       });
-
-      navigation.navigate('Projects');
     }
+    navigation.navigate('Projects');
   };
 
   function toggleCameraType() {

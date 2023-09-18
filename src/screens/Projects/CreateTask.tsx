@@ -117,16 +117,17 @@ const CreateTask = () => {
       setErrorName('');
 
       const assigneesIds = assignees.map(item => item.colleagueId);
-      setTask({
+      const updatedTask = {
         ...task,
         assignees: assigneesIds,
-      });
+      };
+      setTask(updatedTask);
 
       // Update or create task
       if (route.params.task) {
-        updateTask(task);
+        updateTask(updatedTask);
       } else {
-        createTask(task);
+        createTask(updatedTask);
       }
 
       // Add colleagues

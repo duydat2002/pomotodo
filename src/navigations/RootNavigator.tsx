@@ -21,6 +21,8 @@ const RootNavigator: React.FC = () => {
   const {user} = useAppSelector(state => state.user);
   const dispatch = useAppDispatch();
 
+  const {getProjectsFB} = useProject();
+
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
@@ -77,10 +79,20 @@ const RootNavigator: React.FC = () => {
     setLoadingUser(false);
   }, []);
 
-  const getProjectsOnline = useCallback(async () => {
-    const {getProjectsFB} = useProject();
+  useEffect(() => {
+    getThemeStorage();
+    initUser();
+  }, []);
 
-    let projectsTemp = null;
+  useEffect(() => {
+    // if (user) loadDatas(); // Online/Offline
+    if (user) initDatas(); //Offline
+  }, [user]);
+
+  const loadDatas = useCallback(async () => {
+    let projectsTemp = null,
+      tasksTemp = null,
+      colleaguesTemp = null;
 
     const isOnline = await getConnection();
 
@@ -91,48 +103,18 @@ const RootNavigator: React.FC = () => {
     } else {
       console.log('local');
       projectsTemp = await getData('projects');
+      tasksTemp = await getData('tasks');
+      colleaguesTemp = await getData('colleagues');
     }
+
     dispatch(setProjects(projectsTemp));
+    dispatch(setTasks(tasksTemp));
     setLoadingData(false);
+    dispatch(setColleagues(colleaguesTemp));
   }, []);
-
-  useEffect(() => {
-    getThemeStorage();
-    initUser();
-  }, []);
-
-  useEffect(() => {
-    if (user) initData();
-  }, [user]);
-
-  // Get Data when user change
-  // useEffect(() => {
-  //   if (user) getProjectsOnline();
-  // }, [user]);
-
-  // Fake data
-  // useEffect(() => {
-  //   if (user) {
-  //     // Projects
-  //     const projects = PROJECTS.filter(project => project.ownerId == user.id);
-  //     dispatch(setProjects(projects));
-
-  //     // Tasks
-  //     const projectIds = projects.map(project => project.id);
-
-  //     const tasks = TASKS.filter(task => projectIds.includes(task.projectId));
-  //     dispatch(setTasks(tasks));
-
-  //     // Former Colleagues
-  //     const colleagues = COLLEAGUES.filter(
-  //       colleague => colleague.userId == user.id,
-  //     );
-  //     dispatch(setColleagues(colleagues));
-  //   }
-  // }, [user]);
 
   // Init data
-  const initData = useCallback(async () => {
+  const initDatas = useCallback(async () => {
     const projectsTemp = await getData('projects');
     dispatch(setProjects(projectsTemp));
 

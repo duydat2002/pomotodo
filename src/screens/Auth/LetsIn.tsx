@@ -11,6 +11,7 @@ import Header from '@/components/Layout/Header';
 import UButton from '@/components/UI/UButton';
 import Seperator from '@/components/Layout/Seperator';
 import SafeView from '@/components/Layout/SafeView';
+import {getUniqueId} from 'react-native-device-info';
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();
@@ -18,10 +19,12 @@ const LetsIn: React.FC = () => {
     useNavigation<AuthStackScreenProps<'LetsIn'>['navigation']>();
   const dispatch = useAppDispatch();
 
-  const noSignIn = () => {
+  const noSignIn = async () => {
+    const id = await getUniqueId();
     dispatch(
       setUser({
-        id: generatorId(),
+        id, // Id is unique phone id
+        username: `user-${id}`,
       }),
     );
   };

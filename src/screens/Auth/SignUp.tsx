@@ -6,7 +6,6 @@ import {common} from '@/assets/styles';
 import {IAuth} from '@/types';
 import {EFontWeight} from '@/theme';
 import {AntDesign, FontAwesome, Zocial} from '@expo/vector-icons';
-import {useAuth} from '@/hooks';
 import {setUser} from '@/store/user.slice';
 import {validateEmail, validatePassword} from '@/utils';
 import Header from '@/components/Layout/Header';
@@ -15,6 +14,7 @@ import UButton from '@/components/UI/UButton';
 import Seperator from '@/components/Layout/Seperator';
 import SafeView from '@/components/Layout/SafeView';
 import {AuthStackScreenProps} from '@/types';
+import {useAuth} from '@/hooks/useAuth';
 
 const SignUp = () => {
   const dispatch = useAppDispatch();
