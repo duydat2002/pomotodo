@@ -4,16 +4,23 @@ import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {IProject, ITask} from '@/types';
 import SafeView from '@/components/Layout/SafeView';
 import Header from '@/components/Layout/Header';
-import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
+import {
+  storeData,
+  useActivedColors,
+  useAppDispatch,
+  useAppSelector,
+} from '@/hooks';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types';
 import {setProject} from '@/store/projects.slice';
+import firestore from '@react-native-firebase/firestore';
+import {setTasks} from '@/store/tasks.slice';
+import {useTask} from '@/hooks/useTask';
 
 const Tasks = () => {
   const activedColors = useActivedColors();
-  const isFocused = useIsFocused();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'Tasks'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'Tasks'>['route']>();
@@ -22,19 +29,25 @@ const Tasks = () => {
   const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
+  const {listenTasksByProjectId} = useTask();
+
   const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
 
-  useEffect(() => {
-    const projectTemp = projects!.filter(
-      item => item.id === route.params?.projectId,
-    );
-    dispatch(setProject(projectTemp[0]));
+  // listenTasksByProjectId(project?.id || '');
 
-    const tasksTemp = tasks?.filter(
-      task => task.projectId == route.params?.projectId,
-    );
-    setProjectTasks(tasksTemp || null);
-  }, [isFocused]);
+  useEffect(() => {
+    if (projects) {
+      const projectTemp = projects!.filter(
+        item => item.id === route.params?.projectId,
+      );
+      dispatch(setProject(projectTemp[0]));
+
+      const tasksTemp = tasks?.filter(
+        task => task.projectId == route.params?.projectId,
+      );
+      setProjectTasks(tasksTemp || null);
+    }
+  }, [tasks, projects]);
 
   const clickCreateTask = () => {
     navigation.navigate('CreateTask', {projectId: project!.id, task: null});

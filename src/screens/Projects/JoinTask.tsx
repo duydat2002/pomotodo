@@ -36,7 +36,7 @@ const JoinTask = () => {
 
   const {createProject} = useProject();
   const {createTask} = useTask();
-  const {addColleague} = useColleague();
+  const {addColleagues} = useColleague();
 
   const {user} = useAppSelector(state => state.user);
 
@@ -68,6 +68,7 @@ const JoinTask = () => {
       }
     } catch (error) {
       console.debug(error);
+      ToastAndroid.show('Invalid QR Code!', ToastAndroid.SHORT);
     }
   };
 
@@ -95,19 +96,21 @@ const JoinTask = () => {
     }
   };
 
-  const join = () => {
+  const join = async () => {
     if (data && data.owner.id != user!.id) {
       console.log('join');
       createTask(data.task);
       createProject(data.project);
       // Add project owner to colleague
-      addColleague({
-        id: generatorId(),
-        userId: user!.id,
-        colleagueId: data.owner.id,
-        colleagueUsername: data.owner.username || '',
-        colleagueAvatar: data.owner.avatar,
-      });
+      await addColleagues([
+        {
+          id: generatorId(),
+          userId: user!.id,
+          colleagueId: data.owner.id,
+          colleagueUsername: data.owner.username || '',
+          colleagueAvatar: data.owner.avatar,
+        },
+      ]);
     }
     navigation.navigate('Projects');
   };

@@ -16,7 +16,33 @@ export const useUser = () => {
     }
   };
 
+  const getUserByUsername = async (username: string) => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('users')
+        .where('username', '==', username)
+        .get();
+
+      if (querySnapshot.empty) {
+        return null;
+      } else {
+        const users: IUser[] = [];
+        querySnapshot.forEach(doc => {
+          users.push({
+            id: doc.id,
+            ...doc.data(),
+          } as IUser);
+        });
+        return users[0];
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
   return {
     getUser,
+    getUserByUsername,
   };
 };

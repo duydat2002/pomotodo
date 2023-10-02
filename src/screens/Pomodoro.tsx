@@ -172,7 +172,7 @@ const Pomodoro: React.FC = () => {
         </View>
         <Text style={[common.text, {color: activedColors.textSec}]}>
           {isLongBreak
-            ? 'Stay forcus for 25 minutes'
+            ? `Stay forcus for ${task ? task?.longBreak / 60 : 0} minutes`
             : `Take a break for ${task ? task?.shortBreak / 60 : 0} minutes`}
         </Text>
         <View style={styles.buttons}>

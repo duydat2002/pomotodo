@@ -14,8 +14,8 @@ export const colleaguesSlice = createSlice({
   reducers: {
     setColleagues: (state, action: PayloadAction<IColleague[] | null>) => {
       state.colleagues = action.payload;
-      storeData('colleagues', action.payload);
-      console.log('colleagues', state.colleagues);
+      // storeData('colleagues', action.payload);
+      // console.log('colleagues', state.colleagues);
     },
   },
 });

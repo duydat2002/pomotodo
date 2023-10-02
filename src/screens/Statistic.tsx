@@ -1,172 +1,117 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import SafeView from '@/components/Layout/SafeView';
-import CalendarPicker, {
-  CustomDatesStylesFunc,
-  DateChangedCallback,
-} from 'react-native-calendar-picker';
-import {useActivedColors, useAppSelector} from '@/hooks';
-import {common} from '@/assets/styles';
-import {Feather, MaterialCommunityIcons} from '@expo/vector-icons';
-import moment, {Moment} from 'moment';
+import React, {useCallback} from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ListRenderItem,
+} from 'react-native';
+import SwipeableItem, {
+  useSwipeableItemParams,
+} from 'react-native-swipeable-item';
 
-const Statistic = () => {
-  const activedColors = useActivedColors();
-  const {theme} = useAppSelector(state => state.theme);
+const NUM_ITEMS = 10;
 
-  const [key, setKey] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Moment | null>(null);
-
-  const onDateChange: DateChangedCallback = date => {
-    setSelectedDate(date);
-  };
-
-  useEffect(() => {
-    setKey(Math.random());
-  }, [theme]);
+function Statistic() {
+  const renderItem: ListRenderItem<Item> = useCallback(({item}) => {
+    return (
+      <SwipeableItem
+        key={item.key}
+        item={item}
+        renderUnderlayLeft={() => <UnderlayLeft />}
+        snapPointsLeft={[150]}>
+        <View
+          style={[
+            styles.row,
+            {backgroundColor: item.backgroundColor, height: 100},
+          ]}>
+          <Text style={styles.text}>{`${item.text}`}</Text>
+        </View>
+      </SwipeableItem>
+    );
+  }, []);
 
   return (
-    <SafeView>
-      <View
-        style={[
-          common.shadow,
-          {
-            padding: 24,
-            borderRadius: 16,
-            backgroundColor: activedColors.input,
-          },
-        ]}>
-        <View style={{alignItems: 'center', marginBottom: 20}}>
-          <Text
-            style={[
-              common.text,
-              {fontWeight: '700', marginBottom: 4, color: activedColors.text},
-            ]}>
-            Deadline
-          </Text>
-          <Text style={[common.text, {color: activedColors.text}]}>
-            {selectedDate?.format('dddd, D MMMM') || 'Someday'}
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 15,
-          }}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSelectedDate(moment())}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#3cb44b',
-              }}>
-              <Feather name="sun" size={20} color="#fff" />
-            </View>
-            <Text style={{color: activedColors.text}}>Today</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSelectedDate(moment().add(1, 'day'))}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#f58231',
-              }}>
-              <MaterialCommunityIcons
-                name="weather-sunset"
-                size={20}
-                color="#fff"
-              />
-            </View>
-            <Text style={{color: activedColors.text}}>Tomorow</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSelectedDate(moment().add(7, 'day'))}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#93b0f3',
-              }}>
-              <MaterialCommunityIcons
-                name="calendar-arrow-right"
-                size={20}
-                color="#fff"
-              />
-            </View>
-            <Text style={{color: activedColors.text}}>Next week</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setSelectedDate(null)}
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#5249ca',
-              }}>
-              <MaterialCommunityIcons
-                name="calendar-month"
-                size={20}
-                color="#fff"
-              />
-            </View>
-            <Text style={{color: activedColors.text}}>Someday</Text>
-          </TouchableOpacity>
-        </View>
-        <View>
-          <CalendarPicker
-            key={key}
-            onDateChange={onDateChange}
-            selectedStartDate={selectedDate?.toDate()}
-            startFromMonday
-            textStyle={{color: activedColors.text}}
-            todayBackgroundColor="#3cb44b"
-            // todayTextStyle={{color: activedColors.primary}}
-            selectedDayColor={activedColors.primary}
-            selectedDayTextColor="#fff"
-            previousComponent={
-              <Feather
-                name="chevron-left"
-                size={24}
-                color={activedColors.text}
-              />
-            }
-            nextComponent={
-              <Feather
-                name="chevron-right"
-                size={24}
-                color={activedColors.text}
-              />
-            }
-          />
-        </View>
-      </View>
-    </SafeView>
+    <View style={styles.container}>
+      <FlatList
+        keyExtractor={item => item.key}
+        data={initialData}
+        renderItem={({item}) => {
+          return (
+            <SwipeableItem
+              key={item.key}
+              item={item}
+              renderUnderlayLeft={() => <UnderlayLeft />}
+              snapPointsLeft={[150]}>
+              <View
+                style={[
+                  styles.row,
+                  {backgroundColor: item.backgroundColor, height: 100},
+                ]}>
+                <Text style={styles.text}>{`${item.text}`}</Text>
+              </View>
+            </SwipeableItem>
+          );
+        }}
+      />
+    </View>
   );
-};
+}
 
 export default Statistic;
 
-const styles = StyleSheet.create({});
+const UnderlayLeft = () => {
+  const {close} = useSwipeableItemParams<Item>();
+  return (
+    <View style={[styles.row, styles.underlayLeft]}>
+      <TouchableOpacity onPress={() => close()}>
+        <Text style={styles.text}>CLOSE</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+type Item = {
+  key: string;
+  text: string;
+  backgroundColor: string;
+};
+
+function getColor(i: number) {
+  const multiplier = 255 / (NUM_ITEMS - 1);
+  const colorVal = i * multiplier;
+  return `rgb(${colorVal}, ${Math.abs(128 - colorVal)}, ${255 - colorVal})`;
+}
+
+const initialData: Item[] = [...Array(NUM_ITEMS)].fill(0).map((d, index) => {
+  const backgroundColor = getColor(index);
+  return {
+    text: `${index}`,
+    key: `key-${backgroundColor}`,
+    backgroundColor,
+  };
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+  },
+  text: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 32,
+  },
+  underlayLeft: {
+    flex: 1,
+    backgroundColor: 'tomato',
+    justifyContent: 'flex-end',
+  },
+});

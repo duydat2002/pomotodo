@@ -5,6 +5,7 @@ import type {
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {ITask} from './task';
+import {IProject} from './project';
 
 // Auth
 export type AuthStackParamList = {
@@ -18,7 +19,7 @@ export type AuthStackScreenProps<T extends keyof AuthStackParamList> =
 
 // App
 export type AppStackParamList = {
-  Home: undefined;
+  HomeStack: NavigatorScreenParams<HomeStackParamList>;
   ProjectsStack: NavigatorScreenParams<ProjectsStackParamList>;
   Pomodoro: {task: ITask} | undefined;
   Statistic: undefined;
@@ -28,12 +29,25 @@ export type AppStackParamList = {
 export type AppStackScreenProps<T extends keyof AppStackParamList> =
   NativeStackScreenProps<AppStackParamList, T>;
 
+// Home
+export type HomeStackParamList = {
+  Home: undefined;
+  Notification: undefined;
+  Colleagues: undefined;
+};
+
+export type HomeStackScreenProps<T extends keyof HomeStackParamList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<HomeStackParamList, T>,
+    AppStackScreenProps<keyof AppStackParamList>
+  >;
+
 // Project
 export type ProjectsStackParamList = {
   Projects: undefined;
   Tasks: {projectId: string};
   CreateTask: {projectId: string; task: ITask | null};
-  CreateProject: undefined;
+  CreateProject: {project: IProject} | undefined;
   JoinTask: undefined;
 };
 

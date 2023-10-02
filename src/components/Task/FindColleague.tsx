@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import {common} from '@/assets/styles';
 import {useActivedColors} from '@/hooks';
-import {IColleague} from '@/types';
+import {IColleague, IUser} from '@/types';
 
 interface IProps {
-  findColleague: IColleague[];
-  onClickColleague: (colleague: IColleague) => void;
+  findColleague: IUser[];
+  onClickColleague: (colleague: IUser) => void;
 }
 
 const FindColleague: React.FC<IProps> = ({findColleague, onClickColleague}) => {
@@ -36,9 +36,9 @@ const FindColleague: React.FC<IProps> = ({findColleague, onClickColleague}) => {
             <View style={styles.item}>
               <Image
                 source={
-                  colleague.item.colleagueAvatar
+                  colleague.item.avatar
                     ? {
-                        uri: colleague.item.colleagueAvatar,
+                        uri: colleague.item.avatar,
                       }
                     : require('@/assets/images/default-avatar.png')
                 }
@@ -50,7 +50,7 @@ const FindColleague: React.FC<IProps> = ({findColleague, onClickColleague}) => {
                   marginVertical: 8,
                   color: activedColors.text,
                 }}>
-                {colleague.item.colleagueUsername}
+                {colleague.item.username}
               </Text>
             </View>
           </TouchableHighlight>

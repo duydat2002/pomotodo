@@ -19,7 +19,7 @@ import {
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {IColleague, ProjectsStackScreenProps} from '@/types';
+import {IColleague, IUser, ProjectsStackScreenProps} from '@/types';
 import {APP_QR_ID, PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -55,8 +55,10 @@ const CreateTask = () => {
   const [isReady, setIsReady] = useState(false);
   const [QRValue, setQRValue] = useState('');
   const [assignee, setAssignee] = useState('');
-  const [assignees, setAssignees] = useState<IColleague[]>([]);
-  const [findColleague, setFindColleague] = useState<IColleague[] | null>(null);
+  const [assigneeIds, setAssigneeIds] = useState(['']);
+  const [assignees, setAssignees] = useState<IUser[]>([]);
+  const [findColleague, setFindColleague] = useState<IUser[] | null>(null);
+  const [projectColleagues, setProjectColleagues] = useState<IUser[]>([user!]);
 
   const [activePriority, setActivePriority] = useState(false);
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
@@ -84,13 +86,24 @@ const CreateTask = () => {
       const task = route.params.task;
       setTask(task);
 
-      // Get assignees info in list colleagues
-      if (task.assignees) {
-        const assigneesTemp = colleagues?.filter(colleague =>
-          task.assignees.includes(colleague.colleagueId),
+      if (colleagues) {
+        const projectColleaguesTemp: IUser[] = colleagues
+          .filter(item => project!.team.includes(item.colleagueId))
+          .map(item => ({
+            id: item.colleagueId,
+            username: item.colleagueUsername,
+            avatar: item.colleagueAvatar,
+            email: item.colleagueEmail,
+          }));
+        projectColleaguesTemp.unshift(user!);
+
+        setProjectColleagues(projectColleaguesTemp);
+
+        const assigneesTemp: IUser[] = projectColleaguesTemp.filter(item =>
+          task.assignees.includes(item.id),
         );
 
-        setAssignees(assigneesTemp || []);
+        setAssignees(assigneesTemp);
       }
 
       setIsReady(true);
@@ -110,28 +123,47 @@ const CreateTask = () => {
     }
   }, [isReady]);
 
+  useEffect(() => {
+    const colleaguesTemp: IUser[] | undefined = projectColleagues?.filter(
+      item => {
+        if (assignee.trim() != '') {
+          return item.username
+            .toLowerCase()
+            .includes(assignee.trim().toLowerCase());
+        } else {
+          return false;
+        }
+      },
+    );
+
+    setFindColleague(
+      colleaguesTemp && colleaguesTemp.length > 0 ? colleaguesTemp : null,
+    );
+  }, [assignee]);
+
+  useEffect(() => {
+    const assigneeIdsTemp = assignees.map(item => item.id);
+    setAssigneeIds(assigneeIdsTemp);
+  }, [assignees]);
+
   const handleSaveTask = () => {
     if (task.name.trim() == '') {
       setErrorName('Please enter task name.');
     } else {
       setErrorName('');
 
-      const assigneesIds = assignees.map(item => item.colleagueId);
       const updatedTask = {
         ...task,
-        assignees: assigneesIds,
+        assignees: assigneeIds,
       };
       setTask(updatedTask);
 
       // Update or create task
       if (route.params.task) {
-        updateTask(updatedTask);
+        updateTask(route.params.task.id, updatedTask);
       } else {
         createTask(updatedTask);
       }
-
-      // Add colleagues
-      addColleagues(assignees);
 
       navigation.goBack();
     }
@@ -201,7 +233,7 @@ const CreateTask = () => {
     setAssignees(assigneesTemp);
   };
 
-  const onClickColleague = (colleague: IColleague) => {
+  const onClickColleague = (colleague: IUser) => {
     const check = assignees.findIndex(item => item.id == colleague.id);
 
     if (check == -1) {
@@ -211,25 +243,6 @@ const CreateTask = () => {
     setAssignee('');
     setFindColleague(null);
   };
-
-  useEffect(() => {
-    const colleaguesTemp = colleagues?.filter(item => {
-      if (assignee.trim() != '') {
-        return (
-          item.colleagueId == assignee ||
-          item.colleagueUsername
-            .toLowerCase()
-            .includes(assignee.trim().toLowerCase())
-        );
-      } else {
-        return false;
-      }
-    });
-
-    setFindColleague(
-      colleaguesTemp && colleaguesTemp.length > 0 ? colleaguesTemp : null,
-    );
-  }, [assignee]);
 
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
@@ -416,14 +429,7 @@ const CreateTask = () => {
                 styles.assigneeWrap,
                 {backgroundColor: activedColors.input},
               ]}>
-              <View
-                style={[
-                  {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingVertical: 8,
-                  },
-                ]}>
+              <View style={styles.assigneeHeader}>
                 <MaterialIcons
                   name="groups"
                   size={20}
@@ -477,18 +483,12 @@ const CreateTask = () => {
                 }}>
                 <View
                   onStartShouldSetResponder={() => true}
-                  style={[
-                    {
-                      flexDirection: 'row',
-                      flexWrap: 'wrap',
-                      gap: 10,
-                      padding: 16,
-                    },
-                  ]}>
+                  style={styles.assigneeList}>
                   {assignees.map(assignee => (
                     <AssigneeUserItem
                       key={assignee.id}
-                      assignee={assignee}
+                      user={assignee}
+                      ownerId={user!.id}
                       onDelete={onDeleteAssignee}
                     />
                   ))}
@@ -572,5 +572,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
+  },
+  assigneeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  assigneeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    padding: 16,
   },
 });

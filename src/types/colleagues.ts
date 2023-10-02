@@ -4,4 +4,6 @@ export interface IColleague {
   colleagueId: string;
   colleagueUsername: string;
   colleagueAvatar?: string;
+  colleagueEmail?: string;
+  isAccept: boolean;
 }

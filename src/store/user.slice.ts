@@ -15,7 +15,7 @@ export const userSlice = createSlice({
     setUser: (state, action: PayloadAction<IUser | null>) => {
       state.user = action.payload;
       storeData('user', action.payload);
-      console.log('user', action.payload);
+      // console.log('user', action.payload);
     },
   },
 });

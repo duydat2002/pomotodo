@@ -2,14 +2,15 @@ import React from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {MaterialIcons} from '@expo/vector-icons';
-import {IColleague} from '@/types';
+import {IColleague, IUser} from '@/types';
 
 interface IProps {
-  assignee: IColleague;
+  user: IUser;
+  ownerId: string;
   onDelete: (id: string) => void;
 }
 
-const AssigneeUserItem: React.FC<IProps> = ({assignee, onDelete}) => {
+const AssigneeUserItem: React.FC<IProps> = ({user, ownerId, onDelete}) => {
   const activedColors = useActivedColors();
 
   return (
@@ -25,9 +26,9 @@ const AssigneeUserItem: React.FC<IProps> = ({assignee, onDelete}) => {
       }}>
       <Image
         source={
-          assignee.colleagueAvatar
+          user.avatar
             ? {
-                uri: assignee.colleagueAvatar,
+                uri: user.avatar,
               }
             : require('@/assets/images/default-avatar.png')
         }
@@ -44,11 +45,14 @@ const AssigneeUserItem: React.FC<IProps> = ({assignee, onDelete}) => {
           },
         ]}
         numberOfLines={1}>
-        {assignee.colleagueUsername}
+        {user.username}
       </Text>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => onDelete(assignee.id)}>
+      {/* {ownerId != user.id && (
+        <TouchableOpacity activeOpacity={0.7} onPress={() => onDelete(user.id)}>
+          <MaterialIcons name="cancel" size={14} color="#e07070" />
+        </TouchableOpacity>
+      )} */}
+      <TouchableOpacity activeOpacity={0.7} onPress={() => onDelete(user.id)}>
         <MaterialIcons name="cancel" size={14} color="#e07070" />
       </TouchableOpacity>
     </View>

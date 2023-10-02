@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {Appearance} from 'react-native';
-import {getData, useAppDispatch, useAppSelector} from '@/hooks';
+import {getData, storeData, useAppDispatch, useAppSelector} from '@/hooks';
 import {changeTheme} from '@/store/theme.slice';
 import auth from '@react-native-firebase/auth';
 import {setProjects} from '@/store/projects.slice';
@@ -15,17 +15,32 @@ import {COLLEAGUES, PROJECTS, TASKS} from '@/fakeData';
 import {setColleagues} from '@/store/colleagues.slice';
 import {setTasks} from '@/store/tasks.slice';
 import {useProject} from '@/hooks/useProject';
+import {useTask} from '@/hooks/useTask';
+import {ITask} from '@/types';
+import firestore from '@react-native-firebase/firestore';
+import {useColleague} from '@/hooks/useColleague';
+import {useNotification} from '@/hooks/useNotification';
+import {setNotifications} from '@/store/notifications.slice';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);
   const {user} = useAppSelector(state => state.user);
+  const {projects} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
   const dispatch = useAppDispatch();
 
-  const {getProjectsFB} = useProject();
+  const {getProjectsFS, listenProjects} = useProject();
+  const {getTasksByProjects, listenTasks} = useTask();
+  const {getColleaguesFS, listenColleagues} = useColleague();
+  const {getNotificationsFS, listenNotifications} = useNotification();
 
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
+
+  // Listen notifications
+  listenNotifications(auth().currentUser?.uid);
+  listenColleagues(auth().currentUser?.uid);
 
   // Theme
   const getThemeStorage = useCallback(async () => {
@@ -52,7 +67,7 @@ const RootNavigator: React.FC = () => {
   // Net info
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async state => {
-      // console.log('state', state);
+      console.log('isConnected', state.isConnected);
       setIsOnline(state.isConnected!);
     });
 
@@ -85,32 +100,49 @@ const RootNavigator: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // if (user) loadDatas(); // Online/Offline
-    if (user) initDatas(); //Offline
+    if (user) loadDatas(); // Online/Offline
+    // if (user) initDatas(); //Offline
   }, [user]);
 
   const loadDatas = useCallback(async () => {
     let projectsTemp = null,
       tasksTemp = null,
-      colleaguesTemp = null;
+      colleaguesTemp = null,
+      notificationsTemp = null;
 
     const isOnline = await getConnection();
 
     console.log(isOnline ? 'online' : 'offline');
     if (isOnline && auth().currentUser) {
       console.log('firebase');
-      projectsTemp = await getProjectsFB(auth().currentUser!.uid);
+      projectsTemp = await getProjectsFS(auth().currentUser!.uid);
+      tasksTemp = await getTasksByProjects(projectsTemp);
+      colleaguesTemp = await getColleaguesFS(auth().currentUser?.uid!);
+      notificationsTemp = await getNotificationsFS(auth().currentUser?.uid!);
     } else {
       console.log('local');
       projectsTemp = await getData('projects');
       tasksTemp = await getData('tasks');
       colleaguesTemp = await getData('colleagues');
+      notificationsTemp = await getData('notifications');
     }
 
+    // Redux
     dispatch(setProjects(projectsTemp));
     dispatch(setTasks(tasksTemp));
-    setLoadingData(false);
     dispatch(setColleagues(colleaguesTemp));
+    dispatch(setNotifications(notificationsTemp));
+
+    // AsyncStorage
+    const promises = [];
+    if (projectsTemp) promises.push(storeData('projects', projectsTemp));
+    if (tasksTemp) promises.push(storeData('tasks', tasksTemp));
+    if (colleaguesTemp) promises.push(storeData('colleagues', colleaguesTemp));
+    if (notificationsTemp)
+      promises.push(storeData('notifications', notificationsTemp));
+    Promise.all(promises);
+
+    setLoadingData(false);
   }, []);
 
   // Init data

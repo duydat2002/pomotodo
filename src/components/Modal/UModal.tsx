@@ -16,6 +16,7 @@ interface IProps {
   animationType?: 'none' | 'slide' | 'fade';
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
+  isMiddle?: boolean;
   onRequestClose?: () => void;
   onClickOutside?: () => void;
 }
@@ -26,6 +27,7 @@ const UModal: React.FC<IProps> = ({
   animationType = 'none',
   children,
   style,
+  isMiddle = false,
   onRequestClose,
   onClickOutside,
 }) => {
@@ -40,7 +42,17 @@ const UModal: React.FC<IProps> = ({
         <TouchableWithoutFeedback onPress={onClickOutside}>
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
-        <View style={[styles.modalContent, style]}>{children}</View>
+        <View
+          style={[
+            styles.modalContent,
+            style,
+            {
+              marginBottom: isMiddle ? 'auto' : 0,
+              marginHorizontal: isMiddle ? 20 : 0,
+            },
+          ]}>
+          {children}
+        </View>
       </Modal>
     </SafeView>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {common} from '@/assets/styles';
@@ -9,17 +9,28 @@ import UButton from '@/components/UI/UButton';
 import Header from '@/components/Layout/Header';
 import ProjectItem from '@/components/Project/ProjectItem';
 import {ProjectsStackScreenProps} from '@/types';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+import {useProject} from '@/hooks/useProject';
 
 const Projects = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'Projects'>['navigation']>();
-  const dispatch = useAppDispatch();
+
+  const {deleteProject} = useProject();
 
   const {projects} = useAppSelector(state => state.projects);
 
+  const [projectId, setProjectId] = useState('');
+  const [activeDeleteProject, setActiveDeleteProject] = useState(false);
+
   const handleClickProjectItem = (projectId: string) => {
     navigation.navigate('Tasks', {projectId});
+  };
+
+  const handleConfirmDelete = async () => {
+    await deleteProject(projectId);
+    setActiveDeleteProject(false);
   };
 
   return (
@@ -71,14 +82,30 @@ const Projects = () => {
           renderItem={({item}) => (
             <ProjectItem
               onPress={() => handleClickProjectItem(item.id)}
-              color={item.color}
-              name={item.name}
-              totalTime={item.totalTime}
-              totalTask={item.totalTask}
+              item={item}
+              onEdit={() => {
+                navigation.navigate('CreateProject', {project: item});
+              }}
+              onDelete={() => {
+                setProjectId(item.id);
+                setActiveDeleteProject(true);
+              }}
             />
           )}
         />
         <View />
+      </View>
+      <View style={{position: 'absolute'}}>
+        <ConfirmModal
+          visible={activeDeleteProject}
+          title="Are you sure?"
+          desc="Are you sure you want to delete this project?"
+          comfirmText="Delete"
+          onConfirm={handleConfirmDelete}
+          onClose={() => {
+            setActiveDeleteProject(false);
+          }}
+        />
       </View>
     </SafeView>
   );
