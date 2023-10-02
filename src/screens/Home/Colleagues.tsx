@@ -72,6 +72,7 @@ const Colleagues: React.FC = () => {
             senderAvatar: user!.avatar,
             receiverId: receiver.id,
             type: 'invite',
+            subType: 'invite',
             isRead: false,
             isResponded: false,
             content: 'invited you to team',

@@ -82,9 +82,9 @@ const Projects = () => {
           renderItem={({item}) => (
             <ProjectItem
               onPress={() => handleClickProjectItem(item.id)}
-              item={item}
+              project={item}
               onEdit={() => {
-                navigation.navigate('CreateProject', {project: item});
+                navigation.navigate('CreateProject', {projectId: item.id});
               }}
               onDelete={() => {
                 setProjectId(item.id);

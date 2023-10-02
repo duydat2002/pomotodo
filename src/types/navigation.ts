@@ -47,7 +47,7 @@ export type ProjectsStackParamList = {
   Projects: undefined;
   Tasks: {projectId: string};
   CreateTask: {projectId: string; task: ITask | null};
-  CreateProject: {project: IProject} | undefined;
+  CreateProject: {projectId: string} | undefined;
   JoinTask: undefined;
 };
 

@@ -1,6 +1,6 @@
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import React from 'react';
-import {useActivedColors} from '@/hooks';
+import React, {useEffect, useState} from 'react';
+import {useActivedColors, useAppSelector} from '@/hooks';
 import {
   Feather,
   FontAwesome,
@@ -22,6 +22,37 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<AppStackScreenProps<'ProjectsStack'>['navigation']>();
+
+  const {user} = useAppSelector(state => state.user);
+  const {colleagues} = useAppSelector(state => state.colleagues);
+
+  const [assigneeUsernamesText, setAssigneeUsernamesText] = useState('');
+
+  useEffect(() => {
+    if (task.assignees) {
+      let assigneeUsernamesTemp: string[] = [];
+      if (colleagues) {
+        assigneeUsernamesTemp = colleagues
+          .filter(item => task.assignees.includes(item.colleagueId))
+          .map(item => item.colleagueUsername);
+      }
+
+      if (task.assignees.includes(user!.id)) {
+        assigneeUsernamesTemp.unshift('you');
+      }
+
+      let text = '';
+      if (assigneeUsernamesTemp.length > 3) {
+        const assigneesTemp = assigneeUsernamesTemp.slice(0, 2);
+        text = `${assigneesTemp.join(', ')} and ${
+          assigneeUsernamesTemp.length - 3
+        } other(s)`;
+      } else {
+        text = assigneeUsernamesTemp.join(', ');
+      }
+      setAssigneeUsernamesText(text);
+    }
+  }, [task]);
 
   const checkTask = () => {
     task.isDone = !task.isDone;
@@ -68,6 +99,14 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
           />
           <Text style={[common.small, {color: activedColors.primaryLight}]}>
             {task.totalPomodoro}
+          </Text>
+
+          <Text
+            style={[
+              common.small,
+              {marginLeft: 10, color: activedColors.textSec},
+            ]}>
+            {assigneeUsernamesText}
           </Text>
         </View>
       </View>

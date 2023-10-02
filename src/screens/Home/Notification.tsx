@@ -9,14 +9,19 @@ import {useNotification} from '@/hooks/useNotification';
 import {useColleague} from '@/hooks/useColleague';
 import {generatorId} from '@/utils';
 import {setHasNewNotification} from '@/store/notifications.slice';
+import {useNavigation} from '@react-navigation/native';
+import {HomeStackScreenProps} from '@/types';
 
 const Notification: React.FC = () => {
-  const {createNotification, updateNotification} = useNotification();
-  const {acceptColleague, rejectColleague} = useColleague();
   const dispatch = useAppDispatch();
+  const navigation =
+    useNavigation<HomeStackScreenProps<'Notification'>['navigation']>();
 
   const {user} = useAppSelector(state => state.user);
   const {notifications} = useAppSelector(state => state.notifications);
+
+  const {createNotification, updateNotification} = useNotification();
+  const {acceptColleague, rejectColleague} = useColleague();
 
   useEffect(() => {
     dispatch(setHasNewNotification(false));
@@ -35,6 +40,7 @@ const Notification: React.FC = () => {
       senderAvatar: user!.avatar,
       receiverId: notification.senderId,
       type: 'invite',
+      subType: 'accept',
       isRead: false,
       content: 'has accepted your invitation',
       createdAt: new Date().toISOString(),
@@ -55,6 +61,7 @@ const Notification: React.FC = () => {
       senderAvatar: user!.avatar,
       receiverId: notification.senderId,
       type: 'invite',
+      subType: 'reject',
       isRead: false,
       content: 'has rejected your invitation',
       createdAt: new Date().toISOString(),
@@ -63,8 +70,20 @@ const Notification: React.FC = () => {
   };
 
   const onClickNotify = async (notification: INotification) => {
+    if (notification.type == 'assign') {
+      // Is Project
+      if (
+        notification.projectId &&
+        !notification.taskId &&
+        ['add', 'join', 'left'].includes(notification.subType)
+      ) {
+        navigation.navigate('ProjectsStack', {
+          screen: 'CreateProject',
+          params: {projectId: notification.projectId},
+        });
+      }
+    }
     await updateNotification(notification.id, {isRead: true});
-    console.log('onClickNotify', notification);
   };
 
   return (

@@ -41,6 +41,7 @@ const RootNavigator: React.FC = () => {
   // Listen notifications
   listenNotifications(auth().currentUser?.uid);
   listenColleagues(auth().currentUser?.uid);
+  listenProjects(auth().currentUser?.uid);
 
   // Theme
   const getThemeStorage = useCallback(async () => {
@@ -115,15 +116,15 @@ const RootNavigator: React.FC = () => {
     console.log(isOnline ? 'online' : 'offline');
     if (isOnline && auth().currentUser) {
       console.log('firebase');
+      colleaguesTemp = await getColleaguesFS(auth().currentUser?.uid!);
       projectsTemp = await getProjectsFS(auth().currentUser!.uid);
       tasksTemp = await getTasksByProjects(projectsTemp);
-      colleaguesTemp = await getColleaguesFS(auth().currentUser?.uid!);
       notificationsTemp = await getNotificationsFS(auth().currentUser?.uid!);
     } else {
       console.log('local');
+      colleaguesTemp = await getData('colleagues');
       projectsTemp = await getData('projects');
       tasksTemp = await getData('tasks');
-      colleaguesTemp = await getData('colleagues');
       notificationsTemp = await getData('notifications');
     }
 

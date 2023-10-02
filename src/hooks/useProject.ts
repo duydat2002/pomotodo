@@ -8,6 +8,8 @@ import {setTasks} from '@/store/tasks.slice';
 
 export const useProject = () => {
   const dispatch = useAppDispatch();
+
+  const {user} = useAppSelector(state => state.user);
   const {projects} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
@@ -90,7 +92,7 @@ export const useProject = () => {
     try {
       const querySnapshot = await firestore()
         .collection('projects')
-        .where('ownerId', '==', userId)
+        .where('team', 'array-contains', userId)
         .orderBy('createdAt', 'asc')
         .get();
 
@@ -116,6 +118,7 @@ export const useProject = () => {
     useEffect(() => {
       const subscriber = firestore()
         .collection('projects')
+        .where('team', 'array-contains', user?.id || 'none')
         .orderBy('createdAt', 'asc')
         .onSnapshot(async querySnapshot => {
           if (querySnapshot) {

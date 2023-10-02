@@ -1,12 +1,12 @@
 import {useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import {useAppDispatch, useAppSelector} from './useStore';
-import {IInvite, INotification, IUser} from '@/types';
+import {INotification} from '@/types';
 import {
   setHasNewNotification,
   setNotifications,
 } from '@/store/notifications.slice';
-import {getData, storeData} from './useAsyncStorage';
+import {storeData} from './useAsyncStorage';
 
 export const useNotification = () => {
   const dispatch = useAppDispatch();
@@ -43,7 +43,7 @@ export const useNotification = () => {
       const querySnapshot = await firestore()
         .collection('notifications')
         .where('receiverId', '==', userId)
-        .orderBy('createdAt', 'asc')
+        .orderBy('createdAt', 'desc')
         .get();
       if (querySnapshot.empty) {
         return null;
@@ -67,8 +67,8 @@ export const useNotification = () => {
     useEffect(() => {
       const subscriber = firestore()
         .collection('notifications')
-        .where('receiverId', '==', user?.id || '1')
-        .orderBy('createdAt', 'asc')
+        .where('receiverId', '==', user?.id || 'none')
+        .orderBy('createdAt', 'desc')
         .onSnapshot(async querySnapshot => {
           if (querySnapshot) {
             const notifications: INotification[] = [];
@@ -80,6 +80,7 @@ export const useNotification = () => {
             });
             dispatch(setNotifications(notifications));
             await storeData('notifications', notifications);
+
             querySnapshot.docChanges().forEach(change => {
               if (change.type === 'added') {
                 dispatch(setHasNewNotification(true));

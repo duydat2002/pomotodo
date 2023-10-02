@@ -82,31 +82,31 @@ const CreateTask = () => {
   const [errorName, setErrorName] = useState('');
 
   useEffect(() => {
-    if (route.params.task) {
-      const task = route.params.task;
-      setTask(task);
+    if (colleagues) {
+      const projectColleaguesTemp: IUser[] = colleagues
+        .filter(item => project!.team.includes(item.colleagueId))
+        .map(item => ({
+          id: item.colleagueId,
+          username: item.colleagueUsername,
+          avatar: item.colleagueAvatar,
+          email: item.colleagueEmail,
+        }));
+      projectColleaguesTemp.unshift(user!);
 
-      if (colleagues) {
-        const projectColleaguesTemp: IUser[] = colleagues
-          .filter(item => project!.team.includes(item.colleagueId))
-          .map(item => ({
-            id: item.colleagueId,
-            username: item.colleagueUsername,
-            avatar: item.colleagueAvatar,
-            email: item.colleagueEmail,
-          }));
-        projectColleaguesTemp.unshift(user!);
+      setProjectColleagues(projectColleaguesTemp);
 
-        setProjectColleagues(projectColleaguesTemp);
+      if (route.params.task) {
+        const task = route.params.task;
+        setTask(task);
 
         const assigneesTemp: IUser[] = projectColleaguesTemp.filter(item =>
           task.assignees.includes(item.id),
         );
 
         setAssignees(assigneesTemp);
-      }
 
-      setIsReady(true);
+        setIsReady(true);
+      }
     }
   }, [isFocused]);
 
@@ -488,7 +488,7 @@ const CreateTask = () => {
                     <AssigneeUserItem
                       key={assignee.id}
                       user={assignee}
-                      ownerId={user!.id}
+                      ownerId={'none'}
                       onDelete={onDeleteAssignee}
                     />
                   ))}
@@ -501,7 +501,7 @@ const CreateTask = () => {
             style={{
               width: 'auto',
               marginHorizontal: 16,
-              marginBottom: 40,
+              marginBottom: 10,
             }}
             onPress={handleSaveTask}>
             <Text style={[common.text, {color: '#fff'}]}>Save</Text>

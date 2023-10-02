@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
-import {useActivedColors} from '@/hooks';
+import {useActivedColors, useAppSelector} from '@/hooks';
 import {MaterialIcons} from '@expo/vector-icons';
 import {IColleague, IUser} from '@/types';
 
@@ -12,6 +12,22 @@ interface IProps {
 
 const AssigneeUserItem: React.FC<IProps> = ({user, ownerId, onDelete}) => {
   const activedColors = useActivedColors();
+
+  const userState = useAppSelector(state => state.user);
+  const currentUser = userState.user;
+
+  const isShowDelete = () => {
+    // Is owner
+    if (ownerId == user.id) return false;
+
+    // Show all if currentUser is owner
+    if (ownerId == currentUser?.id) return true;
+
+    // Show if is currentUser
+    if (user.id == currentUser?.id) return true;
+
+    return true;
+  };
 
   return (
     <View
@@ -47,14 +63,11 @@ const AssigneeUserItem: React.FC<IProps> = ({user, ownerId, onDelete}) => {
         numberOfLines={1}>
         {user.username}
       </Text>
-      {/* {ownerId != user.id && (
+      {isShowDelete() && (
         <TouchableOpacity activeOpacity={0.7} onPress={() => onDelete(user.id)}>
           <MaterialIcons name="cancel" size={14} color="#e07070" />
         </TouchableOpacity>
-      )} */}
-      <TouchableOpacity activeOpacity={0.7} onPress={() => onDelete(user.id)}>
-        <MaterialIcons name="cancel" size={14} color="#e07070" />
-      </TouchableOpacity>
+      )}
     </View>
   );
 };
