@@ -37,6 +37,7 @@ import FindColleague from '@/components/Task/FindColleague';
 import UButton from '@/components/UI/UButton';
 import {useTask} from '@/hooks/useTask';
 import {useColleague} from '@/hooks/useColleague';
+import {useNotification} from '@/hooks/useNotification';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -47,15 +48,18 @@ const CreateTask = () => {
 
   const {user} = useAppSelector(state => state.user);
   const {project} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
   const {colleagues} = useAppSelector(state => state.colleagues);
 
   const {createTask, updateTask} = useTask();
+  const {createNotification} = useNotification();
   const {addColleagues} = useColleague();
 
   const [isReady, setIsReady] = useState(false);
   const [QRValue, setQRValue] = useState('');
   const [assignee, setAssignee] = useState('');
-  const [assigneeIds, setAssigneeIds] = useState(['']);
+  const [oldAssigneeIds, setOldAssigneeIds] = useState(['']);
+  const [assigneeIds, setAssigneeIds] = useState<string[] | null>(null);
   const [assignees, setAssignees] = useState<IUser[]>([]);
   const [findColleague, setFindColleague] = useState<IUser[] | null>(null);
   const [projectColleagues, setProjectColleagues] = useState<IUser[]>([user!]);
@@ -76,14 +80,17 @@ const CreateTask = () => {
     longBreak: 25 * 60,
     shortBreak: 5 * 60,
     deadline: null,
-    assignees: [],
+    assignees: null,
     createdAt: '',
   });
   const [errorName, setErrorName] = useState('');
+  const [validTask, setValidTask] = useState(true);
 
   useEffect(() => {
+    let projectColleaguesTemp: IUser[] = [];
+
     if (colleagues) {
-      const projectColleaguesTemp: IUser[] = colleagues
+      projectColleaguesTemp = colleagues
         .filter(item => project!.team.includes(item.colleagueId))
         .map(item => ({
           id: item.colleagueId,
@@ -94,17 +101,27 @@ const CreateTask = () => {
       projectColleaguesTemp.unshift(user!);
 
       setProjectColleagues(projectColleaguesTemp);
+    }
 
-      if (route.params.task) {
-        const task = route.params.task;
-        setTask(task);
+    if (route.params.taskId) {
+      const tasksFilter = tasks?.filter(item => item.id == route.params.taskId);
 
-        const assigneesTemp: IUser[] = projectColleaguesTemp.filter(item =>
-          task.assignees.includes(item.id),
+      if (!tasksFilter || tasksFilter.length == 0) {
+        setValidTask(false);
+      } else if (
+        tasksFilter[0].assignees != null &&
+        !tasksFilter[0].assignees.includes(user!.id)
+      ) {
+        setValidTask(false);
+      } else {
+        setTask(tasksFilter[0]);
+        setOldAssigneeIds(tasksFilter[0].assignees || []);
+
+        const assigneesTemp: IUser[] = projectColleaguesTemp.filter(
+          item => tasksFilter[0].assignees?.includes(item.id),
         );
 
         setAssignees(assigneesTemp);
-
         setIsReady(true);
       }
     }
@@ -143,10 +160,10 @@ const CreateTask = () => {
 
   useEffect(() => {
     const assigneeIdsTemp = assignees.map(item => item.id);
-    setAssigneeIds(assigneeIdsTemp);
+    setAssigneeIds(assigneeIdsTemp.length == 0 ? null : assigneeIdsTemp);
   }, [assignees]);
 
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
     if (task.name.trim() == '') {
       setErrorName('Please enter task name.');
     } else {
@@ -159,13 +176,66 @@ const CreateTask = () => {
       setTask(updatedTask);
 
       // Update or create task
-      if (route.params.task) {
-        updateTask(route.params.task.id, updatedTask);
+      if (route.params.taskId) {
+        console.log('cac', updatedTask);
+        updateTask(route.params.taskId, updatedTask);
       } else {
         createTask(updatedTask);
       }
 
-      navigation.goBack();
+      // Check add/ remove
+      const promise: any[] = [];
+      // Add
+      assigneeIds?.forEach(item => {
+        if (item != user?.id && !oldAssigneeIds.includes(item)) {
+          promise.push(
+            createNotification({
+              id: generatorId(),
+              senderId: user!.id,
+              senderUsername: user!.username,
+              senderAvatar: user!.avatar,
+              receiverId: item,
+              type: 'assign',
+              subType: 'add',
+              isRead: false,
+              content: 'added you to',
+              projectId: project?.id,
+              projectName: project?.name,
+              taskId: task.id,
+              taskName: task.name,
+              createdAt: new Date().toISOString(),
+            }),
+          );
+        }
+      });
+
+      // Delete
+      oldAssigneeIds.forEach(item => {
+        if (item != user?.id && !assigneeIds?.includes(item)) {
+          promise.push(
+            createNotification({
+              id: generatorId(),
+              senderId: user!.id,
+              senderUsername: user!.username,
+              senderAvatar: user!.avatar,
+              receiverId: item,
+              type: 'assign',
+              subType: 'remove',
+              isRead: false,
+              content: 'removed you from',
+              projectId: project?.id,
+              projectName: project?.name,
+              taskId: task.id,
+              taskName: task.name,
+              createdAt: new Date().toISOString(),
+            }),
+          );
+        }
+      });
+
+      await Promise.all(promise);
+
+      navigation.navigate('Tasks', {projectId: route.params.projectId});
     }
   };
 
@@ -244,10 +314,39 @@ const CreateTask = () => {
     setFindColleague(null);
   };
 
+  if (!validTask) {
+    return (
+      <SafeView>
+        <Header title={route.params.taskId ? 'Edit Task' : 'Create Task'}>
+          {{
+            leftChild: (
+              <Feather
+                name="x"
+                size={24}
+                color={activedColors.text}
+                onPress={() =>
+                  navigation.navigate('Tasks', {
+                    projectId: route.params.projectId,
+                  })
+                }
+              />
+            ),
+          }}
+        </Header>
+        <View style={[common.container]}>
+          <Text style={[common.text, {color: activedColors.text}]}>
+            Task not found The task doesn't seem to exist or you don't have
+            permission to access it.
+          </Text>
+        </View>
+      </SafeView>
+    );
+  }
+
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
       <SafeView clickOutSide={() => setActivePriority(false)}>
-        <Header title={route.params.task ? 'Edit Task' : 'Create Task'}>
+        <Header title={route.params.taskId ? 'Edit Task' : 'Create Task'}>
           {{
             leftChild: (
               <Feather

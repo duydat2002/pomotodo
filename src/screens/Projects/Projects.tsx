@@ -11,11 +11,13 @@ import ProjectItem from '@/components/Project/ProjectItem';
 import {ProjectsStackScreenProps} from '@/types';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import {useProject} from '@/hooks/useProject';
+import {setProject} from '@/store/projects.slice';
 
 const Projects = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'Projects'>['navigation']>();
+  const dispatch = useAppDispatch();
 
   const {deleteProject} = useProject();
 
@@ -25,6 +27,11 @@ const Projects = () => {
   const [activeDeleteProject, setActiveDeleteProject] = useState(false);
 
   const handleClickProjectItem = (projectId: string) => {
+    if (projects) {
+      const index = projects.findIndex(item => item.id == projectId);
+      const project = index != -1 ? projects[index] : null;
+      dispatch(setProject(project));
+    }
     navigation.navigate('Tasks', {projectId});
   };
 

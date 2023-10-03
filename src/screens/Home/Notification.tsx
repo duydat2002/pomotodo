@@ -82,6 +82,21 @@ const Notification: React.FC = () => {
           params: {projectId: notification.projectId},
         });
       }
+
+      // Is Task
+      if (
+        notification.projectId &&
+        notification.taskId &&
+        ['add', 'join', 'left'].includes(notification.subType)
+      ) {
+        navigation.navigate('ProjectsStack', {
+          screen: 'CreateTask',
+          params: {
+            projectId: notification.projectId,
+            taskId: notification.taskId,
+          },
+        });
+      }
     }
     await updateNotification(notification.id, {isRead: true});
   };

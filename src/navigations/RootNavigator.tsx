@@ -42,6 +42,7 @@ const RootNavigator: React.FC = () => {
   listenNotifications(auth().currentUser?.uid);
   listenColleagues(auth().currentUser?.uid);
   listenProjects(auth().currentUser?.uid);
+  listenTasks(auth().currentUser?.uid);
 
   // Theme
   const getThemeStorage = useCallback(async () => {

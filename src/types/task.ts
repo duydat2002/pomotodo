@@ -11,6 +11,6 @@ export interface ITask {
   longBreak: number;
   shortBreak: number;
   deadline: string | null;
-  assignees: string[];
+  assignees: string[] | null;
   createdAt: string;
 }

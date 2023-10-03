@@ -8,6 +8,8 @@ import {storeData} from './useAsyncStorage';
 
 export const useTask = () => {
   const dispatch = useAppDispatch();
+  const {user} = useAppSelector(state => state.user);
+  const {projects} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
   const {updateProjectInfo} = useProject();
 
@@ -19,7 +21,7 @@ export const useTask = () => {
 
         const querySnapshot = await firestore()
           .collection('tasks')
-          .where('projectId', 'in', projectsIds)
+          .where('projectId', 'in', projectsIds || [''])
           .get();
 
         if (querySnapshot.empty) {
@@ -102,7 +104,7 @@ export const useTask = () => {
     }
   };
 
-  const listenTasks = (projects: IProject[]) => {
+  const listenTasks = (dependency: any) => {
     useEffect(() => {
       const projectsIds = projects?.map(item => item.id);
 
@@ -125,7 +127,7 @@ export const useTask = () => {
         });
 
       return () => subscriber();
-    }, [projects]);
+    }, [dependency]);
   };
 
   const listenTasksByProjectId = (projectId: string) => {

@@ -46,7 +46,7 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> =
 export type ProjectsStackParamList = {
   Projects: undefined;
   Tasks: {projectId: string};
-  CreateTask: {projectId: string; task: ITask | null};
+  CreateTask: {projectId: string; taskId: string | null};
   CreateProject: {projectId: string} | undefined;
   JoinTask: undefined;
 };

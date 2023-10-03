@@ -33,7 +33,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
       let assigneeUsernamesTemp: string[] = [];
       if (colleagues) {
         assigneeUsernamesTemp = colleagues
-          .filter(item => task.assignees.includes(item.colleagueId))
+          .filter(item => task.assignees!.includes(item.colleagueId))
           .map(item => item.colleagueUsername);
       }
 
@@ -51,6 +51,8 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
         text = assigneeUsernamesTemp.join(', ');
       }
       setAssigneeUsernamesText(text);
+    } else {
+      setAssigneeUsernamesText('');
     }
   }, [task]);
 

@@ -1,23 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import {IProject, ITask} from '@/types';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {ITask} from '@/types';
 import SafeView from '@/components/Layout/SafeView';
 import Header from '@/components/Layout/Header';
-import {
-  storeData,
-  useActivedColors,
-  useAppDispatch,
-  useAppSelector,
-} from '@/hooks';
+import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types';
-import {setProject} from '@/store/projects.slice';
-import firestore from '@react-native-firebase/firestore';
-import {setTasks} from '@/store/tasks.slice';
-import {useTask} from '@/hooks/useTask';
 
 const Tasks = () => {
   const activedColors = useActivedColors();
@@ -29,28 +20,20 @@ const Tasks = () => {
   const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
-  const {listenTasksByProjectId} = useTask();
-
   const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
-
-  // listenTasksByProjectId(project?.id || '');
 
   useEffect(() => {
     if (projects) {
-      const projectTemp = projects!.filter(
-        item => item.id === route.params?.projectId,
-      );
-      dispatch(setProject(projectTemp[0]));
-
       const tasksTemp = tasks?.filter(
         task => task.projectId == route.params?.projectId,
       );
+      console.log('tasks', tasksTemp);
       setProjectTasks(tasksTemp || null);
     }
-  }, [tasks, projects]);
+  }, [tasks, project]);
 
   const clickCreateTask = () => {
-    navigation.navigate('CreateTask', {projectId: project!.id, task: null});
+    navigation.navigate('CreateTask', {projectId: project!.id, taskId: null});
   };
 
   return (
@@ -94,7 +77,7 @@ const Tasks = () => {
               onPress={() => {
                 navigation.navigate('CreateTask', {
                   projectId: item.projectId,
-                  task: item,
+                  taskId: item.id,
                 });
               }}
             />
