@@ -17,17 +17,20 @@ const Tasks = () => {
   const route = useRoute<ProjectsStackScreenProps<'Tasks'>['route']>();
   const dispatch = useAppDispatch();
 
+  const {user} = useAppSelector(state => state.user);
   const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
   const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
+    setIsOwner(project?.ownerId == user?.id);
+
     if (projects) {
       const tasksTemp = tasks?.filter(
         task => task.projectId == route.params?.projectId,
       );
-      console.log('tasks', tasksTemp);
       setProjectTasks(tasksTemp || null);
     }
   }, [tasks, project]);
@@ -84,15 +87,17 @@ const Tasks = () => {
           )}
         />
       </View>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={clickCreateTask}
-        style={[
-          styles.createTaskButton,
-          {backgroundColor: activedColors.buttonSec},
-        ]}>
-        <MaterialCommunityIcons name="plus" size={30} color="#fff" />
-      </TouchableOpacity>
+      {isOwner && (
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={clickCreateTask}
+          style={[
+            styles.createTaskButton,
+            {backgroundColor: activedColors.buttonSec},
+          ]}>
+          <MaterialCommunityIcons name="plus" size={30} color="#fff" />
+        </TouchableOpacity>
+      )}
     </SafeView>
   );
 };

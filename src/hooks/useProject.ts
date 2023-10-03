@@ -116,25 +116,27 @@ export const useProject = () => {
 
   const listenProjects = (dependency?: any) => {
     useEffect(() => {
-      const subscriber = firestore()
-        .collection('projects')
-        .where('team', 'array-contains', user?.id || 'none')
-        .orderBy('createdAt', 'asc')
-        .onSnapshot(async querySnapshot => {
-          if (querySnapshot) {
-            const projects: IProject[] = [];
-            querySnapshot.forEach(doc => {
-              projects.push({
-                id: doc.id,
-                ...doc.data(),
-              } as IProject);
-            });
-            dispatch(setProjects(projects));
-            await storeData('projects', projects);
-          }
-        });
+      if (user?.id) {
+        const subscriber = firestore()
+          .collection('projects')
+          .where('team', 'array-contains', user.id)
+          .orderBy('createdAt', 'asc')
+          .onSnapshot(async querySnapshot => {
+            if (querySnapshot) {
+              const projects: IProject[] = [];
+              querySnapshot.forEach(doc => {
+                projects.push({
+                  id: doc.id,
+                  ...doc.data(),
+                } as IProject);
+              });
+              dispatch(setProjects(projects));
+              await storeData('projects', projects);
+            }
+          });
 
-      return () => subscriber();
+        return () => subscriber();
+      }
     }, [dependency]);
   };
 

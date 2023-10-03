@@ -157,7 +157,7 @@ const CreateProject = () => {
       const promise: any[] = [];
       // Add
       teamIds.forEach(item => {
-        if (!oldTeam.includes(item)) {
+        if (item != user?.id && !oldTeam.includes(item)) {
           promise.push(
             createNotification({
               id: generatorId(),
@@ -179,7 +179,7 @@ const CreateProject = () => {
 
       // Delete
       oldTeam.forEach(item => {
-        if (!teamIds.includes(item)) {
+        if (item != user?.id && !teamIds.includes(item)) {
           promise.push(
             createNotification({
               id: generatorId(),

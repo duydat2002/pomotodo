@@ -21,6 +21,7 @@ import firestore from '@react-native-firebase/firestore';
 import {useColleague} from '@/hooks/useColleague';
 import {useNotification} from '@/hooks/useNotification';
 import {setNotifications} from '@/store/notifications.slice';
+import {useUser} from '@/hooks/useUser';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);
@@ -29,6 +30,7 @@ const RootNavigator: React.FC = () => {
   const {tasks} = useAppSelector(state => state.tasks);
   const dispatch = useAppDispatch();
 
+  const {getUser} = useUser();
   const {getProjectsFS, listenProjects} = useProject();
   const {getTasksByProjects, listenTasks} = useTask();
   const {getColleaguesFS, listenColleagues} = useColleague();
@@ -39,10 +41,39 @@ const RootNavigator: React.FC = () => {
   const [isOnline, setIsOnline] = useState(false);
 
   // Listen notifications
-  listenNotifications(auth().currentUser?.uid);
-  listenColleagues(auth().currentUser?.uid);
-  listenProjects(auth().currentUser?.uid);
-  listenTasks(auth().currentUser?.uid);
+  listenNotifications(user);
+  listenColleagues(user);
+  listenProjects(user);
+  listenTasks(projects);
+
+  // useEffect(() => {
+  //   console.log('chạy zo useEffect');
+  //   let subscriber = () => {};
+  //   if (projects) {
+  //     const projectsIds = projects.map(item => item.id);
+
+  //     subscriber = firestore()
+  //       .collection('tasks')
+  //       .where('projectId', 'in', projectsIds)
+  //       .orderBy('createdAt', 'asc')
+  //       .onSnapshot(async querySnapshot => {
+  //         console.log('querySnapshot');
+  //         if (querySnapshot) {
+  //           console.log('changed');
+  //           const tasks: ITask[] = [];
+  //           querySnapshot.forEach(doc => {
+  //             tasks.push({
+  //               id: doc.id,
+  //               ...doc.data(),
+  //             } as ITask);
+  //           });
+  //           dispatch(setTasks(tasks));
+  //           await storeData('tasks', tasks);
+  //         }
+  //       });
+  //   }
+  //   return () => subscriber();
+  // }, [projects]);
 
   // Theme
   const getThemeStorage = useCallback(async () => {
@@ -79,14 +110,15 @@ const RootNavigator: React.FC = () => {
   }, []);
 
   // User
-  // useEffect(() => {
-  //   const subscriber = auth().onAuthStateChanged(user => {
-  //     setHasUser(!!user);
-
-  //     // setLoadingSplash(false);
-  //   });
-  //   return subscriber;
-  // }, []);
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(async user => {
+      if (user) {
+        const userTemp = await getUser(user?.uid);
+        dispatch(setUser(userTemp));
+      }
+    });
+    return subscriber;
+  }, []);
 
   // Datas
   const initUser = useCallback(async () => {

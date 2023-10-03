@@ -16,10 +16,10 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from '@expo/vector-icons';
-import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
+import {useActivedColors, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {common} from '@/assets/styles';
-import {IColleague, IUser, ProjectsStackScreenProps} from '@/types';
+import {IUser, ProjectsStackScreenProps} from '@/types';
 import {APP_QR_ID, PRIORITY_COLORS} from '@/constants';
 import {IPriority, ITask} from '@/types';
 import {generatorId, secondsToMinutes} from '@/utils';
@@ -36,7 +36,6 @@ import QRModal from '@/components/Modal/QRModal';
 import FindColleague from '@/components/Task/FindColleague';
 import UButton from '@/components/UI/UButton';
 import {useTask} from '@/hooks/useTask';
-import {useColleague} from '@/hooks/useColleague';
 import {useNotification} from '@/hooks/useNotification';
 
 const CreateTask = () => {
@@ -53,22 +52,7 @@ const CreateTask = () => {
 
   const {createTask, updateTask} = useTask();
   const {createNotification} = useNotification();
-  const {addColleagues} = useColleague();
 
-  const [isReady, setIsReady] = useState(false);
-  const [QRValue, setQRValue] = useState('');
-  const [assignee, setAssignee] = useState('');
-  const [oldAssigneeIds, setOldAssigneeIds] = useState(['']);
-  const [assigneeIds, setAssigneeIds] = useState<string[] | null>(null);
-  const [assignees, setAssignees] = useState<IUser[]>([]);
-  const [findColleague, setFindColleague] = useState<IUser[] | null>(null);
-  const [projectColleagues, setProjectColleagues] = useState<IUser[]>([user!]);
-
-  const [activePriority, setActivePriority] = useState(false);
-  const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
-  const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
-  const [activeCalendarPicker, setActiveCalendarPicker] = useState(false);
-  const [activeQRCode, setActiveQRCode] = useState(false);
   const [task, setTask] = useState<ITask>({
     id: generatorId(),
     projectId: route.params.projectId,
@@ -83,10 +67,28 @@ const CreateTask = () => {
     assignees: null,
     createdAt: '',
   });
+  const [isReady, setIsReady] = useState(false);
+  const [QRValue, setQRValue] = useState('');
+  const [assignee, setAssignee] = useState('');
+  const [oldAssigneeIds, setOldAssigneeIds] = useState(['']);
+  const [assigneeIds, setAssigneeIds] = useState<string[] | null>(null);
+  const [assignees, setAssignees] = useState<IUser[]>([]);
+  const [findColleague, setFindColleague] = useState<IUser[] | null>(null);
+  const [projectColleagues, setProjectColleagues] = useState<IUser[]>([user!]);
+
+  const [activePriority, setActivePriority] = useState(false);
+  const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
+  const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
+  const [activeCalendarPicker, setActiveCalendarPicker] = useState(false);
+  const [activeQRCode, setActiveQRCode] = useState(false);
+
   const [errorName, setErrorName] = useState('');
   const [validTask, setValidTask] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isInAssignees, setIsInAssignees] = useState(false);
 
   useEffect(() => {
+    setIsOwner(project?.ownerId == user?.id);
     let projectColleaguesTemp: IUser[] = [];
 
     if (colleagues) {
@@ -104,16 +106,20 @@ const CreateTask = () => {
     }
 
     if (route.params.taskId) {
-      const tasksFilter = tasks?.filter(item => item.id == route.params.taskId);
+      const tasksFilter =
+        tasks?.filter(item => item.id == route.params.taskId) || null;
 
       if (!tasksFilter || tasksFilter.length == 0) {
-        setValidTask(false);
-      } else if (
-        tasksFilter[0].assignees != null &&
-        !tasksFilter[0].assignees.includes(user!.id)
-      ) {
+        // Not found
         setValidTask(false);
       } else {
+        // Founded
+        setIsInAssignees(
+          tasksFilter[0].assignees
+            ? tasksFilter[0].assignees.includes(user!.id)
+            : false,
+        );
+
         setTask(tasksFilter[0]);
         setOldAssigneeIds(tasksFilter[0].assignees || []);
 
@@ -177,10 +183,9 @@ const CreateTask = () => {
 
       // Update or create task
       if (route.params.taskId) {
-        console.log('cac', updatedTask);
-        updateTask(route.params.taskId, updatedTask);
+        await updateTask(route.params.taskId, updatedTask);
       } else {
-        createTask(updatedTask);
+        await createTask({...updatedTask, createdAt: new Date().toISOString()});
       }
 
       // Check add/ remove
@@ -236,6 +241,40 @@ const CreateTask = () => {
       await Promise.all(promise);
 
       navigation.navigate('Tasks', {projectId: route.params.projectId});
+    }
+  };
+
+  const leftTask = async () => {
+    if (route.params.taskId) {
+      const newAssignees =
+        assigneeIds?.filter(item => item != user?.id) || null;
+
+      const updatedTask = {
+        ...task,
+        assignees:
+          newAssignees && newAssignees.length == 0 ? null : newAssignees,
+      };
+
+      navigation.navigate('Tasks', {projectId: route.params.projectId});
+      await updateTask(route.params.taskId, updatedTask);
+      if (project?.ownerId != user?.id) {
+        await createNotification({
+          id: generatorId(),
+          senderId: user!.id,
+          senderUsername: user!.username,
+          senderAvatar: user!.avatar,
+          receiverId: project!.ownerId,
+          type: 'assign',
+          subType: 'left',
+          isRead: false,
+          content: 'left',
+          projectId: project?.id,
+          projectName: project?.name,
+          taskId: task.id,
+          taskName: task.name,
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
   };
 
@@ -357,15 +396,28 @@ const CreateTask = () => {
               />
             ),
             rightChild: (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setActiveQRCode(true)}>
-                <Ionicons
-                  name="qr-code-outline"
-                  size={24}
-                  color={activedColors.text}
-                />
-              </TouchableOpacity>
+              <View style={{flexDirection: 'row', gap: 15}}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setActiveQRCode(true)}>
+                  <Ionicons
+                    name="qr-code-outline"
+                    size={24}
+                    color={activedColors.text}
+                  />
+                </TouchableOpacity>
+                {isInAssignees && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => leftTask()}>
+                    <Feather
+                      name="log-out"
+                      size={24}
+                      color={activedColors.text}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             ),
           }}
         </Header>
@@ -595,16 +647,18 @@ const CreateTask = () => {
               </ScrollView>
             </View>
           </View>
-          <UButton
-            primary
-            style={{
-              width: 'auto',
-              marginHorizontal: 16,
-              marginBottom: 10,
-            }}
-            onPress={handleSaveTask}>
-            <Text style={[common.text, {color: '#fff'}]}>Save</Text>
-          </UButton>
+          {isOwner && (
+            <UButton
+              primary
+              style={{
+                width: 'auto',
+                marginHorizontal: 16,
+                marginBottom: 10,
+              }}
+              onPress={handleSaveTask}>
+              <Text style={[common.text, {color: '#fff'}]}>Save</Text>
+            </UButton>
+          )}
         </View>
         <View style={{position: 'absolute'}}>
           <QRModal

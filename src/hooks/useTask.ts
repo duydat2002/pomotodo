@@ -22,6 +22,7 @@ export const useTask = () => {
         const querySnapshot = await firestore()
           .collection('tasks')
           .where('projectId', 'in', projectsIds || [''])
+          .orderBy('createdAt', 'asc')
           .get();
 
         if (querySnapshot.empty) {
@@ -50,6 +51,7 @@ export const useTask = () => {
       const querySnapshot = await firestore()
         .collection('tasks')
         .where('projectId', '==', projectId)
+        .orderBy('createdAt', 'asc')
         .get();
 
       if (querySnapshot.empty) {
@@ -106,27 +108,31 @@ export const useTask = () => {
 
   const listenTasks = (dependency: any) => {
     useEffect(() => {
-      const projectsIds = projects?.map(item => item.id);
+      if (projects) {
+        let projectsIds = projects?.map(item => item.id) || null;
+        projectsIds =
+          projectsIds && projectsIds.length > 0 ? projectsIds : [''];
 
-      const subscriber = firestore()
-        .collection('tasks')
-        .where('projectId', 'in', projectsIds || [''])
-        .orderBy('createdAt', 'asc')
-        .onSnapshot(async querySnapshot => {
-          if (querySnapshot) {
-            const tasks: ITask[] = [];
-            querySnapshot.forEach(doc => {
-              tasks.push({
-                id: doc.id,
-                ...doc.data(),
-              } as ITask);
-            });
-            dispatch(setTasks(tasks));
-            await storeData('tasks', tasks);
-          }
-        });
+        const subscriber = firestore()
+          .collection('tasks')
+          .where('projectId', 'in', projectsIds)
+          .orderBy('createdAt', 'asc')
+          .onSnapshot(async querySnapshot => {
+            if (querySnapshot) {
+              const tasks: ITask[] = [];
+              querySnapshot.forEach(doc => {
+                tasks.push({
+                  id: doc.id,
+                  ...doc.data(),
+                } as ITask);
+              });
+              dispatch(setTasks(tasks));
+              await storeData('tasks', tasks);
+            }
+          });
 
-      return () => subscriber();
+        return () => subscriber();
+      }
     }, [dependency]);
   };
 
