@@ -8,7 +8,6 @@ import {secondsFormatToHM} from '@/utils';
 import UButton from '../UI/UButton';
 
 interface IProps {
-  visible: boolean;
   initPomodoro: number;
   initPomodoroLength: number;
   onClickOutside?: () => void;
@@ -17,7 +16,6 @@ interface IProps {
 }
 
 const PomodoroPicker: React.FC<IProps> = ({
-  visible,
   initPomodoro,
   initPomodoroLength,
   onClickOutside,
@@ -41,7 +39,7 @@ const PomodoroPicker: React.FC<IProps> = ({
   }, [initPomodoro, initPomodoroLength]);
 
   return (
-    <UModal visible={visible} onClickOutside={onClickOutside}>
+    <UModal visible onClickOutside={onClickOutside}>
       <View
         style={[
           common.shadow,

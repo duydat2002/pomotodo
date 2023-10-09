@@ -9,18 +9,12 @@ import {captureRef} from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
 
 interface IProps {
-  visible: boolean;
   value: string;
   onClickOutside?: () => void;
   onClose: () => void;
 }
 
-const QRModal: React.FC<IProps> = ({
-  visible,
-  value,
-  onClickOutside,
-  onClose,
-}) => {
+const QRModal: React.FC<IProps> = ({value, onClickOutside, onClose}) => {
   const activedColors = useActivedColors();
 
   const viewToSnapshot = useRef<View>(null);
@@ -41,7 +35,7 @@ const QRModal: React.FC<IProps> = ({
   };
 
   return (
-    <UModal visible={visible} onClickOutside={onClickOutside}>
+    <UModal visible onClickOutside={onClickOutside}>
       <View
         style={[
           common.shadow,

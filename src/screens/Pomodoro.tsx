@@ -78,7 +78,7 @@ const Pomodoro: React.FC = () => {
         };
 
         setTask(newTask);
-        updateTask(newTask);
+        updateTask(newTask.id, newTask);
 
         if (isDone) {
           ToastAndroid.show('Task is done!', ToastAndroid.SHORT);

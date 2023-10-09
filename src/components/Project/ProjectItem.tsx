@@ -34,12 +34,15 @@ const ProjectItem: React.FC<IProps> = ({
   const {colleagues} = useAppSelector(state => state.colleagues);
 
   const [teamText, setTeamText] = useState('');
+  const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
+    setHasPermission(false);
     let ownerUsername = '';
 
     if (project.ownerId == user?.id) {
       ownerUsername = 'you';
+      setHasPermission(true);
     } else if (colleagues) {
       const owner = colleagues.filter(
         item => item.colleagueId == project.ownerId,
@@ -61,7 +64,7 @@ const ProjectItem: React.FC<IProps> = ({
       renderUnderlayLeft={() => (
         <UnderlayLeft onEdit={onEdit} onDelete={onDelete} />
       )}
-      snapPointsLeft={[100]}>
+      snapPointsLeft={[hasPermission ? 100 : 0]}>
       <TouchableHighlight
         underlayColor={activedColors.backgroundSec}
         activeOpacity={0.7}

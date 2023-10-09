@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
@@ -55,6 +56,7 @@ const CreateProject = () => {
   const [findTeam, setFindTeam] = useState<IUser[] | null>(null);
   const [error, setError] = useState('');
   const [validProject, setValidProject] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (route.params?.projectId) {
@@ -90,6 +92,7 @@ const CreateProject = () => {
     } else {
       setTeam([user!]);
     }
+    setIsLoading(false);
   }, [isFocused]);
 
   useEffect(() => {
@@ -276,119 +279,136 @@ const CreateProject = () => {
           ),
         }}
       </Header>
-      <View style={[common.container]}>
-        <UInput
-          value={project.name}
-          onChangeText={setName}
-          placeholder="Projet name"
-          style={{marginTop: 20}}>
-          {{
-            leftChild: (
-              <View
-                style={[
-                  styles.colorWrapperInput,
-                  {backgroundColor: project.color},
-                ]}
-              />
-            ),
-          }}
-        </UInput>
-        <Text
-          style={[
-            common.small,
-            styles.errorText,
-            {
-              color: activedColors.error,
-            },
-          ]}>
-          {error}
-        </Text>
-        <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 20}}>
-          {COLORS_LIST.map(item => (
-            <View key={item} style={styles.itemWrapper}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setColor(item)}
-                style={[styles.colorItem, {backgroundColor: item}]}>
-                {project.color == item && (
-                  <Feather name="check" size={24} color="#fff" />
-                )}
-              </TouchableOpacity>
-            </View>
-          ))}
+      {isLoading ? (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <ActivityIndicator size={30} color={activedColors.textSec} />
         </View>
-        <View
-          style={[styles.assigneeWrap, {backgroundColor: activedColors.input}]}>
-          <View style={styles.assigneeHeader}>
-            <MaterialIcons
-              name="groups"
-              size={20}
-              color={activedColors.textSec}
-            />
-            <Text
-              style={[common.text, styles.title, {color: activedColors.text}]}>
-              Team
-            </Text>
-            <Text style={[common.text, {color: activedColors.textSec}]}>
-              {team.length}
-            </Text>
+      ) : (
+        <View style={[common.container]}>
+          <UInput
+            value={project.name}
+            onChangeText={setName}
+            placeholder="Projet name"
+            style={{marginTop: 20}}>
+            {{
+              leftChild: (
+                <View
+                  style={[
+                    styles.colorWrapperInput,
+                    {backgroundColor: project.color},
+                  ]}
+                />
+              ),
+            }}
+          </UInput>
+          <Text
+            style={[
+              common.small,
+              styles.errorText,
+              {
+                color: activedColors.error,
+              },
+            ]}>
+            {error}
+          </Text>
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 20}}>
+            {COLORS_LIST.map(item => (
+              <View key={item} style={styles.itemWrapper}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setColor(item)}
+                  style={[styles.colorItem, {backgroundColor: item}]}>
+                  {project.color == item && (
+                    <Feather name="check" size={24} color="#fff" />
+                  )}
+                </TouchableOpacity>
+              </View>
+            ))}
           </View>
           <View
+            style={[
+              styles.assigneeWrap,
+              {backgroundColor: activedColors.input},
+            ]}>
+            <View style={styles.assigneeHeader}>
+              <MaterialIcons
+                name="groups"
+                size={20}
+                color={activedColors.textSec}
+              />
+              <Text
+                style={[
+                  common.text,
+                  styles.title,
+                  {color: activedColors.text},
+                ]}>
+                Team
+              </Text>
+              <Text style={[common.text, {color: activedColors.textSec}]}>
+                {team.length}
+              </Text>
+            </View>
+            <View
+              style={{
+                width: '100%',
+                height: 2,
+                marginTop: 4,
+                backgroundColor: activedColors.background,
+              }}
+            />
+            <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
+              <AntDesign
+                name="adduser"
+                size={20}
+                color={activedColors.textSec}
+              />
+              <View style={{flex: 1, width: 'auto', marginLeft: 8}}>
+                <UInput
+                  value={teamInput}
+                  onChangeText={setTeamInput}
+                  placeholder="Enter username..."
+                />
+                {findTeam && (
+                  <FindColleague
+                    findColleague={findTeam}
+                    onClickColleague={onClickColleague}
+                  />
+                )}
+              </View>
+            </View>
+            <ScrollView
+              style={{
+                height: 150,
+                borderRadius: 8,
+                backgroundColor: activedColors.background,
+              }}>
+              <View
+                onStartShouldSetResponder={() => true}
+                style={styles.assigneeList}>
+                {team.map(item => (
+                  <AssigneeUserItem
+                    key={item.id}
+                    user={item}
+                    ownerId={user!.id}
+                    onDelete={onDeleteTeam}
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+          <UButton
+            primary
             style={{
               width: '100%',
-              height: 2,
-              marginTop: 4,
-              backgroundColor: activedColors.background,
+              paddingHorizontal: 16,
+              marginBottom: 10,
+              marginTop: 'auto',
             }}
-          />
-          <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
-            <AntDesign name="adduser" size={20} color={activedColors.textSec} />
-            <View style={{flex: 1, width: 'auto', marginLeft: 8}}>
-              <UInput
-                value={teamInput}
-                onChangeText={setTeamInput}
-                placeholder="Enter username..."
-              />
-              {findTeam && (
-                <FindColleague
-                  findColleague={findTeam}
-                  onClickColleague={onClickColleague}
-                />
-              )}
-            </View>
-          </View>
-          <ScrollView
-            style={{
-              height: 150,
-              borderRadius: 8,
-              backgroundColor: activedColors.background,
-            }}>
-            <View
-              onStartShouldSetResponder={() => true}
-              style={styles.assigneeList}>
-              {team.map(item => (
-                <AssigneeUserItem
-                  key={item.id}
-                  user={item}
-                  ownerId={user!.id}
-                  onDelete={onDeleteTeam}
-                />
-              ))}
-            </View>
-          </ScrollView>
+            onPress={hanldeSaveProject}>
+            <Text style={[common.text, {color: '#fff'}]}>Save</Text>
+          </UButton>
         </View>
-        <UButton
-          primary
-          style={{
-            width: '100%',
-            paddingHorizontal: 16,
-            marginBottom: 10,
-            marginTop: 'auto',
-          }}
-          onPress={hanldeSaveProject}>
-          <Text style={[common.text, {color: '#fff'}]}>Save</Text>
-        </UButton>
-      </View>
+      )}
     </SafeView>
   );
 };

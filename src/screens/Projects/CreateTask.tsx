@@ -41,7 +41,6 @@ import {useNotification} from '@/hooks/useNotification';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
-  const isFocused = useIsFocused();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'CreateTask'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'CreateTask'>['route']>();
@@ -87,27 +86,33 @@ const CreateTask = () => {
   const [errorName, setErrorName] = useState('');
   const [validTask, setValidTask] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
-  const [isInAssignees, setIsInAssignees] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false); //Permission to update task
 
   useEffect(() => {
     setIsOwner(project?.ownerId == user?.id);
+    let taskTemp: ITask | undefined;
 
     if (route.params.taskId) {
-      const taskTemp = tasks?.find(item => item.id == route.params.taskId);
+      taskTemp = tasks?.find(item => item.id == route.params.taskId);
 
       if (!taskTemp) {
         // Not found
         setValidTask(false);
       } else {
         // Founded
+        if (
+          project?.ownerId == user?.id ||
+          taskTemp.assignees == null ||
+          taskTemp.assignees.includes(user!.id)
+        ) {
+          setHasPermission(true);
+        }
         setTask(taskTemp);
       }
     }
     setIsLoading(false);
-  }, [route.params.taskId]);
 
-  useEffect(() => {
-    if (colleagues && route.params.taskId) {
+    if (colleagues && taskTemp) {
       const projectColleaguesTemp: IUser[] = colleagues
         .filter(item => project!.team.includes(item.colleagueId))
         .map(item => ({
@@ -120,15 +125,15 @@ const CreateTask = () => {
 
       setProjectColleagues(projectColleaguesTemp);
 
-      setOldAssigneeIds(task.assignees || []);
+      setOldAssigneeIds(taskTemp.assignees || []);
 
       const assigneesTemp: IUser[] = projectColleaguesTemp.filter(
-        item => task.assignees?.includes(item.id),
+        item => taskTemp?.assignees?.includes(item.id),
       );
 
       setAssignees(assigneesTemp);
     }
-  }, [task]);
+  }, [route.params.taskId]);
 
   useEffect(() => {
     if (isReady) {
@@ -350,6 +355,10 @@ const CreateTask = () => {
     setFindColleague(null);
   };
 
+  const clickPlayTask = () => {
+    navigation.navigate('Pomodoro', {task: task});
+  };
+
   if (!validTask) {
     return (
       <SafeView>
@@ -382,7 +391,7 @@ const CreateTask = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
       <SafeView clickOutSide={() => setActivePriority(false)}>
-        <Header title={route.params.taskId ? 'Edit Task' : 'Create Task'}>
+        <Header title={route.params.taskId ? task?.name : 'Create Task'}>
           {{
             leftChild: (
               <Feather
@@ -399,17 +408,26 @@ const CreateTask = () => {
                   onPress={() => setActiveQRCode(true)}>
                   <Ionicons
                     name="qr-code-outline"
-                    size={24}
+                    size={22}
                     color={activedColors.text}
                   />
                 </TouchableOpacity>
-                {isInAssignees && (
+                {hasPermission && (
+                  <TouchableOpacity activeOpacity={0.7} onPress={clickPlayTask}>
+                    <AntDesign
+                      name="playcircleo"
+                      size={22}
+                      color={activedColors.text}
+                    />
+                  </TouchableOpacity>
+                )}
+                {hasPermission && !isOwner && task?.assignees && (
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => leftTask()}>
                     <Feather
                       name="log-out"
-                      size={24}
+                      size={22}
                       color={activedColors.text}
                     />
                   </TouchableOpacity>
@@ -670,35 +688,51 @@ const CreateTask = () => {
                   <Text style={[common.text, {color: '#fff'}]}>Save</Text>
                 </UButton>
               )}
+              {!isOwner && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    left: 0,
+                    bottom: 0,
+                    zIndex: 10,
+                  }}
+                />
+              )}
             </View>
             <View style={{position: 'absolute'}}>
-              <QRModal
-                visible={activeQRCode}
-                value={QRValue}
-                onClickOutside={() => setActiveQRCode(false)}
-                onClose={() => setActiveQRCode(false)}
-              />
-              <PomodoroPicker
-                visible={activePomodoroPicker}
-                initPomodoro={task.totalPomodoro}
-                initPomodoroLength={task.longBreak / 60}
-                onClickOutside={() => setActivePomodoroPicker(false)}
-                onClose={() => setActivePomodoroPicker(false)}
-                onSave={savePomodoro}
-              />
-              <BreaktimePicker
-                visible={activeBreaktimePicker}
-                initShortBreak={task.shortBreak / 60}
-                onClickOutside={() => setActiveBreaktimePicker(false)}
-                onClose={() => setActiveBreaktimePicker(false)}
-                onSave={saveBreaktime}
-              />
-              <MCalendarPicker
-                visible={activeCalendarPicker}
-                onClickOutside={() => setActiveCalendarPicker(false)}
-                onClose={() => setActiveCalendarPicker(false)}
-                onSave={saveDeadline}
-              />
+              {activeQRCode && (
+                <QRModal
+                  value={QRValue}
+                  onClickOutside={() => setActiveQRCode(false)}
+                  onClose={() => setActiveQRCode(false)}
+                />
+              )}
+              {activePomodoroPicker && (
+                <PomodoroPicker
+                  initPomodoro={task.totalPomodoro}
+                  initPomodoroLength={task.longBreak / 60}
+                  onClickOutside={() => setActivePomodoroPicker(false)}
+                  onClose={() => setActivePomodoroPicker(false)}
+                  onSave={savePomodoro}
+                />
+              )}
+              {activeBreaktimePicker && (
+                <BreaktimePicker
+                  initShortBreak={task.shortBreak / 60}
+                  onClickOutside={() => setActiveBreaktimePicker(false)}
+                  onClose={() => setActiveBreaktimePicker(false)}
+                  onSave={saveBreaktime}
+                />
+              )}
+              {activeCalendarPicker && (
+                <MCalendarPicker
+                  onClickOutside={() => setActiveCalendarPicker(false)}
+                  onClose={() => setActiveCalendarPicker(false)}
+                  onSave={saveDeadline}
+                />
+              )}
             </View>
           </>
         )}

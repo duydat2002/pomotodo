@@ -7,7 +7,6 @@ import {Picker} from 'react-native-wheel-pick';
 import UButton from '../UI/UButton';
 
 interface IProps {
-  visible: boolean;
   initShortBreak: number;
   onClickOutside?: () => void;
   onClose: () => void;
@@ -15,7 +14,6 @@ interface IProps {
 }
 
 const BreaktimePicker: React.FC<IProps> = ({
-  visible,
   initShortBreak,
   onClickOutside,
   onClose,
@@ -35,7 +33,7 @@ const BreaktimePicker: React.FC<IProps> = ({
   }, [initShortBreak]);
 
   return (
-    <UModal visible={visible} onClickOutside={onClickOutside}>
+    <UModal visible onClickOutside={onClickOutside}>
       <View
         style={[
           common.shadow,

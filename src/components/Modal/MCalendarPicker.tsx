@@ -11,14 +11,12 @@ import CalendarPicker, {
 import moment, {Moment} from 'moment';
 
 interface IProps {
-  visible: boolean;
   onClickOutside?: () => void;
   onClose: () => void;
   onSave: (date: Date | null) => void;
 }
 
 const MCalendarPicker: React.FC<IProps> = ({
-  visible,
   onClickOutside,
   onClose,
   onSave,
@@ -38,7 +36,7 @@ const MCalendarPicker: React.FC<IProps> = ({
   }, [theme]);
 
   return (
-    <UModal visible={visible} onClickOutside={onClickOutside}>
+    <UModal visible onClickOutside={onClickOutside}>
       <View
         style={[
           common.shadow,

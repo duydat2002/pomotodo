@@ -63,7 +63,12 @@ const Tasks = () => {
         }}
       </Header>
       {isLoading ? (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
           <ActivityIndicator size={30} color={activedColors.textSec} />
         </View>
       ) : (
