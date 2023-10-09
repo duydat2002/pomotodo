@@ -2,7 +2,7 @@ import {useEffect} from 'react';
 import {IProject, ITask} from '@/types';
 import firestore from '@react-native-firebase/firestore';
 import {useAppSelector, useAppDispatch} from './useStore';
-import {setProjects} from '@/store/projects.slice';
+import {setProject, setProjects} from '@/store/projects.slice';
 import {storeData} from './useAsyncStorage';
 import {setTasks} from '@/store/tasks.slice';
 
@@ -10,7 +10,7 @@ export const useProject = () => {
   const dispatch = useAppDispatch();
 
   const {user} = useAppSelector(state => state.user);
-  const {projects} = useAppSelector(state => state.projects);
+  const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
   const createProject = async (project: IProject) => {
@@ -166,6 +166,7 @@ export const useProject = () => {
       });
 
       dispatch(setProjects(updatedProjects));
+      dispatch(setProject({...project, ...datas} as IProject));
       await storeData('projects', updatedProjects);
     }
   };

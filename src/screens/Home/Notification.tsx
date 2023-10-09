@@ -89,6 +89,7 @@ const Notification: React.FC = () => {
         notification.taskId &&
         ['add', 'join', 'left'].includes(notification.subType)
       ) {
+        console.log('CreateTask');
         navigation.navigate('ProjectsStack', {
           screen: 'CreateTask',
           params: {

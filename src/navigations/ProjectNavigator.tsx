@@ -27,10 +27,10 @@ const ProjectNavigator = () => {
       initialRouteName="Projects"
       screenOptions={{
         headerShown: false,
-        transitionSpec: {
-          open: config,
-          close: config,
-        },
+        // transitionSpec: {
+        //   open: config,
+        //   close: config,
+        // },
       }}>
       <Stack.Screen name="Projects" component={Projects} options={{}} />
       <Stack.Screen name="Tasks" component={Tasks} />

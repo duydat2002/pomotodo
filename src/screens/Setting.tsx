@@ -1,5 +1,11 @@
 import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import {FontAwesome} from '@expo/vector-icons';
 import auth from '@react-native-firebase/auth';
 import {setUser} from '@/store/user.slice';
@@ -57,6 +63,7 @@ const Setting: React.FC = () => {
       <Pressable onPress={logall} style={{marginTop: 40}}>
         <Text style={{color: activedColors.text}}>Log all</Text>
       </Pressable>
+      <ActivityIndicator />
     </SafeView>
   );
 };

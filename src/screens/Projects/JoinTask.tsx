@@ -109,6 +109,7 @@ const JoinTask = () => {
           colleagueId: data.owner.id,
           colleagueUsername: data.owner.username || '',
           colleagueAvatar: data.owner.avatar,
+          isAccept: false,
         },
       ]);
     }

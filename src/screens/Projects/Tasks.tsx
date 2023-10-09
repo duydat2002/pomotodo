@@ -1,5 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ITask} from '@/types';
 import SafeView from '@/components/Layout/SafeView';
@@ -23,6 +29,7 @@ const Tasks = () => {
 
   const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsOwner(project?.ownerId == user?.id);
@@ -33,6 +40,7 @@ const Tasks = () => {
       );
       setProjectTasks(tasksTemp || null);
     }
+    setIsLoading(false);
   }, [tasks, project]);
 
   const clickCreateTask = () => {
@@ -54,49 +62,62 @@ const Tasks = () => {
           ),
         }}
       </Header>
-      <View style={{flex: 1, width: '100%', marginTop: 20}}>
-        <View style={[styles.info, {backgroundColor: activedColors.input}]}>
-          <ProjectInfoCard
-            title="Time Remaining"
-            time={project ? project?.totalTime - project?.elapsedTime : 0}
-          />
-          <ProjectInfoCard
-            title="Tasks Remaining"
-            number={project ? project?.totalTask - project?.taskComplete : 0}
-          />
-          <ProjectInfoCard title="Elapsed Time" time={project?.elapsedTime} />
-          <ProjectInfoCard
-            title="Tasks Completed"
-            number={project?.taskComplete}
-          />
+      {isLoading ? (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <ActivityIndicator size={30} color={activedColors.textSec} />
         </View>
-        <FlatList
-          style={{marginTop: 20}}
-          data={projectTasks}
-          keyExtractor={(item, index) => item.name + index}
-          renderItem={({item}) => (
-            <TaskItem
-              task={item}
-              onPress={() => {
-                navigation.navigate('CreateTask', {
-                  projectId: item.projectId,
-                  taskId: item.id,
-                });
-              }}
+      ) : (
+        <>
+          <View style={{flex: 1, width: '100%', marginTop: 20}}>
+            <View style={[styles.info, {backgroundColor: activedColors.input}]}>
+              <ProjectInfoCard
+                title="Time Remaining"
+                time={project ? project?.totalTime - project?.elapsedTime : 0}
+              />
+              <ProjectInfoCard
+                title="Tasks Remaining"
+                number={
+                  project ? project?.totalTask - project?.taskComplete : 0
+                }
+              />
+              <ProjectInfoCard
+                title="Elapsed Time"
+                time={project?.elapsedTime}
+              />
+              <ProjectInfoCard
+                title="Tasks Completed"
+                number={project?.taskComplete}
+              />
+            </View>
+            <FlatList
+              style={{marginTop: 20}}
+              data={projectTasks}
+              keyExtractor={(item, index) => item.name + index}
+              renderItem={({item}) => (
+                <TaskItem
+                  task={item}
+                  onPress={() => {
+                    navigation.navigate('CreateTask', {
+                      projectId: item.projectId,
+                      taskId: item.id,
+                    });
+                  }}
+                />
+              )}
             />
+          </View>
+          {isOwner && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={clickCreateTask}
+              style={[
+                styles.createTaskButton,
+                {backgroundColor: activedColors.buttonSec},
+              ]}>
+              <MaterialCommunityIcons name="plus" size={30} color="#fff" />
+            </TouchableOpacity>
           )}
-        />
-      </View>
-      {isOwner && (
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={clickCreateTask}
-          style={[
-            styles.createTaskButton,
-            {backgroundColor: activedColors.buttonSec},
-          ]}>
-          <MaterialCommunityIcons name="plus" size={30} color="#fff" />
-        </TouchableOpacity>
+        </>
       )}
     </SafeView>
   );
