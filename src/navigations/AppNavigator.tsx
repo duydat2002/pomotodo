@@ -10,7 +10,7 @@ import {
 import {useActivedColors} from '@/hooks';
 import {HIDDEN_BOTTOM_TAB_ROUTER} from '@/constants';
 import Pomodoro from '@/screens/Pomodoro';
-import Statistic from '@/screens/Statistic';
+import Statistic from '@/screens/Statistic/Statistic';
 import Setting from '@/screens/Setting';
 import ProjectNavigator from './ProjectNavigator';
 import {AppStackParamList} from '@/types';

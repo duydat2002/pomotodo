@@ -12,15 +12,37 @@ interface IProps {
   style?: StyleProp<ViewStyle>;
   children: ReactNode;
   clickOutSide?: () => void;
+  hasDismissKeyboard?: boolean;
 }
 
-const SafeView: React.FC<IProps> = ({children, clickOutSide, style}) => {
+const SafeView: React.FC<IProps> = ({
+  children,
+  clickOutSide,
+  style,
+  hasDismissKeyboard = true,
+}) => {
   const activedColors = useActivedColors();
 
   const press = () => {
     Keyboard.dismiss();
     if (clickOutSide) clickOutSide();
   };
+
+  if (!hasDismissKeyboard) {
+    return (
+      <SafeAreaView
+        style={[
+          {
+            flex: 1,
+            alignItems: 'center',
+            backgroundColor: activedColors.background,
+          },
+          style,
+        ]}>
+        {children}
+      </SafeAreaView>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={press}>
