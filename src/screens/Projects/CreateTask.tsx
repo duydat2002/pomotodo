@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
@@ -38,6 +39,7 @@ import FindColleague from '@/components/Task/FindColleague';
 import UButton from '@/components/UI/UButton';
 import {useTask} from '@/hooks/useTask';
 import {useNotification} from '@/hooks/useNotification';
+import FindColleagueDropdown from '@/components/Task/FindColleagueDropdown';
 
 const CreateTask = () => {
   const activedColors = useActivedColors();
@@ -64,15 +66,14 @@ const CreateTask = () => {
     longBreak: 25 * 60,
     shortBreak: 5 * 60,
     deadline: null,
-    assignees: null,
+    assignee: null,
     createdAt: '',
   });
   const [isReady, setIsReady] = useState(false);
   const [QRValue, setQRValue] = useState('');
-  const [assignee, setAssignee] = useState('');
-  const [oldAssigneeIds, setOldAssigneeIds] = useState(['']);
-  const [assigneeIds, setAssigneeIds] = useState<string[] | null>(null);
-  const [assignees, setAssignees] = useState<IUser[]>([]);
+  const [oldAssigneeId, setOldAssigneeId] = useState<string | null>(null);
+  const [assigneeUser, setAssigneeUser] = useState<IUser | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [findColleague, setFindColleague] = useState<IUser[] | null>(null);
   const [projectColleagues, setProjectColleagues] = useState<IUser[]>([user!]);
@@ -81,6 +82,7 @@ const CreateTask = () => {
   const [activePomodoroPicker, setActivePomodoroPicker] = useState(false);
   const [activeBreaktimePicker, setActiveBreaktimePicker] = useState(false);
   const [activeCalendarPicker, setActiveCalendarPicker] = useState(false);
+  const [activeFindColleague, setActiveFindColleague] = useState(false);
   const [activeQRCode, setActiveQRCode] = useState(false);
 
   const [errorName, setErrorName] = useState('');
@@ -102,8 +104,8 @@ const CreateTask = () => {
         // Founded
         if (
           project?.ownerId == user?.id ||
-          taskTemp.assignees == null ||
-          taskTemp.assignees.includes(user!.id)
+          taskTemp.assignee == null ||
+          taskTemp.assignee == user!.id
         ) {
           setHasPermission(true);
         }
@@ -112,7 +114,7 @@ const CreateTask = () => {
     }
     setIsLoading(false);
 
-    if (colleagues && taskTemp) {
+    if (colleagues) {
       const projectColleaguesTemp: IUser[] = colleagues
         .filter(item => project!.team.includes(item.colleagueId))
         .map(item => ({
@@ -125,13 +127,13 @@ const CreateTask = () => {
 
       setProjectColleagues(projectColleaguesTemp);
 
-      setOldAssigneeIds(taskTemp.assignees || []);
+      setOldAssigneeId(taskTemp?.assignee || null);
 
-      const assigneesTemp: IUser[] = projectColleaguesTemp.filter(
-        item => taskTemp?.assignees?.includes(item.id),
-      );
+      const assigneeTemp: IUser | null =
+        projectColleaguesTemp.find(item => taskTemp?.assignee == item.id) ||
+        null;
 
-      setAssignees(assigneesTemp);
+      setAssigneeUser(assigneeTemp);
     }
   }, [route.params.taskId]);
 
@@ -148,29 +150,6 @@ const CreateTask = () => {
     }
   }, [isReady]);
 
-  useEffect(() => {
-    const colleaguesTemp: IUser[] | undefined = projectColleagues?.filter(
-      item => {
-        if (assignee.trim() != '') {
-          return item.username
-            .toLowerCase()
-            .includes(assignee.trim().toLowerCase());
-        } else {
-          return false;
-        }
-      },
-    );
-
-    setFindColleague(
-      colleaguesTemp && colleaguesTemp.length > 0 ? colleaguesTemp : null,
-    );
-  }, [assignee]);
-
-  useEffect(() => {
-    const assigneeIdsTemp = assignees.map(item => item.id);
-    setAssigneeIds(assigneeIdsTemp.length == 0 ? null : assigneeIdsTemp);
-  }, [assignees]);
-
   const handleSaveTask = async () => {
     if (task.name.trim() == '') {
       setErrorName('Please enter task name.');
@@ -179,7 +158,7 @@ const CreateTask = () => {
 
       const updatedTask = {
         ...task,
-        assignees: assigneeIds,
+        assignee: assigneeUser?.id || null,
       };
       setTask(updatedTask);
 
@@ -193,68 +172,61 @@ const CreateTask = () => {
       navigation.navigate('Tasks', {projectId: route.params.projectId});
 
       // Check add/ remove
-      const promise: any[] = [];
       // Add
-      assigneeIds?.forEach(item => {
-        if (item != user?.id && !oldAssigneeIds.includes(item)) {
-          promise.push(
-            createNotification({
-              id: generatorId(),
-              senderId: user!.id,
-              senderUsername: user!.username,
-              senderAvatar: user!.avatar,
-              receiverId: item,
-              type: 'assign',
-              subType: 'add',
-              isRead: false,
-              content: 'added you to',
-              projectId: project?.id,
-              projectName: project?.name,
-              taskId: task.id,
-              taskName: task.name,
-              createdAt: new Date().toISOString(),
-            }),
-          );
-        }
-      });
+      if (
+        assigneeUser &&
+        assigneeUser.id != user?.id &&
+        assigneeUser.id != oldAssigneeId
+      ) {
+        await createNotification({
+          id: generatorId(),
+          senderId: user!.id,
+          senderUsername: user!.username,
+          senderAvatar: user!.avatar,
+          receiverId: assigneeUser.id,
+          type: 'assign',
+          subType: 'add',
+          isRead: false,
+          content: 'added you to',
+          projectId: project?.id,
+          projectName: project?.name,
+          taskId: task.id,
+          taskName: task.name,
+          createdAt: new Date().toISOString(),
+        });
+      }
 
       // Delete
-      oldAssigneeIds.forEach(item => {
-        if (item != user?.id && !assigneeIds?.includes(item)) {
-          promise.push(
-            createNotification({
-              id: generatorId(),
-              senderId: user!.id,
-              senderUsername: user!.username,
-              senderAvatar: user!.avatar,
-              receiverId: item,
-              type: 'assign',
-              subType: 'remove',
-              isRead: false,
-              content: 'removed you from',
-              projectId: project?.id,
-              projectName: project?.name,
-              taskId: task.id,
-              taskName: task.name,
-              createdAt: new Date().toISOString(),
-            }),
-          );
-        }
-      });
-
-      await Promise.all(promise);
+      if (
+        oldAssigneeId &&
+        oldAssigneeId != user?.id &&
+        oldAssigneeId != assigneeUser?.id
+      ) {
+        await createNotification({
+          id: generatorId(),
+          senderId: user!.id,
+          senderUsername: user!.username,
+          senderAvatar: user!.avatar,
+          receiverId: oldAssigneeId,
+          type: 'assign',
+          subType: 'remove',
+          isRead: false,
+          content: 'removed you from',
+          projectId: project?.id,
+          projectName: project?.name,
+          taskId: task.id,
+          taskName: task.name,
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
   };
 
   const leftTask = async () => {
     if (route.params.taskId) {
-      const newAssignees =
-        assigneeIds?.filter(item => item != user?.id) || null;
-
       const updatedTask = {
         ...task,
-        assignees:
-          newAssignees && newAssignees.length == 0 ? null : newAssignees,
+        assignee: null,
       };
 
       navigation.navigate('Tasks', {projectId: route.params.projectId});
@@ -338,21 +310,12 @@ const CreateTask = () => {
     setActiveCalendarPicker(false);
   };
 
-  const onDeleteAssignee = (id: string) => {
-    const assigneesTemp = assignees.filter(assignee => assignee.id != id);
+  const onClickColleague = (colleague: IUser | null) => {
+    setAssigneeUser(colleague);
 
-    setAssignees(assigneesTemp);
-  };
-
-  const onClickColleague = (colleague: IUser) => {
-    const check = assignees.findIndex(item => item.id == colleague.id);
-
-    if (check == -1) {
-      setAssignees([...assignees, colleague]);
-    }
-
-    setAssignee('');
     setFindColleague(null);
+
+    setActiveFindColleague(false);
   };
 
   const clickPlayTask = () => {
@@ -390,7 +353,10 @@ const CreateTask = () => {
 
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior="height" enabled={false}>
-      <SafeView clickOutSide={() => setActivePriority(false)}>
+      <SafeView
+        clickOutSide={() => {
+          setActivePriority(false), setActiveFindColleague(false);
+        }}>
         <Header title={route.params.taskId ? task?.name : 'Create Task'}>
           {{
             leftChild: (
@@ -421,7 +387,7 @@ const CreateTask = () => {
                     />
                   </TouchableOpacity>
                 )}
-                {hasPermission && !isOwner && task?.assignees && (
+                {hasPermission && !isOwner && task?.assignee && (
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => leftTask()}>
@@ -621,59 +587,16 @@ const CreateTask = () => {
                         styles.title,
                         {color: activedColors.text},
                       ]}>
-                      Assignees
+                      Assignee
                     </Text>
-                    <Text style={[common.text, {color: activedColors.textSec}]}>
-                      {assignees.length}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      width: '100%',
-                      height: 2,
-                      marginTop: 4,
-                      backgroundColor: activedColors.background,
-                    }}
-                  />
-                  <View style={[{flexDirection: 'row', alignItems: 'center'}]}>
-                    <AntDesign
-                      name="adduser"
-                      size={20}
-                      color={activedColors.textSec}
+                    <FindColleagueDropdown
+                      activeFindColleague={activeFindColleague}
+                      setActiveFindColleague={setActiveFindColleague}
+                      assigneeUser={assigneeUser}
+                      projectColleagues={projectColleagues}
+                      onClickColleague={onClickColleague}
                     />
-                    <View style={{flex: 1, width: 'auto', marginLeft: 8}}>
-                      <UInput
-                        value={assignee}
-                        onChangeText={setAssignee}
-                        placeholder="Add user..."
-                      />
-                      {findColleague && (
-                        <FindColleague
-                          findColleague={findColleague}
-                          onClickColleague={onClickColleague}
-                        />
-                      )}
-                    </View>
                   </View>
-                  <ScrollView
-                    style={{
-                      height: 150,
-                      borderRadius: 8,
-                      backgroundColor: activedColors.background,
-                    }}>
-                    <View
-                      onStartShouldSetResponder={() => true}
-                      style={styles.assigneeList}>
-                      {assignees.map(assignee => (
-                        <AssigneeUserItem
-                          key={assignee.id}
-                          user={assignee}
-                          ownerId={'none'}
-                          onDelete={onDeleteAssignee}
-                        />
-                      ))}
-                    </View>
-                  </ScrollView>
                 </View>
               </View>
               {isOwner && (

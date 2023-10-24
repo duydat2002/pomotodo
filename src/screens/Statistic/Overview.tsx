@@ -44,10 +44,9 @@ const Overview = () => {
     useState<moment.unitOfTime.DurationConstructor>('days');
   const [timeString, setTimeString] = useState('Today');
 
-  useEffect(() => {
-    switch (tabActive) {
+  const setTimeDisplay = (tab: 'Daily' | 'Weekly' | 'Monthly' | 'Annually') => {
+    switch (tab) {
       case 'Daily':
-        setTimeUnit('days');
         setTimeString(
           startDate.isSame(moment(), 'day')
             ? 'Today'
@@ -55,27 +54,43 @@ const Overview = () => {
         );
         break;
       case 'Weekly':
-        setTimeUnit('weeks');
         setTimeString(
           startDate.format('DD/MM') + ' - ' + endDate.format('DD/MM'),
         );
         break;
       case 'Monthly':
-        setTimeUnit('months');
         setTimeString(startDate.format('MM/YYYY'));
         break;
       case 'Annually':
-        setTimeUnit('years');
         setTimeString(startDate.format('YYYY'));
         break;
     }
-  }, [tabActive, startDate]);
+  };
 
   useEffect(() => {
-    const unit = timeUnit != 'weeks' ? timeUnit : 'isoWeek';
-    setStartDate(moment().startOf(unit));
-    setEndDate(moment().endOf(unit));
-  }, [timeUnit]);
+    let unit = timeUnit;
+    switch (tabActive) {
+      case 'Daily':
+        unit = 'days';
+        break;
+      case 'Weekly':
+        unit = 'weeks';
+        break;
+      case 'Monthly':
+        unit = 'months';
+        break;
+      case 'Annually':
+        unit = 'years';
+        break;
+    }
+    setStartDate(moment().startOf(unit != 'weeks' ? unit : 'isoWeek'));
+    setEndDate(moment().endOf(unit != 'weeks' ? unit : 'isoWeek'));
+    setTimeDisplay(tabActive);
+  }, [tabActive]);
+
+  useEffect(() => {
+    setTimeDisplay(tabActive);
+  }, [startDate]);
 
   const prevTime = () => {
     setStartDate(startDate.clone().subtract(1, timeUnit));

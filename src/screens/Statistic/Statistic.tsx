@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -18,57 +19,59 @@ import {common} from '@/assets/styles';
 const Statistic = () => {
   const activedColors = useActivedColors();
 
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    {key: 'overview', title: 'Overview'},
-    {key: 'projectStatistic', title: 'Project'},
-  ]);
-
-  const initialLayout = {
-    height: 0,
-    width: Dimensions.get('window').width,
-  };
+  const [tab, setTab] = useState<'Overview' | 'Project'>('Overview');
 
   return (
     <SafeView hasDismissKeyboard={false}>
       <Header title={'Statistic'} />
       <View style={{flex: 1, width: '100%'}}>
-        <TabView
-          lazy
-          initialLayout={initialLayout}
-          navigationState={{index, routes}}
-          renderScene={SceneMap({
-            overview: Overview,
-            projectStatistic: ProjectStatistic,
-          })}
-          onIndexChange={setIndex}
-          renderTabBar={props => (
-            <TabBar
-              {...props}
-              activeColor={activedColors.primary}
-              inactiveColor={activedColors.textSec}
-              indicatorStyle={{
-                backgroundColor: activedColors.primary,
-                height: 3,
-              }}
-              indicatorContainerStyle={{
-                marginHorizontal: 40,
-                paddingHorizontal: 80,
-              }}
-              labelStyle={[
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              borderBottomColor: activedColors.primaryDark,
+              borderBottomWidth: tab == 'Overview' ? 2 : 0,
+            }}
+            onPress={() => setTab('Overview')}>
+            <Text
+              style={[
                 common.text,
-                {fontWeight: '600', textTransform: 'capitalize'},
-              ]}
-              style={{
-                backgroundColor: activedColors.background,
-                borderBottomColor: activedColors.border,
-                borderBottomWidth: 1,
-                elevation: 0,
-              }}
-              contentContainerStyle={{flexGrow: 1}}
-            />
-          )}
-        />
+                styles.tab,
+                {
+                  color:
+                    tab == 'Overview'
+                      ? activedColors.primary
+                      : activedColors.primaryLight,
+                },
+              ]}>
+              Overview
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              borderBottomColor: activedColors.primaryDark,
+              borderBottomWidth: tab == 'Project' ? 2 : 0,
+            }}
+            onPress={() => setTab('Project')}>
+            <Text
+              style={[
+                common.text,
+                styles.tab,
+                {
+                  color:
+                    tab == 'Project'
+                      ? activedColors.primary
+                      : activedColors.primaryLight,
+                },
+              ]}>
+              Project
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView style={{backgroundColor: activedColors.input}}>
+          {tab == 'Overview' ? <Overview /> : <ProjectStatistic />}
+        </ScrollView>
       </View>
     </SafeView>
   );
@@ -76,4 +79,10 @@ const Statistic = () => {
 
 export default Statistic;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  tab: {
+    padding: 10,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+});

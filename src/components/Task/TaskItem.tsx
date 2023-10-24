@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {
@@ -7,11 +7,12 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from '@expo/vector-icons';
-import {ITask} from '@/types';
+import {ITask, IUser} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
 import {common} from '@/assets/styles';
 import {useNavigation} from '@react-navigation/native';
 import {AppStackScreenProps} from '@/types';
+import {useTask} from '@/hooks/useTask';
 
 interface IProps {
   task: ITask;
@@ -26,38 +27,39 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   const {user} = useAppSelector(state => state.user);
   const {colleagues} = useAppSelector(state => state.colleagues);
 
-  const [assigneeUsernamesText, setAssigneeUsernamesText] = useState('');
+  const {updateTask} = useTask();
+
+  const [assigneeUser, setAssigneeUser] = useState<IUser | null>(null);
+  const [taskDone, setTaskDone] = useState(false);
 
   useEffect(() => {
-    if (task.assignees) {
-      let assigneeUsernamesTemp: string[] = [];
-      if (colleagues) {
-        assigneeUsernamesTemp = colleagues
-          .filter(item => task.assignees!.includes(item.colleagueId))
-          .map(item => item.colleagueUsername);
-      }
-
-      if (task.assignees.includes(user!.id)) {
-        assigneeUsernamesTemp.unshift('you');
-      }
-
-      let text = '';
-      if (assigneeUsernamesTemp.length > 3) {
-        const assigneesTemp = assigneeUsernamesTemp.slice(0, 2);
-        text = `${assigneesTemp.join(', ')} and ${
-          assigneeUsernamesTemp.length - 3
-        } other(s)`;
-      } else {
-        text = assigneeUsernamesTemp.join(', ');
-      }
-      setAssigneeUsernamesText(text);
+    setTaskDone(task.isDone);
+    if (task.assignee == user?.id) {
+      setAssigneeUser(user);
     } else {
-      setAssigneeUsernamesText('');
+      const colleague = colleagues?.find(
+        item => task.assignee == item.colleagueId,
+      );
+      if (colleague) {
+        const assigneeTemp = {
+          id: colleague.colleagueId,
+          username: colleague.colleagueUsername,
+          avatar: colleague.colleagueAvatar,
+          email: colleague.colleagueEmail,
+        };
+        setAssigneeUser(assigneeTemp);
+      } else {
+        setAssigneeUser(null);
+      }
     }
   }, [task]);
 
-  const checkTask = () => {
-    task.isDone = !task.isDone;
+  const checkTask = async () => {
+    console.log('cac');
+    // task.isDone = !task.isDone;
+    setTaskDone(!taskDone);
+
+    updateTask(task.id, {isDone: !task.isDone});
   };
 
   const clickPlayTask = () => {
@@ -79,7 +81,9 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
             backgroundColor: PRIORITY_COLORS[task.priority].light,
           },
         ]}>
-        {task.isDone && <Feather name="check" size={16} color="#fff" />}
+        {taskDone && (
+          <Feather name="check" size={16} color={activedColors.primary} />
+        )}
       </TouchableOpacity>
       <View style={{flex: 1, marginLeft: 16}}>
         <Text style={[common.text, {color: activedColors.text}]}>
@@ -102,14 +106,32 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
           <Text style={[common.small, {color: activedColors.primaryLight}]}>
             {task.totalPomodoro}
           </Text>
-
-          <Text
-            style={[
-              common.small,
-              {marginLeft: 10, color: activedColors.textSec},
-            ]}>
-            {assigneeUsernamesText}
-          </Text>
+          {assigneeUser && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 10,
+              }}>
+              <Image
+                source={
+                  assigneeUser.avatar
+                    ? {
+                        uri: assigneeUser.avatar,
+                      }
+                    : require('@/assets/images/default-avatar.png')
+                }
+                style={{width: 15, height: 15, borderRadius: 15}}
+              />
+              <Text
+                style={{
+                  marginLeft: 4,
+                  color: activedColors.textSec,
+                }}>
+                {assigneeUser.username}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
       <TouchableOpacity
