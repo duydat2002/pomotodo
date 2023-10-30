@@ -117,7 +117,7 @@ const ProjectChart: React.FC<IProps> = ({project}) => {
 
   return (
     <View style={[styles.widthFullCenter, {marginTop: 20}]}>
-      {pieData.length != 0 ? (
+      {pieData && pieData.length != 0 ? (
         <View style={styles.widthFullCenter}>
           <PieChart
             data={pieData}

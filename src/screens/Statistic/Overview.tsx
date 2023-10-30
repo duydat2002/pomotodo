@@ -23,7 +23,7 @@ const Tab: React.FC<ITabProps> = ({tab, tabActive, onPress}) => {
         {
           color: tab == tabActive ? activedColors.text : activedColors.textSec,
           backgroundColor:
-            tab == tabActive ? activedColors.background : 'transparent',
+            tab == tabActive ? activedColors.input : 'transparent',
         },
       ]}
       onPress={onPress}>
@@ -107,9 +107,9 @@ const Overview = () => {
       style={{
         flex: 1,
         paddingHorizontal: 16,
-        backgroundColor: activedColors.input,
+        backgroundColor: activedColors.background,
       }}>
-      <View style={[styles.card, {backgroundColor: activedColors.background}]}>
+      <View style={[styles.card, {backgroundColor: activedColors.input}]}>
         <Text
           style={[common.text, {fontWeight: '600', color: activedColors.text}]}>
           Focus time
@@ -120,7 +120,8 @@ const Overview = () => {
             borderTopWidth: 2,
             borderTopColor: activedColors.backgroundSec,
           }}>
-          <View style={[styles.tabs, {backgroundColor: activedColors.input}]}>
+          <View
+            style={[styles.tabs, {backgroundColor: activedColors.background}]}>
             <Tab
               tab="Daily"
               tabActive={tabActive}

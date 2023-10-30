@@ -23,7 +23,7 @@ export type AppStackParamList = {
   ProjectsStack: NavigatorScreenParams<ProjectsStackParamList>;
   Pomodoro: {task: ITask} | undefined;
   Statistic: undefined;
-  Setting: undefined;
+  SettingStack: NavigatorScreenParams<SettingStackParamList>;
 };
 
 export type AppStackScreenProps<T extends keyof AppStackParamList> =
@@ -54,5 +54,17 @@ export type ProjectsStackParamList = {
 export type ProjectsStackScreenProps<T extends keyof ProjectsStackParamList> =
   CompositeScreenProps<
     BottomTabScreenProps<ProjectsStackParamList, T>,
+    AppStackScreenProps<keyof AppStackParamList>
+  >;
+
+// Setting
+export type SettingStackParamList = {
+  Setting: undefined;
+  Profile: undefined;
+};
+
+export type SettingStackScreenProps<T extends keyof SettingStackParamList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<SettingStackParamList, T>,
     AppStackScreenProps<keyof AppStackParamList>
   >;

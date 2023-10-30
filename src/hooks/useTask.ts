@@ -87,11 +87,12 @@ export const useTask = () => {
   const updateTask = async (taskId: string, datas: Partial<ITask>) => {
     try {
       const {id, ...newDatas} = datas;
-      const updatedTasks = await updateTaskLocal(taskId, newDatas);
-      await firestore().collection('tasks').doc(taskId).update(newDatas);
+      const updatedTasks = updateTaskLocal(taskId, newDatas);
+
       if (updatedTasks) {
         await updateProjectInfo(datas.projectId!, updatedTasks);
       }
+      await firestore().collection('tasks').doc(taskId).update(newDatas);
     } catch (error) {
       console.log(error);
     }
@@ -180,14 +181,14 @@ export const useTask = () => {
     await storeData('tasks', updatedTasks);
   };
 
-  const updateTaskLocal = async (taskId: string, datas: Partial<ITask>) => {
+  const updateTaskLocal = (taskId: string, datas: Partial<ITask>) => {
     if (tasks) {
       const updatedTasks: ITask[] = tasks.map(item => {
         return item.id == taskId ? {...item, ...datas} : item;
       });
 
       dispatch(setTasks(updatedTasks));
-      await storeData('tasks', updatedTasks);
+      storeData('tasks', updatedTasks);
       return updatedTasks;
     } else {
       return null;

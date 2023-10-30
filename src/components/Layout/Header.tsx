@@ -54,6 +54,8 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     height: 50,
     paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBlockColor: '#f1f1f1',
   },
   title: {
     flex: 1,

@@ -3,4 +3,5 @@ export const HIDDEN_BOTTOM_TAB_ROUTER = [
   'CreateTask',
   'CreateProject',
   'JoinTask',
+  'Profile',
 ];

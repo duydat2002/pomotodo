@@ -1,19 +1,27 @@
 import React from 'react';
-import {StyleSheet, Text, View, DimensionValue} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  DimensionValue,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import {useActivedColors} from '@/hooks';
 import {EFontWeight} from '@/theme';
 
 interface IProps {
   text?: string;
   height?: DimensionValue;
+  style?: StyleProp<ViewStyle>;
 }
 
-const Seperator: React.FC<IProps> = ({text, height = 5}) => {
+const Seperator: React.FC<IProps> = ({text, height = 5, style}) => {
   const activedColors = useActivedColors();
 
   if (text) {
     return (
-      <View style={styles.seperatorWrapper}>
+      <View style={[styles.seperatorWrapper, style]}>
         <View
           style={[
             styles.seperator,
@@ -37,6 +45,7 @@ const Seperator: React.FC<IProps> = ({text, height = 5}) => {
         style={[
           styles.seperatorWrapper,
           {height: height, backgroundColor: activedColors.border},
+          style,
         ]}></View>
     );
   }

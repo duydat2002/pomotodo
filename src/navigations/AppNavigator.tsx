@@ -11,10 +11,10 @@ import {useActivedColors} from '@/hooks';
 import {HIDDEN_BOTTOM_TAB_ROUTER} from '@/constants';
 import Pomodoro from '@/screens/Pomodoro';
 import Statistic from '@/screens/Statistic/Statistic';
-import Setting from '@/screens/Setting';
 import ProjectNavigator from './ProjectNavigator';
 import {AppStackParamList} from '@/types';
 import HomeNavigator from './HomeNavigator';
+import SettingNavigator from './SettingNavigator';
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
 
@@ -101,13 +101,21 @@ const AppNavigator: React.FC = () => {
         }}
       />
       <Tab.Screen
-        name="Setting"
-        component={Setting}
-        options={{
+        name="SettingStack"
+        component={SettingNavigator}
+        options={({route}) => ({
+          tabBarStyle: {
+            display: getTabBarVisibility(route),
+            backgroundColor: activedColors.background,
+            paddingTop: 5,
+            height: 60,
+            borderTopWidth: 0,
+          },
+          tabBarLabel: 'settings',
           tabBarIcon: ({color}) => (
             <MaterialIcons name="settings" size={24} color={color} />
           ),
-        }}
+        })}
       />
     </Tab.Navigator>
   );

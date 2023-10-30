@@ -69,7 +69,7 @@ const Statistic = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <ScrollView style={{backgroundColor: activedColors.input}}>
+        <ScrollView style={{backgroundColor: activedColors.background}}>
           {tab == 'Overview' ? <Overview /> : <ProjectStatistic />}
         </ScrollView>
       </View>

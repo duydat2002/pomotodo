@@ -25,13 +25,13 @@ const ProjectStatistic = () => {
         flex: 1,
         paddingHorizontal: 16,
       }}>
-      <View style={[styles.card, {backgroundColor: activedColors.background}]}>
+      <View style={[styles.card, {backgroundColor: activedColors.input}]}>
         <Text
           style={[
             common.text,
             styles.projectSelect,
             {
-              borderBottomColor: activedColors.backgroundSec,
+              borderBottomColor: activedColors.background,
               color: activedColors.text,
             },
           ]}>
@@ -43,7 +43,7 @@ const ProjectStatistic = () => {
             marginHorizontal: 16,
             padding: 10,
             borderRadius: 10,
-            backgroundColor: activedColors.input,
+            backgroundColor: activedColors.background,
           }}
           onPress={() => setActiveSelectProject(true)}>
           <Text style={[common.text, {color: activedColors.text}]}>

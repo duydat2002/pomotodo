@@ -55,11 +55,14 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   }, [task]);
 
   const checkTask = async () => {
-    console.log('cac');
-    // task.isDone = !task.isDone;
     setTaskDone(!taskDone);
 
-    updateTask(task.id, {isDone: !task.isDone});
+    const updatedTask: ITask = {
+      ...task,
+      isDone: !task.isDone,
+    };
+
+    await updateTask(task.id, updatedTask);
   };
 
   const clickPlayTask = () => {

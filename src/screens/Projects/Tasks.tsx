@@ -77,7 +77,7 @@ const Tasks = () => {
             <View style={[styles.info, {backgroundColor: activedColors.input}]}>
               <ProjectInfoCard
                 title="Time Remaining"
-                time={project ? project?.totalTime - project?.elapsedTime : 0}
+                time={project ? project?.remainingTime : 0}
               />
               <ProjectInfoCard
                 title="Tasks Remaining"

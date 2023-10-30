@@ -3,6 +3,7 @@ export interface IProject {
   name: string;
   color: string;
   totalTime: number;
+  remainingTime: number;
   elapsedTime: number;
   totalTask: number;
   taskComplete: number;

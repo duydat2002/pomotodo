@@ -1,18 +1,18 @@
 export const PRIORITY_COLORS = {
   high: {
     default: '#ff3f3f',
-    light: '#ff9595',
+    light: '#ffc1c1',
   },
   medium: {
     default: '#f58231',
-    light: '#fde2ce',
+    light: '#ffefe3',
   },
   low: {
     default: '#3cb44b',
-    light: '#c5e7ca',
+    light: '#d3e9d6',
   },
   none: {
     default: '#acacac',
-    light: '#e6e6e6',
+    light: '#eeeeee',
   },
 };

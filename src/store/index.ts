@@ -6,6 +6,7 @@ import netInforSlice from './netInfor.slice';
 import colleaguesSlice from './colleagues.slice';
 import tasksSlice from './tasks.slice';
 import notificationsSlice from './notifications.slice';
+import settingSlice from './setting.slice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     tasks: tasksSlice,
     colleagues: colleaguesSlice,
     notifications: notificationsSlice,
+    setting: settingSlice,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

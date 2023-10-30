@@ -26,7 +26,7 @@ export const useProject = () => {
   const updateProject = async (projectId: string, datas: Partial<IProject>) => {
     try {
       const {id, ...newDatas} = datas;
-      await updateProjectLocal(projectId, newDatas);
+      updateProjectLocal(projectId, newDatas);
       await firestore().collection('projects').doc(projectId).update(newDatas);
     } catch (error) {
       console.log(error);
@@ -35,6 +35,7 @@ export const useProject = () => {
 
   const updateProjectInfo = async (projectId: string, tasks: ITask[]) => {
     let totalTime = 0,
+      remainingTime = 0,
       elapsedTime = 0,
       totalTask = 0,
       taskComplete = 0;
@@ -45,21 +46,26 @@ export const useProject = () => {
         totalTask++;
         elapsedTime += task.pomodoroCount * task.longBreak;
         if (task.isDone) taskComplete++;
+        else remainingTime += task.totalPomodoro * task.longBreak;
       }
     });
 
-    await updateProjectLocal(projectId, {
-      totalTime,
-      elapsedTime,
-      totalTask,
-      taskComplete,
-    });
-    await updateProject(projectId, {
-      totalTime,
-      elapsedTime,
-      totalTask,
-      taskComplete,
-    });
+    await Promise.all([
+      updateProjectLocal(projectId, {
+        totalTime,
+        remainingTime,
+        elapsedTime,
+        totalTask,
+        taskComplete,
+      }),
+      updateProject(projectId, {
+        totalTime,
+        remainingTime,
+        elapsedTime,
+        totalTask,
+        taskComplete,
+      }),
+    ]);
   };
 
   const deleteProject = async (projectId: string) => {
@@ -156,18 +162,15 @@ export const useProject = () => {
     await storeData('projects', updatedProjects);
   };
 
-  const updateProjectLocal = async (
-    projectId: string,
-    datas: Partial<IProject>,
-  ) => {
+  const updateProjectLocal = (projectId: string, datas: Partial<IProject>) => {
     if (projects) {
+      dispatch(setProject({...project, ...datas} as IProject));
       const updatedProjects: IProject[] = projects.map(item => {
         return item.id == projectId ? {...item, ...datas} : item;
       });
 
       dispatch(setProjects(updatedProjects));
-      dispatch(setProject({...project, ...datas} as IProject));
-      await storeData('projects', updatedProjects);
+      storeData('projects', updatedProjects);
     }
   };
 
