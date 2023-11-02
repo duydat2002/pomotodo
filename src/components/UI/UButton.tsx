@@ -1,5 +1,12 @@
 import React, {ReactNode} from 'react';
-import {StyleSheet, TouchableOpacity, ViewStyle, StyleProp} from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  View,
+  StyleProp,
+  ActivityIndicator,
+} from 'react-native';
 import {useActivedColors} from '@/hooks';
 
 interface IProps {
@@ -9,6 +16,8 @@ interface IProps {
   primary?: boolean;
   secondary?: boolean;
   disabled?: boolean;
+  loading?: boolean;
+  loadingColor?: string;
 }
 
 const UButton: React.FC<IProps> = ({
@@ -18,6 +27,8 @@ const UButton: React.FC<IProps> = ({
   primary,
   secondary,
   disabled,
+  loading = false,
+  loadingColor,
 }) => {
   const activedColors = useActivedColors();
 
@@ -38,7 +49,17 @@ const UButton: React.FC<IProps> = ({
       style={buttonStyles}
       activeOpacity={0.6}
       disabled={disabled}>
-      {children}
+      <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        {loading && (
+          <ActivityIndicator
+            style={styles.loading}
+            size={30}
+            color={loadingColor || '#fff'}
+          />
+        )}
+
+        <View style={{opacity: loading ? 0 : 1}}>{children}</View>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -53,5 +74,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loading: {
+    position: 'absolute',
   },
 });
