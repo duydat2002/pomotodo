@@ -71,7 +71,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
 
   return (
     <TouchableOpacity
-      style={[styles.item, {backgroundColor: activedColors.input}]}
+      style={[styles.item, {backgroundColor: activedColors.backgroundLight}]}
       activeOpacity={0.8}
       onPress={onPress}>
       <TouchableOpacity

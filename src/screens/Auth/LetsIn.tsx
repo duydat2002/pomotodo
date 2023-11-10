@@ -56,14 +56,19 @@ const LetsIn: React.FC = () => {
                 backgroundColor: activedColors.border,
               },
             ]}>
-            <Image
-              style={[common.buttonIcon, {marginRight: 10}]}
-              source={require('@/assets/images/facebook-icon.png')}
-            />
-            <Text
-              style={[styles.continueButtonText, {color: activedColors.text}]}>
-              Continue with Facebook
-            </Text>
+            <View style={{flexDirection: 'row'}}>
+              <Image
+                style={[common.buttonIcon, {marginRight: 10}]}
+                source={require('@/assets/images/facebook-icon.png')}
+              />
+              <Text
+                style={[
+                  styles.continueButtonText,
+                  {color: activedColors.text},
+                ]}>
+                Continue with Facebook
+              </Text>
+            </View>
           </UButton>
           <UButton
             style={[
@@ -73,14 +78,19 @@ const LetsIn: React.FC = () => {
                 backgroundColor: activedColors.border,
               },
             ]}>
-            <Image
-              style={[common.buttonIcon, {marginRight: 10}]}
-              source={require('@/assets/images/google-icon.png')}
-            />
-            <Text
-              style={[styles.continueButtonText, {color: activedColors.text}]}>
-              Continue with Google
-            </Text>
+            <View style={{flexDirection: 'row'}}>
+              <Image
+                style={[common.buttonIcon, {marginRight: 10}]}
+                source={require('@/assets/images/google-icon.png')}
+              />
+              <Text
+                style={[
+                  styles.continueButtonText,
+                  {color: activedColors.text},
+                ]}>
+                Continue with Google
+              </Text>
+            </View>
           </UButton>
           <Seperator text="OR" />
           <UButton

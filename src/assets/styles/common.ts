@@ -8,6 +8,7 @@ export const common = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 16,
+    marginTop: 10,
   },
 
   // Title

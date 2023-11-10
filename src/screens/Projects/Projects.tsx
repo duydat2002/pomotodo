@@ -60,19 +60,18 @@ const Projects = () => {
         <UButton
           style={[
             styles.searchButton,
-            {
-              borderColor: activedColors.border,
-              backgroundColor: activedColors.border,
-            },
+            {backgroundColor: activedColors.border},
           ]}>
-          <Ionicons name="search" size={22} color={activedColors.textSec} />
-          <Text
-            style={[
-              common.text,
-              {color: activedColors.textSec, marginLeft: 10},
-            ]}>
-            Search tasks...
-          </Text>
+          <View style={{flexDirection: 'row'}}>
+            <Ionicons name="search" size={22} color={activedColors.textSec} />
+            <Text
+              style={[
+                common.text,
+                {color: activedColors.textSec, marginLeft: 10},
+              ]}>
+              Search tasks...
+            </Text>
+          </View>
         </UButton>
         <TouchableOpacity
           onPress={() => navigation.navigate('CreateProject')}
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
   searchButton: {
     borderRadius: 14,
     marginHorizontal: 16,
-    marginBottom: 9,
+    marginVertical: 10,
     width: 'auto',
   },
   addProject: {

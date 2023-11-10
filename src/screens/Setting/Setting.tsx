@@ -100,7 +100,7 @@ const Setting = () => {
                 alignItems: 'center',
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                backgroundColor: activedColors.input,
+                backgroundColor: activedColors.backgroundLight,
               }}>
               <Image
                 source={
@@ -134,7 +134,7 @@ const Setting = () => {
           <View
             style={{
               marginTop: 15,
-              backgroundColor: activedColors.input,
+              backgroundColor: activedColors.backgroundLight,
             }}>
             <View style={[styles.item]}>
               <Text style={[common.text, {color: activedColors.text}]}>
@@ -187,7 +187,7 @@ const Setting = () => {
           <View
             style={{
               marginTop: 15,
-              backgroundColor: activedColors.input,
+              backgroundColor: activedColors.backgroundLight,
             }}>
             <TouchableOpacity
               activeOpacity={0.8}
@@ -204,7 +204,7 @@ const Setting = () => {
           <View
             style={{
               marginTop: 15,
-              backgroundColor: activedColors.input,
+              backgroundColor: activedColors.backgroundLight,
             }}>
             <View style={[styles.item]}>
               <Text style={[common.text, {color: activedColors.text}]}>

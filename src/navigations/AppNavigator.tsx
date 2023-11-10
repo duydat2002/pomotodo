@@ -32,6 +32,7 @@ const AppNavigator: React.FC = () => {
 
   return (
     <Tab.Navigator
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: activedColors.primaryDark,

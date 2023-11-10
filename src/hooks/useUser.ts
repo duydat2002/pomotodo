@@ -57,7 +57,7 @@ export const useUser = () => {
         await firestore().collection('users').doc(userId).update(newDatas);
       }
     } catch (error) {
-      console.log('cac', error);
+      console.log(error);
     }
   };
 

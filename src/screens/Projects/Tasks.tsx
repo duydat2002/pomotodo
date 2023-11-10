@@ -47,9 +47,11 @@ const Tasks = () => {
     navigation.navigate('CreateTask', {projectId: project!.id, taskId: null});
   };
 
+  if (!project) return null;
+
   return (
     <SafeView>
-      <Header title={project?.name} hasBack>
+      <Header title={project.name} hasBack>
         {{
           rightChild: (
             <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
@@ -74,7 +76,11 @@ const Tasks = () => {
       ) : (
         <>
           <View style={{flex: 1, width: '100%', marginTop: 20}}>
-            <View style={[styles.info, {backgroundColor: activedColors.input}]}>
+            <View
+              style={[
+                styles.info,
+                {backgroundColor: activedColors.backgroundLight},
+              ]}>
               <ProjectInfoCard
                 title="Time Remaining"
                 time={project ? project?.remainingTime : 0}

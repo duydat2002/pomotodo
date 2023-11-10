@@ -10,6 +10,7 @@ import {common} from '@/assets/styles';
 import * as ImagePicker from 'expo-image-picker';
 import {useStorage} from '@/hooks/useStorage';
 import {useUser} from '@/hooks/useUser';
+import {useColleague} from '@/hooks/useColleague';
 
 const Profile = () => {
   const activedColors = useActivedColors();
@@ -23,6 +24,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const {updateUser, getUserByUsername} = useUser();
+  const {updateColleagues} = useColleague();
   const {setUserAvatar} = useStorage();
 
   useEffect(() => {
@@ -73,11 +75,24 @@ const Profile = () => {
       urlAvatar = await setUserAvatar(user!.id, uriAvatar);
     }
 
-    await updateUser(user!.id, {
+    const updateData = {
       avatar: urlAvatar || user?.avatar,
       username: username,
       fullname: fullname,
-    });
+    };
+
+    await Promise.all([
+      updateUser(user!.id, {
+        avatar: urlAvatar || user?.avatar,
+        username: username,
+        fullname: fullname,
+      }),
+      updateColleagues(user!.id, {
+        colleagueAvatar: urlAvatar || user?.avatar,
+        colleagueUsername: username,
+      }),
+    ]);
+
     setIsLoading(false);
   };
 
@@ -135,7 +150,7 @@ const Profile = () => {
           <UButton
             primary
             loading={isLoading}
-            style={{backgroundColor: activedColors.primary}}
+            backgroundColor={activedColors.primary}
             onPress={saveProfile}>
             <Text style={[common.text, {color: '#fff'}]}>Save</Text>
           </UButton>

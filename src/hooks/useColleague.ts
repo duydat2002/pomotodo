@@ -149,6 +149,32 @@ export const useColleague = () => {
     }
   };
 
+  const updateColleagues = async (
+    idColleague: string,
+    datas: Partial<IColleague>,
+  ) => {
+    try {
+      const {colleagueId, ...newDatas} = datas;
+
+      const querySnaps = await firestore()
+        .collection('colleagues')
+        .where('colleagueId', '==', idColleague)
+        .get();
+
+      if (!querySnaps.empty) {
+        const batch = firestore().batch();
+
+        querySnaps.forEach(doc => {
+          batch.update(doc.ref, newDatas);
+        });
+
+        await batch.commit();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getColleaguesFS = async (userId: string) => {
     try {
       const querySnapshot = await firestore()
@@ -199,6 +225,7 @@ export const useColleague = () => {
   return {
     addColleague,
     addColleagues,
+    updateColleagues,
     acceptColleague,
     rejectColleague,
     getColleaguesFS,

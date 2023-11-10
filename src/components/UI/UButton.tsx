@@ -18,6 +18,7 @@ interface IProps {
   disabled?: boolean;
   loading?: boolean;
   loadingColor?: string;
+  backgroundColor?: string;
 }
 
 const UButton: React.FC<IProps> = ({
@@ -29,6 +30,7 @@ const UButton: React.FC<IProps> = ({
   disabled,
   loading = false,
   loadingColor,
+  backgroundColor = '#fff',
 }) => {
   const activedColors = useActivedColors();
 
@@ -45,21 +47,19 @@ const UButton: React.FC<IProps> = ({
 
   return (
     <TouchableOpacity
-      onPress={onPress}
       style={buttonStyles}
+      onPress={onPress}
       activeOpacity={0.6}
-      disabled={disabled}>
-      <View style={{alignItems: 'center', justifyContent: 'center'}}>
-        {loading && (
-          <ActivityIndicator
-            style={styles.loading}
-            size={30}
-            color={loadingColor || '#fff'}
-          />
-        )}
+      disabled={disabled || loading}>
+      {loading && (
+        <ActivityIndicator
+          style={styles.loading}
+          size={30}
+          color={loadingColor || '#fff'}
+        />
+      )}
 
-        <View style={{opacity: loading ? 0 : 1}}>{children}</View>
-      </View>
+      <View style={[{opacity: loading ? 0 : 1}]}>{children}</View>
     </TouchableOpacity>
   );
 };
