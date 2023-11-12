@@ -1,40 +1,45 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import UModal from './UModal';
-import {common} from '@/assets/styles';
+import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {useActivedColors} from '@/hooks';
+import {common} from '@/assets/styles';
+import UModal from './UModal';
 import UButton from '../UI/UButton';
 
-interface IThemeItemProps {
-  themeValue: 'dark' | 'light' | 'system';
+interface IItemProps {
+  key: string;
+  value: any;
 }
 
 interface IProps {
   visible: boolean;
-  theme: 'dark' | 'light' | 'system';
-  onSelect: (theme: 'dark' | 'light' | 'system') => void;
+  title: string;
+  selected: string;
+  items: IItemProps[];
+  onSelect: (key: string) => void;
   onClose: () => void;
 }
 
-const SelectThemeModal: React.FC<IProps> = ({
+const SelectRadioModal: React.FC<IProps> = ({
   visible,
-  theme,
+  title,
+  selected,
+  items,
   onSelect,
   onClose,
 }) => {
   const activedColors = useActivedColors();
 
-  const ThemeItem: React.FC<IThemeItemProps> = ({themeValue}) => (
+  const Item: React.FC<{item: IItemProps}> = ({item}) => (
     <TouchableOpacity
       activeOpacity={0.8}
       style={[styles.item]}
-      onPress={() => onSelect(themeValue)}>
+      onPress={() => onSelect(item.key)}>
       <View
         style={[
           styles.box,
           {
             borderColor:
-              themeValue == theme
+              item.key == selected
                 ? activedColors.primary
                 : activedColors.textSec,
           },
@@ -44,13 +49,13 @@ const SelectThemeModal: React.FC<IProps> = ({
             styles.innerBox,
             {
               backgroundColor:
-                themeValue == theme ? activedColors.primary : 'transparent',
+                item.key == selected ? activedColors.primary : 'transparent',
             },
           ]}
         />
       </View>
       <Text style={[common.text, {color: activedColors.text}]}>
-        {themeValue}
+        {item.value}
       </Text>
     </TouchableOpacity>
   );
@@ -67,12 +72,12 @@ const SelectThemeModal: React.FC<IProps> = ({
           },
         ]}>
         <Text style={[common.subTitle, {color: activedColors.text}]}>
-          Select theme
+          {title}
         </Text>
         <View style={{marginVertical: 20}}>
-          <ThemeItem themeValue="light" />
-          <ThemeItem themeValue="dark" />
-          <ThemeItem themeValue="system" />
+          {items.map(item => (
+            <Item key={item.key} item={item} />
+          ))}
         </View>
         <View style={{flexDirection: 'row', alignSelf: 'flex-end', gap: 20}}>
           <UButton style={{flex: 1, backgroundColor: '#fff'}} onPress={onClose}>
@@ -86,7 +91,7 @@ const SelectThemeModal: React.FC<IProps> = ({
   );
 };
 
-export default SelectThemeModal;
+export default SelectRadioModal;
 
 const styles = StyleSheet.create({
   item: {

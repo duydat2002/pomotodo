@@ -25,11 +25,11 @@ import {
   setAutoStartNextPomodoro,
   setDisableBreaktime,
 } from '@/store/setting.slice';
-import SelectThemeModal from '@/components/Modal/SelectThemeModal';
 import {changeTheme} from '@/store/theme.slice';
 import UButton from '@/components/UI/UButton';
 import auth from '@react-native-firebase/auth';
 import {setUser} from '@/store/user.slice';
+import SelectRadioModal from '@/components/Modal/SelectRadioModal';
 
 const Setting = () => {
   const activedColors = useActivedColors();
@@ -47,6 +47,12 @@ const Setting = () => {
   );
   const [activeThemeModal, setActiveThemeModal] = useState(false);
 
+  const themeItems = [
+    {key: 'light', value: 'Light'},
+    {key: 'dark', value: 'Dark'},
+    {key: 'system', value: 'System'},
+  ];
+
   useEffect(() => {
     setThemeMode(theme.system ? 'system' : theme.mode);
   }, [theme]);
@@ -63,11 +69,11 @@ const Setting = () => {
     dispatch(setAutoStartNextPomodoro(!autoStartNextPomodoro));
   };
 
-  const hanldeSelectTheme = (theme: 'dark' | 'light' | 'system') => {
+  const handleSelectTheme = (selected: string) => {
     dispatch(
       changeTheme({
-        system: theme == 'system',
-        mode: theme == 'system' ? 'light' : theme,
+        system: selected == 'system',
+        mode: selected == 'system' ? 'light' : (selected as 'light' | 'dark'),
       }),
     );
   };
@@ -258,10 +264,12 @@ const Setting = () => {
         </View>
       </View>
       <View style={{position: 'absolute'}}>
-        <SelectThemeModal
+        <SelectRadioModal
           visible={activeThemeModal}
-          theme={themeMode}
-          onSelect={hanldeSelectTheme}
+          title="Select theme"
+          selected={themeMode}
+          items={themeItems}
+          onSelect={handleSelectTheme}
           onClose={() => setActiveThemeModal(false)}
         />
       </View>

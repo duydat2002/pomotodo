@@ -75,12 +75,6 @@ const Profile = () => {
       urlAvatar = await setUserAvatar(user!.id, uriAvatar);
     }
 
-    const updateData = {
-      avatar: urlAvatar || user?.avatar,
-      username: username,
-      fullname: fullname,
-    };
-
     await Promise.all([
       updateUser(user!.id, {
         avatar: urlAvatar || user?.avatar,
