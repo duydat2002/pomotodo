@@ -1,11 +1,21 @@
-import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ToastAndroid,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {
+  AntDesign,
   Feather,
   FontAwesome,
+  FontAwesome5,
   Ionicons,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from '@expo/vector-icons';
 import {ITask, IUser} from '@/types';
 import {PRIORITY_COLORS} from '@/constants';
@@ -13,6 +23,7 @@ import {common} from '@/assets/styles';
 import {useNavigation} from '@react-navigation/native';
 import {AppStackScreenProps} from '@/types';
 import {useTask} from '@/hooks/useTask';
+import {useUser} from '@/hooks/useUser';
 
 interface IProps {
   task: ITask;
@@ -25,48 +36,61 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
     useNavigation<AppStackScreenProps<'ProjectsStack'>['navigation']>();
 
   const {user} = useAppSelector(state => state.user);
-  const {colleagues} = useAppSelector(state => state.colleagues);
+  const {project} = useAppSelector(state => state.projects);
 
+  const {getLocalUserById} = useUser();
   const {updateTask} = useTask();
 
   const [assigneeUser, setAssigneeUser] = useState<IUser | null>(null);
-  const [taskDone, setTaskDone] = useState(false);
+  const [compeletedUser, setCompeletedUser] = useState<IUser | null>(null);
+  const [taskDone, setTaskDone] = useState(task.isDone);
+  const [hasPemistion, setHasPemisstion] = useState(true);
 
   useEffect(() => {
-    setTaskDone(task.isDone);
-    if (task.assignee == user?.id) {
-      setAssigneeUser(user);
-    } else {
-      const colleague = colleagues?.find(
-        item => task.assignee == item.colleagueId,
-      );
-      if (colleague) {
-        const assigneeTemp = {
-          id: colleague.colleagueId,
-          username: colleague.colleagueUsername,
-          avatar: colleague.colleagueAvatar,
-          email: colleague.colleagueEmail,
-        };
-        setAssigneeUser(assigneeTemp);
-      } else {
-        setAssigneeUser(null);
-      }
-    }
+    setHasPemisstion(
+      user?.id == project?.ownerId ||
+        !task.assignee ||
+        task.assignee == user?.id,
+    );
+
+    const getUsers = async () => {
+      setAssigneeUser(await getLocalUserById(task.assignee));
+
+      setCompeletedUser(await getLocalUserById(task.completedBy));
+    };
+
+    getUsers();
   }, [task]);
 
   const checkTask = async () => {
-    setTaskDone(!taskDone);
+    if (hasPemistion) {
+      setTaskDone(!taskDone);
 
-    const updatedTask: ITask = {
-      ...task,
-      isDone: !task.isDone,
-    };
+      const updatedTask: ITask = {
+        ...task,
+        isDone: !taskDone,
+        completedBy: !taskDone ? user!.id : null,
+        completedAt: !taskDone ? new Date().toISOString() : '',
+      };
 
-    await updateTask(task.id, updatedTask);
+      await updateTask(task.id, updatedTask);
+    } else {
+      ToastAndroid.show(
+        'You do not have permission to perform this function!',
+        ToastAndroid.SHORT,
+      );
+    }
   };
 
   const clickPlayTask = () => {
-    navigation.navigate('Pomodoro', {task: task});
+    if (hasPemistion) {
+      navigation.navigate('Pomodoro', {task: task});
+    } else {
+      ToastAndroid.show(
+        'You do not have permission to perform this function!',
+        ToastAndroid.SHORT,
+      );
+    }
   };
 
   return (
@@ -114,8 +138,16 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginLeft: 10,
+                marginHorizontal: 10,
               }}>
+              <Text style={[common.small, {color: activedColors.textSec}]}>
+                <FontAwesome5
+                  name="user-tag"
+                  size={12}
+                  color={activedColors.primary}
+                />
+                {': '}
+              </Text>
               <Image
                 source={
                   assigneeUser.avatar
@@ -129,9 +161,43 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
               <Text
                 style={{
                   marginLeft: 4,
-                  color: activedColors.textSec,
+                  color: activedColors.primary,
                 }}>
                 {assigneeUser.username}
+              </Text>
+            </View>
+          )}
+          {compeletedUser && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 10,
+              }}>
+              <Text style={[common.small, {color: activedColors.textSec}]}>
+                <AntDesign
+                  name="checkcircle"
+                  size={13}
+                  color={activedColors.secondary}
+                />
+                {': '}
+              </Text>
+              <Image
+                source={
+                  compeletedUser.avatar
+                    ? {
+                        uri: compeletedUser.avatar,
+                      }
+                    : require('@/assets/images/default-avatar.png')
+                }
+                style={{width: 15, height: 15, borderRadius: 15}}
+              />
+              <Text
+                style={{
+                  marginLeft: 4,
+                  color: activedColors.secondary,
+                }}>
+                {compeletedUser.username}
               </Text>
             </View>
           )}

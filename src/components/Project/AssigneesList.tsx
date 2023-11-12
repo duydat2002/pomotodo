@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import {common} from '@/assets/styles';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {StyleSheet, Text, View, Image} from 'react-native';
+import {useUser} from '@/hooks/useUser';
+import {IUser} from '@/types';
 
 interface IProps {
   assigneeIds: string[];
@@ -15,38 +17,40 @@ const AssigneesList: React.FC<IProps> = ({
   const activedColors = useActivedColors();
 
   const {user} = useAppSelector(state => state.user);
-  const {colleagues} = useAppSelector(state => state.colleagues);
 
-  const [avatars, setAvatars] = useState<string[]>([]);
+  const {getLocalUserById} = useUser();
+
+  const [assignees, setAssignees] = useState<(IUser | null)[]>([]);
   const [residual, setResidual] = useState(0);
 
   useEffect(() => {
-    const temp =
-      colleagues
-        ?.filter(item => assigneeIds.includes(item.colleagueId))
-        ?.map(item => item.colleagueAvatar || '') || [];
+    const getAssigneeUser = async () => {
+      const temp = await Promise.all(
+        assigneeIds.map(async id => await getLocalUserById(id)),
+      );
 
-    temp.unshift(user?.avatar || '');
+      if (temp.length > maxDisplayedUsers) {
+        setAssignees(temp.slice(0, maxDisplayedUsers));
+        setResidual(temp.length - maxDisplayedUsers);
+      } else {
+        setAssignees(temp);
+      }
+    };
 
-    if (temp.length > maxDisplayedUsers) {
-      setAvatars(temp.slice(0, maxDisplayedUsers));
-      setResidual(temp.length - maxDisplayedUsers);
-    } else {
-      setAvatars(temp);
-    }
+    getAssigneeUser();
   }, [assigneeIds]);
 
   if (!user) return null;
 
   return (
     <View style={{flexDirection: 'row', marginLeft: 5}}>
-      {avatars.map((avatar, index) => (
+      {assignees.map((assignee, index) => (
         <Image
           key={index}
           source={
-            avatar
+            assignee?.avatar
               ? {
-                  uri: avatar,
+                  uri: assignee.avatar,
                 }
               : require('@/assets/images/default-avatar.png')
           }

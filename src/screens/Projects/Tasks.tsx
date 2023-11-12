@@ -41,7 +41,7 @@ const Tasks = () => {
       setProjectTasks(tasksTemp || null);
     }
     setIsLoading(false);
-  }, [tasks, project]);
+  }, [project]);
 
   const clickCreateTask = () => {
     navigation.navigate('CreateTask', {projectId: project!.id, taskId: null});

@@ -7,6 +7,7 @@ import {storeData} from './useAsyncStorage';
 export const useUser = () => {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.user);
+  const {colleagues} = useAppSelector(state => state.colleagues);
 
   const getUser = async (id: string) => {
     const doc = await firestore().collection('users').doc(id).get();
@@ -61,9 +62,28 @@ export const useUser = () => {
     }
   };
 
+  const getLocalUserById = async (id: string | null) => {
+    if (!id) return null;
+
+    if (user?.id == id) return user;
+
+    const colleague = colleagues?.find(item => id == item.colleagueId);
+    if (colleague) {
+      return {
+        id: colleague.colleagueId,
+        username: colleague.colleagueUsername,
+        avatar: colleague.colleagueAvatar,
+        email: colleague.colleagueEmail,
+      } as IUser;
+    } else {
+      return await getUser(id);
+    }
+  };
+
   return {
     getUser,
     getUserByUsername,
     updateUser,
+    getLocalUserById,
   };
 };

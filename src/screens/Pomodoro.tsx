@@ -28,6 +28,8 @@ const Pomodoro: React.FC = () => {
     useNavigation<AppStackScreenProps<'Pomodoro'>['navigation']>();
   const route = useRoute<AppStackScreenProps<'Pomodoro'>['route']>();
 
+  const {user} = useAppSelector(state => state.user);
+
   const {updateTask} = useTask();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -75,6 +77,8 @@ const Pomodoro: React.FC = () => {
           ...task,
           isDone,
           pomodoroCount: task.pomodoroCount + 1,
+          completedBy: isDone ? user!.id : null,
+          completedAt: isDone ? new Date().toISOString() : '',
         };
 
         setTask(newTask);

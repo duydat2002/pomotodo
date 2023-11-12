@@ -1,5 +1,6 @@
 import {common} from '@/assets/styles';
 import {useActivedColors, useAppSelector} from '@/hooks';
+import {useUser} from '@/hooks/useUser';
 import {IProject, ITask} from '@/types';
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View, TouchableHighlight} from 'react-native';
@@ -16,6 +17,8 @@ const ProjectChart: React.FC<IProps> = ({project}) => {
   const {tasks} = useAppSelector(state => state.tasks);
   const {colleagues} = useAppSelector(state => state.colleagues);
 
+  const {getLocalUserById} = useUser();
+
   const [tasksInProject, setTasksInProject] = useState<ITask[] | null>(null);
   const [pieData, setPieData] = useState<any[]>([]);
   const [selectedPie, setSelectedPie] = useState<any>(null);
@@ -31,41 +34,38 @@ const ProjectChart: React.FC<IProps> = ({project}) => {
   }, [project]);
 
   useEffect(() => {
-    if (tasksInProject) {
-      const datas = projectOverview(tasksInProject);
-      setPieData(datas);
-      setTotalTasks(tasksInProject.length);
-    } else {
-      setPieData([]);
-      setTotalTasks(0);
-    }
+    const getPieData = async () => {
+      if (tasksInProject) {
+        const datas = await projectOverview(tasksInProject);
+        setPieData(datas);
+        setTotalTasks(tasksInProject.length);
+      } else {
+        setPieData([]);
+        setTotalTasks(0);
+      }
+    };
+
+    getPieData();
   }, [tasksInProject]);
 
-  const getUserNameAssignee = (id: string | null) => {
-    let name = '';
-    if (!id) {
-      name = 'Unassigned';
-    } else if (id == user?.id) {
-      name = user!.username;
-    } else {
-      name =
-        colleagues?.find(colleague => colleague.colleagueId == id)
-          ?.colleagueUsername || 'user';
-    }
-    return name;
-  };
-
-  const projectOverview = (tasksInput: ITask[]) => {
+  const projectOverview = async (tasksInput: ITask[]) => {
     const taskCountObj: any = {};
     taskCountObj['Unfinished'] = 0;
     const overview: any[] = [];
 
-    tasksInput.forEach(item => {
-      if (item.isDone) {
-        const name = getUserNameAssignee(item.assignee);
+    console.log('tasks');
+    const usersTemp = await Promise.all(
+      tasksInput.map(async item => {
+        return item.isDone ? await getLocalUserById(item.completedBy) : null;
+      }),
+    );
 
-        taskCountObj[name] =
-          taskCountObj[name] == undefined ? 1 : taskCountObj[name] + 1;
+    usersTemp.forEach(item => {
+      if (item) {
+        taskCountObj[item.username] =
+          taskCountObj[item.username] == undefined
+            ? 1
+            : taskCountObj[item.username] + 1;
       } else {
         taskCountObj['Unfinished']++;
       }
@@ -76,14 +76,6 @@ const ProjectChart: React.FC<IProps> = ({project}) => {
       value: taskCountObj['Unfinished'],
       color: '#ff5757',
     });
-    if (taskCountObj['Unassigned'])
-      overview.unshift({
-        text: 'Unassigned',
-        value: taskCountObj['Unassigned'],
-        color: '#a8a8a8',
-      });
-
-    delete taskCountObj['Unassigned'];
     delete taskCountObj['Unfinished'];
 
     const sortTasks = Object.entries(taskCountObj)

@@ -68,6 +68,8 @@ const CreateTask = () => {
     deadline: null,
     assignee: null,
     createdAt: '',
+    completedBy: null,
+    completedAt: '',
   });
   const [isReady, setIsReady] = useState(false);
   const [QRValue, setQRValue] = useState('');
@@ -253,9 +255,12 @@ const CreateTask = () => {
   };
 
   const checkTask = () => {
+    const isTaskDone = !task.isDone;
     setTask({
       ...task,
-      isDone: !task.isDone,
+      isDone: isTaskDone,
+      completedBy: isTaskDone ? user!.id : null,
+      completedAt: isTaskDone ? new Date().toISOString() : '',
     });
   };
 
@@ -282,6 +287,8 @@ const CreateTask = () => {
         pomodoroCount: pomodoros,
         totalPomodoro: pomodoros,
         longBreak: pomodoroLength,
+        completedBy: user!.id,
+        completedAt: new Date().toISOString(),
       });
     } else {
       setTask({
@@ -289,6 +296,8 @@ const CreateTask = () => {
         isDone: false,
         totalPomodoro: pomodoros,
         longBreak: pomodoroLength,
+        completedBy: null,
+        completedAt: '',
       });
     }
     setActivePomodoroPicker(false);
@@ -431,7 +440,11 @@ const CreateTask = () => {
                     },
                   ]}>
                   {task.isDone && (
-                    <Feather name="check" size={16} color="#fff" />
+                    <Feather
+                      name="check"
+                      size={16}
+                      color={activedColors.primary}
+                    />
                   )}
                 </TouchableOpacity>
                 <UInput

@@ -13,4 +13,6 @@ export interface ITask {
   deadline: string | null;
   assignee: string | null;
   createdAt: string;
+  completedBy: string | null;
+  completedAt: string;
 }
