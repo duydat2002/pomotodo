@@ -94,11 +94,10 @@ const Projects = () => {
       <Header title="Your Projects">
         {{
           rightChild: (
-            <AntDesign
-              name="swap"
+            <MaterialCommunityIcons
+              name="sort"
               size={24}
               color={activedColors.text}
-              style={{transform: [{rotateZ: '90deg'}]}}
               onPress={() => setActiveSort(true)}
             />
           ),

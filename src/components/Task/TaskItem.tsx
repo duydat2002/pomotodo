@@ -24,6 +24,7 @@ import {useNavigation} from '@react-navigation/native';
 import {AppStackScreenProps} from '@/types';
 import {useTask} from '@/hooks/useTask';
 import {useUser} from '@/hooks/useUser';
+import {timeFromNowFormat} from '@/utils';
 
 interface IProps {
   task: ITask;
@@ -202,6 +203,18 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
             </View>
           )}
         </View>
+        {task.deadline && (
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <AntDesign name="calendar" size={14} color={activedColors.error} />
+            <Text
+              style={[
+                common.small,
+                {marginLeft: 1, color: activedColors.error},
+              ]}>
+              {timeFromNowFormat(task.deadline)}
+            </Text>
+          </View>
+        )}
       </View>
       <TouchableOpacity
         activeOpacity={0.7}
@@ -224,7 +237,7 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 50,
+    // height: 50,
     marginHorizontal: 16,
     padding: 8,
     borderRadius: 8,

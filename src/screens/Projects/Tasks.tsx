@@ -2,9 +2,11 @@ import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
+  Text,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ITask} from '@/types';
@@ -15,6 +17,10 @@ import {MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types';
+import {common} from '@/assets/styles';
+import moment from 'moment';
+import {timeFromNowFormat} from '@/utils';
+import SelectRadioModal from '@/components/Modal/SelectRadioModal';
 
 const Tasks = () => {
   const activedColors = useActivedColors();
@@ -27,34 +33,109 @@ const Tasks = () => {
   const {projects, project} = useAppSelector(state => state.projects);
   const {tasks} = useAppSelector(state => state.tasks);
 
-  const [projectTasks, setProjectTasks] = useState<ITask[] | null>(null);
+  const [uncompletedTasks, setUncompletedTasks] = useState<ITask[]>([]);
+  const [groupCompletedTasks, setGroupCompletedTasks] = useState<{
+    [date: string]: ITask[];
+  }>({});
   const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+  const [activeSort, setActiveSort] = useState(false);
+  const [sortType, setSortType] = useState('auto');
+
+  const sortItems = [
+    {key: 'auto', value: 'Auto'},
+    {key: 'deadline', value: 'Deadline'},
+    {key: 'priority', value: 'Priority'},
+  ];
 
   useEffect(() => {
     setIsOwner(project?.ownerId == user?.id);
 
     if (projects) {
-      const tasksTemp = tasks?.filter(
+      const projectTasks = tasks?.filter(
         task => task.projectId == route.params?.projectId,
       );
-      setProjectTasks(tasksTemp || null);
+      const completeTasksTemp: ITask[] = [];
+      const uncompleteTasksTemp: ITask[] = [];
+
+      projectTasks?.forEach(task => {
+        if (task.isDone) completeTasksTemp.push(task);
+        else uncompleteTasksTemp.push(task);
+      });
+
+      setGroupCompletedTasks(groupCompletedTasksByDate(completeTasksTemp));
+      setUncompletedTasks(uncompleteTasksTemp);
     }
     setIsLoading(false);
   }, [project]);
+
+  useEffect(() => {
+    if (uncompletedTasks.length > 0) {
+      setUncompletedTasks(sortUncompletedTasks(uncompletedTasks));
+      setActiveSort(false);
+    }
+  }, [sortType]);
 
   const clickCreateTask = () => {
     navigation.navigate('CreateTask', {projectId: project!.id, taskId: null});
   };
 
+  const sortUncompletedTasks = (uncompletedTasks: ITask[]) => {
+    const uncompletedTasksTemp = uncompletedTasks.slice();
+
+    switch (sortType) {
+      case 'auto':
+        uncompletedTasksTemp.sort(
+          (t1, t2) => Date.parse(t1.createdAt) - Date.parse(t2.createdAt),
+        );
+        break;
+      case 'deadline':
+        uncompletedTasksTemp.sort((t1, t2) =>
+          !t1.deadline
+            ? 1
+            : !t2.deadline
+            ? -1
+            : Date.parse(t1.deadline) - Date.parse(t2.deadline),
+        );
+        break;
+      case 'priority':
+        const priorityLevel = {high: 3, medium: 2, low: 1, none: 0};
+        uncompletedTasksTemp.sort(
+          (t1, t2) => priorityLevel[t2.priority] - priorityLevel[t1.priority],
+        );
+        break;
+    }
+
+    return uncompletedTasksTemp;
+  };
+
+  const groupCompletedTasksByDate = (completedTasks: ITask[]) => {
+    const grouped: {[date: string]: ITask[]} = {};
+
+    completedTasks
+      .sort((t1, t2) => Date.parse(t2.completedAt) - Date.parse(t1.completedAt))
+      .forEach(task => {
+        const dateTemp = timeFromNowFormat(task.completedAt);
+
+        if (!grouped[dateTemp]) grouped[dateTemp] = [];
+
+        grouped[dateTemp].push(task);
+      });
+
+    return grouped;
+  };
+
   if (!project) return null;
 
   return (
-    <SafeView>
+    <SafeView hasDismissKeyboard={false}>
       <Header title={project.name} hasBack>
         {{
           rightChild: (
-            <TouchableOpacity activeOpacity={0.7} onPress={() => {}}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setActiveSort(true)}>
               <MaterialCommunityIcons
                 name="sort"
                 size={24}
@@ -100,21 +181,74 @@ const Tasks = () => {
                 number={project?.taskComplete}
               />
             </View>
-            <FlatList
-              style={{marginTop: 20}}
-              data={projectTasks}
-              keyExtractor={(item, index) => item.name + index}
-              renderItem={({item}) => (
-                <TaskItem
-                  task={item}
-                  onPress={() => {
-                    navigation.navigate('CreateTask', {
-                      projectId: item.projectId,
-                      taskId: item.id,
-                    });
-                  }}
-                />
-              )}
+            <ScrollView>
+              <View style={{paddingBottom: 100}}>
+                {uncompletedTasks.map(task => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onPress={() => {
+                      navigation.navigate('CreateTask', {
+                        projectId: task.projectId,
+                        taskId: task.id,
+                      });
+                    }}
+                  />
+                ))}
+                {Object.keys(groupCompletedTasks).length > 0 && (
+                  <View style={{marginTop: 20}}>
+                    <Text
+                      style={[
+                        common.small,
+                        styles.buttonShowMore,
+                        {
+                          backgroundColor: activedColors.primaryLight,
+                        },
+                      ]}
+                      onPress={() =>
+                        setShowCompletedTasks(!showCompletedTasks)
+                      }>
+                      {showCompletedTasks
+                        ? 'Hide completed tasks'
+                        : 'Show completed tasks'}
+                    </Text>
+                    {showCompletedTasks &&
+                      Object.keys(groupCompletedTasks).map(date => (
+                        <View key={date} style={{marginTop: 20}}>
+                          <Text
+                            style={[
+                              common.text,
+                              {marginLeft: 16, color: activedColors.textSec},
+                            ]}>
+                            {date}
+                          </Text>
+                          {groupCompletedTasks[date].map(task => (
+                            <TaskItem
+                              key={task.id}
+                              task={task}
+                              onPress={() => {
+                                navigation.navigate('CreateTask', {
+                                  projectId: task.projectId,
+                                  taskId: task.id,
+                                });
+                              }}
+                            />
+                          ))}
+                        </View>
+                      ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+          <View style={{position: 'absolute'}}>
+            <SelectRadioModal
+              visible={activeSort}
+              title="Sort by"
+              selected={sortType}
+              items={sortItems}
+              onSelect={selected => setSortType(selected)}
+              onClose={() => setActiveSort(false)}
             />
           </View>
           {isOwner && (
@@ -143,6 +277,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     padding: 8,
     borderRadius: 8,
+    marginBottom: 20,
   },
   createTaskButton: {
     position: 'absolute',
@@ -152,5 +287,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  buttonShowMore: {
+    alignSelf: 'center',
+    marginBottom: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    color: '#fff',
   },
 });
