@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import SafeView from '@/components/Layout/SafeView';
 import {
   StyleSheet,
@@ -6,21 +6,25 @@ import {
   TouchableOpacity,
   View,
   ToastAndroid,
-  KeyboardAvoidingView,
   FlatList,
 } from 'react-native';
 import Header from '@/components/Layout/Header';
 import UInput from '@/components/UI/UInput';
 import {common} from '@/assets/styles';
 import {useActivedColors, useAppSelector} from '@/hooks';
-import {generatorId, validateEmail} from '@/utils';
+import {generatorId} from '@/utils';
 import {useNotification} from '@/hooks/useNotification';
 import {useUser} from '@/hooks/useUser';
 import ColleagueItem from '@/components/Home/ColleagueItem';
 import {useColleague} from '@/hooks/useColleague';
+import {Ionicons} from '@expo/vector-icons';
+import {useNavigation} from '@react-navigation/native';
+import {HomeStackScreenProps} from '@/types';
 
 const Colleagues: React.FC = () => {
   const activedColors = useActivedColors();
+  const navigation =
+    useNavigation<HomeStackScreenProps<'Colleagues'>['navigation']>();
 
   const {user} = useAppSelector(state => state.user);
   const {colleagues} = useAppSelector(state => state.colleagues);
@@ -87,7 +91,21 @@ const Colleagues: React.FC = () => {
 
   return (
     <SafeView>
-      <Header hasBack title="Colleagues"></Header>
+      <Header hasBack title="Colleagues">
+        {{
+          rightChild: (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('JoinColleague')}>
+              <Ionicons
+                name="qr-code-outline"
+                size={22}
+                color={activedColors.text}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      </Header>
       <View style={[common.container]}>
         <View
           style={{width: '100%', flexDirection: 'row', alignItems: 'center'}}>

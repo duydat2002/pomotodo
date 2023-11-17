@@ -54,7 +54,7 @@ const QRModal: React.FC<IProps> = ({value, onClickOutside, onClose}) => {
             QR Code
           </Text>
           <Text style={[common.text, {color: activedColors.text}]}>
-            Scan the QR code to join this task
+            Scan the QR code to join colleague
           </Text>
         </View>
         <View ref={viewToSnapshot} style={styles.qrWrapper}>

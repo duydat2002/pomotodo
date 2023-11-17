@@ -19,7 +19,11 @@ const Header: React.FC<IProps> = ({title, children, hasBack = false}) => {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {borderBlockColor: activedColors.backgroundLight},
+      ]}>
       {children?.leftChild}
       {hasBack && (
         <FontAwesome
@@ -55,7 +59,6 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBlockColor: '#f1f1f1',
   },
   title: {
     flex: 1,

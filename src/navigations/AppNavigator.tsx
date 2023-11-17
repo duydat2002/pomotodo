@@ -49,8 +49,9 @@ const AppNavigator: React.FC = () => {
       <Tab.Screen
         name="HomeStack"
         component={HomeNavigator}
-        options={() => ({
+        options={({route}) => ({
           tabBarStyle: {
+            display: getTabBarVisibility(route),
             backgroundColor: activedColors.background,
             paddingTop: 5,
             height: 60,

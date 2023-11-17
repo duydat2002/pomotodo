@@ -6,7 +6,6 @@ import Tasks from '@/screens/Projects/Tasks';
 import CreateTask from '@/screens/Projects/CreateTask';
 import CreateProject from '@/screens/Projects/CreateProject';
 import {ProjectsStackParamList} from '@/types';
-import JoinTask from '@/screens/Projects/JoinTask';
 
 const Stack = createNativeStackNavigator<ProjectsStackParamList>();
 
@@ -36,7 +35,6 @@ const ProjectNavigator = () => {
       <Stack.Screen name="Tasks" component={Tasks} />
       <Stack.Screen name="CreateTask" component={CreateTask} />
       <Stack.Screen name="CreateProject" component={CreateProject} />
-      <Stack.Screen name="JoinTask" component={JoinTask} />
     </Stack.Navigator>
   );
 };

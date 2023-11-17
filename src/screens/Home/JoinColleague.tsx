@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Button,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {common} from '@/assets/styles';
 import SafeView from '@/components/Layout/SafeView';
@@ -13,7 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {Feather, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {IQR, ProjectsStackScreenProps} from '@/types';
+import {HomeStackScreenProps, IUser} from '@/types';
 import {
   BarCodeScanningResult,
   Camera,
@@ -21,30 +22,36 @@ import {
   FlashMode,
 } from 'expo-camera';
 import {BarCodeScanner} from 'expo-barcode-scanner';
-import JoinTaskModal from '@/components/Modal/JoinTaskModal';
 import {APP_QR_ID} from '@/constants';
-import {useProject} from '@/hooks/useProject';
-import {useTask} from '@/hooks/useTask';
 import {useColleague} from '@/hooks/useColleague';
 import {generatorId} from '@/utils';
+import QRModal from '@/components/Modal/QRModal';
+import InviteColleagueModal from '@/components/Modal/InviteColleagueModal';
+import {useUser} from '@/hooks/useUser';
+import {useNotification} from '@/hooks/useNotification';
 
-const JoinTask = () => {
+const JoinColleague: React.FC = () => {
   const activedColors = useActivedColors();
   const navigation =
-    useNavigation<ProjectsStackScreenProps<'JoinTask'>['navigation']>();
-  const route = useRoute<ProjectsStackScreenProps<'JoinTask'>['route']>();
+    useNavigation<HomeStackScreenProps<'JoinColleague'>['navigation']>();
+  const route = useRoute<HomeStackScreenProps<'JoinColleague'>['route']>();
 
-  const {createProject} = useProject();
-  const {createTask} = useTask();
-  const {addColleagues} = useColleague();
+  const {getUser} = useUser();
+  const {addColleague} = useColleague();
+  const {createNotification} = useNotification();
 
   const {user} = useAppSelector(state => state.user);
+  const {colleagues} = useAppSelector(state => state.colleagues);
 
-  const [data, setData] = useState<IQR | null>(null);
   const [type, setType] = useState(CameraType.back);
   const [flashMode, setFlashMode] = useState(FlashMode.off);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+
   const [activeModal, setActiveModal] = useState(false);
+  const [activeQRCode, setActiveQRCode] = useState(false);
+  const [userQR, setUserQR] = useState<IUser | null>(null);
+  const [loadingInvite, setLoadingInvite] = useState(false);
+  const [loadingQR, setLoadingQR] = useState(false);
 
   const handleBarCodeScanned = ({data}: BarCodeScanningResult) => {
     checkData(data);
@@ -72,20 +79,26 @@ const JoinTask = () => {
     }
   };
 
-  const checkData = (data: string) => {
+  const checkData = async (data: string) => {
     try {
-      const value = JSON.parse(data);
+      setLoadingQR(true);
+      const qrData = JSON.parse(data);
 
       if (
-        typeof value == 'object' &&
-        'id' in value &&
-        value.id == APP_QR_ID &&
-        'project' in value &&
-        'task' in value &&
-        'owner' in value
+        typeof qrData == 'object' &&
+        'id' in qrData &&
+        qrData.id == APP_QR_ID &&
+        'userId' in qrData
       ) {
-        setData(value);
-        setActiveModal(true);
+        const userTemp = await getUser(qrData.userId);
+
+        if (userTemp) {
+          setUserQR(userTemp);
+          setActiveModal(true);
+        } else {
+          setActiveModal(false);
+          ToastAndroid.show('This user was not found!', ToastAndroid.SHORT);
+        }
       } else {
         setActiveModal(false);
         ToastAndroid.show('Invalid QR Code!', ToastAndroid.SHORT);
@@ -93,27 +106,57 @@ const JoinTask = () => {
     } catch (error) {
       setActiveModal(false);
       ToastAndroid.show('Invalid QR Code!', ToastAndroid.SHORT);
+    } finally {
+      setLoadingQR(false);
     }
   };
 
-  const join = async () => {
-    if (data && data.owner.id != user!.id) {
-      console.log('join');
-      createTask(data.task);
-      createProject(data.project);
-      // Add project owner to colleague
-      await addColleagues([
-        {
+  const handleInvite = async () => {
+    setLoadingInvite(true);
+
+    if (userQR?.username == user!.username) {
+      ToastAndroid.show('It you!', ToastAndroid.SHORT);
+    } else {
+      let alreadyOnTeam = false;
+      colleagues?.forEach(item => {
+        if (item.colleagueUsername == userQR?.username) {
+          ToastAndroid.show(
+            'This user is already on your colleague!',
+            ToastAndroid.SHORT,
+          );
+          alreadyOnTeam = true;
+          return;
+        }
+      });
+
+      if (!alreadyOnTeam) {
+        await addColleague({
           id: generatorId(),
           userId: user!.id,
-          colleagueId: data.owner.id,
-          colleagueUsername: data.owner.username || '',
-          colleagueAvatar: data.owner.avatar,
+          colleagueId: userQR!.id,
+          colleagueUsername: userQR!.username,
+          colleagueAvatar: userQR!.avatar,
+          colleagueEmail: userQR!.email,
           isAccept: false,
-        },
-      ]);
+        });
+        await createNotification({
+          id: generatorId(),
+          senderId: user!.id,
+          senderUsername: user!.username,
+          senderAvatar: user!.avatar,
+          receiverId: userQR!.id,
+          type: 'invite',
+          subType: 'invite',
+          isRead: false,
+          isResponded: false,
+          content: 'invited you to team',
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
-    navigation.navigate('Projects');
+
+    setLoadingInvite(false);
+    setActiveModal(false);
   };
 
   function toggleCameraType() {
@@ -182,6 +225,12 @@ const JoinTask = () => {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}
+            onPress={() => setActiveQRCode(true)}
+            style={[styles.button, {width: 'auto', paddingHorizontal: 10}]}>
+            <Text style={{color: '#fff'}}>My QR code</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
             onPress={toggleFlash}
             style={[styles.button]}>
             <Ionicons
@@ -195,6 +244,11 @@ const JoinTask = () => {
             />
           </TouchableOpacity>
         </View>
+        {loadingQR && (
+          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+            <ActivityIndicator size={40} color={activedColors.textSec} />
+          </View>
+        )}
         <View style={[styles.buttonsBottom]}>
           <TouchableOpacity activeOpacity={0.8} onPress={openImage} style={{}}>
             <View style={[styles.button]}>
@@ -214,20 +268,29 @@ const JoinTask = () => {
           </TouchableOpacity>
         </View>
         <View style={{position: 'absolute'}}>
-          <JoinTaskModal
-            visible={activeModal}
-            value={data}
-            onJoin={join}
-            onClickOutside={() => setActiveModal(false)}
-            onClose={() => setActiveModal(false)}
-          />
+          {userQR && (
+            <InviteColleagueModal
+              visible={activeModal}
+              user={userQR}
+              onClose={() => setActiveModal(false)}
+              onInvite={handleInvite}
+              loadingInvite={loadingInvite}
+            />
+          )}
+          {activeQRCode && (
+            <QRModal
+              value={JSON.stringify({id: APP_QR_ID, userId: user!.id})}
+              onClickOutside={() => setActiveQRCode(false)}
+              onClose={() => setActiveQRCode(false)}
+            />
+          )}
         </View>
       </SafeView>
     </View>
   );
 };
 
-export default JoinTask;
+export default JoinColleague;
 
 const styles = StyleSheet.create({
   container: {

@@ -5,6 +5,7 @@ import {HomeStackParamList} from '@/types';
 import Home from '@/screens/Home/Home';
 import Notification from '@/screens/Home/Notification';
 import Colleagues from '@/screens/Home/Colleagues';
+import JoinColleague from '@/screens/Home/JoinColleague';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
@@ -18,6 +19,7 @@ const HomeNavigator = () => {
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Notification" component={Notification} />
       <Stack.Screen name="Colleagues" component={Colleagues} />
+      <Stack.Screen name="JoinColleague" component={JoinColleague} />
     </Stack.Navigator>
   );
 };
