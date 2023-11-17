@@ -56,7 +56,10 @@
     "react-native-view-shot": "3.7.0",
     "react-qr-code": "^2.0.12",
     "react-redux": "^8.1.2",
-    "redux": "^4.2.1"
+    "redux": "^4.2.1",
+    "expo-notifications": "~0.20.1",
+    "expo-device": "~5.4.0",
+    "expo-av": "~13.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

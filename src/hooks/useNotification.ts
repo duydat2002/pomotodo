@@ -7,6 +7,7 @@ import {
   setNotifications,
 } from '@/store/notifications.slice';
 import {storeData} from './useAsyncStorage';
+import * as Notifications from 'expo-notifications';
 
 export const useNotification = () => {
   const dispatch = useAppDispatch();
@@ -123,7 +124,30 @@ export const useNotification = () => {
     }, [notificationId]);
   };
 
+  const scheduleNotification = async (
+    identifier?: string,
+    content?: Notifications.NotificationContentInput,
+    trigger?: Notifications.NotificationTriggerInput,
+  ) => {
+    await Notifications.scheduleNotificationAsync({
+      identifier,
+      content: {
+        sound: 'daydiongchauoi.wav',
+        vibrate: [0, 250, 250, 250],
+        priority: 'max',
+        ...content,
+      },
+      trigger: trigger || null,
+    });
+  };
+
+  const cancelScheduledNotification = async (identifier: string) => {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+  };
+
   return {
+    scheduleNotification,
+    cancelScheduledNotification,
     createNotification,
     updateNotification,
     getNotificationsFS,

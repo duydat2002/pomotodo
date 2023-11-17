@@ -5,7 +5,9 @@ import {
   View,
   TouchableOpacity,
   ToastAndroid,
+  Platform,
 } from 'react-native';
+import * as Device from 'expo-device';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {FontAwesome, MaterialIcons} from '@expo/vector-icons';
 import {common} from '@/assets/styles';
@@ -21,6 +23,18 @@ import {AppStackScreenProps} from '@/types';
 import Header from '@/components/Layout/Header';
 import SafeView from '@/components/Layout/SafeView';
 import {useTask} from '@/hooks/useTask';
+import * as Notifications from 'expo-notifications';
+import moment from 'moment';
+import {useNotification} from '@/hooks/useNotification';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const Pomodoro: React.FC = () => {
   const activedColors = useActivedColors();
@@ -31,11 +45,14 @@ const Pomodoro: React.FC = () => {
   const {user} = useAppSelector(state => state.user);
 
   const {updateTask} = useTask();
+  const {scheduleNotification, cancelScheduledNotification} = useNotification();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLongBreak, setIsLongBreak] = useState(true);
   const [duration, setDuration] = useState(0);
+  const [remainingTime, setRemainingTime] = useState(0);
   const [key, setKey] = useState(0);
+  const [activeModalStop, setActiveModalStop] = useState(false);
 
   const [task, setTask] = useState<ITask | null>(null);
 
@@ -51,15 +68,50 @@ const Pomodoro: React.FC = () => {
   const resetPomodoro = () => {
     setIsPlaying(false);
     setKey(Math.random());
+    cancelScheduledNotification(isLongBreak ? 'longbreak' : 'shortbreak');
   };
 
-  const playStopPomodoro = () => {
+  const playStopPomodoro = async () => {
     setIsPlaying(!isPlaying);
+    if (!isPlaying && task) {
+      const date = moment().add(remainingTime, 'seconds').toDate();
+
+      if (isLongBreak) {
+        await scheduleNotification(
+          'longbreak',
+          {
+            title: '🎉 Pomodoro completed.',
+            body: 'Pomodoro completed, take a short break!',
+          },
+          {
+            channelId: 'timer',
+            date,
+          },
+        );
+      } else {
+        await scheduleNotification(
+          'shortbreak',
+          {
+            title: '☕ Breaktime is over.',
+            body: "Breaktime is over, it's time to work!",
+          },
+          {
+            channelId: 'timer',
+            date,
+          },
+        );
+      }
+    } else {
+      cancelScheduledNotification(isLongBreak ? 'longbreak' : 'shortbreak');
+    }
   };
 
-  const cancelTask = () => {
+  const handleConfirmStop = () => {
+    setIsPlaying(false);
     setTask(null);
     setKey(Math.random());
+    cancelScheduledNotification(isLongBreak ? 'longbreak' : 'shortbreak');
+    setActiveModalStop(false);
   };
 
   const chooseTask = () => {
@@ -154,6 +206,7 @@ const Pomodoro: React.FC = () => {
             duration={duration}
             colors={activedColors.secondary as ColorFormat}
             trailColor={activedColors.backgroundSec as ColorFormat}
+            onUpdate={setRemainingTime}
             onComplete={onCompleteTimer}>
             {({remainingTime}) => (
               <View style={{alignItems: 'center'}}>
@@ -162,7 +215,7 @@ const Pomodoro: React.FC = () => {
                     common.title,
                     {color: activedColors.text, fontWeight: EFontWeight.bold},
                   ]}>
-                  {secondsFormat(remainingTime)}
+                  {secondsFormat(task ? remainingTime : 0)}
                 </Text>
                 {isLongBreak && (
                   <Text style={[common.text, {color: activedColors.textSec}]}>
@@ -176,8 +229,12 @@ const Pomodoro: React.FC = () => {
         </View>
         <Text style={[common.text, {color: activedColors.textSec}]}>
           {isLongBreak
-            ? `Stay forcus for ${task ? task?.longBreak / 60 : 0} minutes`
-            : `Take a break for ${task ? task?.shortBreak / 60 : 0} minutes`}
+            ? `Stay forcus for ${
+                task ? (task?.longBreak / 60).toFixed(2) : 0
+              } minutes`
+            : `Take a break for ${
+                task ? (task?.shortBreak / 60).toFixed(2) : 0
+              } minutes`}
         </Text>
         <View style={styles.buttons}>
           <TouchableOpacity
@@ -211,11 +268,25 @@ const Pomodoro: React.FC = () => {
               styles.secondaryButton,
               {backgroundColor: activedColors.backgroundSec},
             ]}
-            onPress={cancelTask}
+            onPress={() => {
+              if (task) setActiveModalStop(true);
+            }}
             activeOpacity={0.8}>
             <MaterialIcons name="stop" size={30} color={activedColors.text} />
           </TouchableOpacity>
         </View>
+      </View>
+      <View style={{position: 'absolute'}}>
+        <ConfirmModal
+          visible={activeModalStop}
+          title="Are you sure?"
+          desc="Are you sure you want to cancel this pomodoro?"
+          comfirmText="Cancel"
+          onConfirm={handleConfirmStop}
+          onClose={() => {
+            setActiveModalStop(false);
+          }}
+        />
       </View>
     </SafeView>
   );

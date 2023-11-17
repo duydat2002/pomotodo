@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {Appearance} from 'react-native';
+import {Appearance, Platform} from 'react-native';
 import {getData, storeData, useAppDispatch, useAppSelector} from '@/hooks';
 import {changeTheme} from '@/store/theme.slice';
 import auth from '@react-native-firebase/auth';
@@ -22,6 +22,8 @@ import {useColleague} from '@/hooks/useColleague';
 import {useNotification} from '@/hooks/useNotification';
 import {setNotifications} from '@/store/notifications.slice';
 import {useUser} from '@/hooks/useUser';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 
 const RootNavigator: React.FC = () => {
   const theme = useAppSelector(state => state.theme.theme);
@@ -45,35 +47,6 @@ const RootNavigator: React.FC = () => {
   listenColleagues(user);
   listenProjects(user);
   listenTasks(projects);
-
-  // useEffect(() => {
-  //   console.log('chạy zo useEffect');
-  //   let subscriber = () => {};
-  //   if (projects) {
-  //     const projectsIds = projects.map(item => item.id);
-
-  //     subscriber = firestore()
-  //       .collection('tasks')
-  //       .where('projectId', 'in', projectsIds)
-  //       .orderBy('createdAt', 'asc')
-  //       .onSnapshot(async querySnapshot => {
-  //         console.log('querySnapshot');
-  //         if (querySnapshot) {
-  //           console.log('changed');
-  //           const tasks: ITask[] = [];
-  //           querySnapshot.forEach(doc => {
-  //             tasks.push({
-  //               id: doc.id,
-  //               ...doc.data(),
-  //             } as ITask);
-  //           });
-  //           dispatch(setTasks(tasks));
-  //           await storeData('tasks', tasks);
-  //         }
-  //       });
-  //   }
-  //   return () => subscriber();
-  // }, [projects]);
 
   // Theme
   const getThemeStorage = useCallback(async () => {
@@ -192,6 +165,51 @@ const RootNavigator: React.FC = () => {
 
     setLoadingData(false);
   }, [user]);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    let token = null;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('timer', {
+        name: 'Timer Notification Channel',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        sound: 'daydiongchauoi.wav',
+      });
+    }
+
+    if (Device.isDevice) {
+      const {status: existingStatus} =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const {status} = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return null;
+      }
+      // Learn more about projectId:
+      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+      // token = (
+      //   await Notifications.getExpoPushTokenAsync({
+      //     projectId: 'your-project-id',
+      //   })
+      // ).data;
+
+      token = (await Notifications.getDevicePushTokenAsync()).data as string;
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    return token;
+  }
 
   if (loadingUser && loadingData) {
     return <Splash />;
