@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import {useActivedColors, useAppDispatch} from '@/hooks';
 import {common} from '@/assets/styles';
-import {IAuth} from '@/types';
 import {Zocial, AntDesign, FontAwesome} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/native';
 import {EFontWeight} from '@/theme';
@@ -22,48 +21,34 @@ const SignIn: React.FC = () => {
   const navigation =
     useNavigation<AuthStackScreenProps<'SignIn'>['navigation']>();
 
-  const [authForm, setAuthForm] = useState<IAuth>({
-    email: '',
-    password: '',
-  });
-  const [authErr, setAuthErr] = useState<IAuth>({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errEmail, setErrEmail] = useState('');
+  const [errPassword, setErrPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  const setEmail = (value: string) => {
-    setAuthForm({...authForm, email: value});
-  };
-
-  const setPassword = (value: string) => {
-    setAuthForm({...authForm, password: value});
-  };
+  const [loadingSignIn, setLoadingSignIn] = useState(false);
 
   const handleSignIn = async () => {
-    const checkEmail = validateEmail(authForm.email);
-    const checkPassword = validatePassword(authForm.password);
+    setLoadingSignIn(true);
 
-    setAuthErr({
-      email: checkEmail,
-      password: checkPassword,
-    });
+    const checkEmail = validateEmail(email);
+    const checkPassword = validatePassword(password);
+
+    setErrEmail(checkEmail);
+    setErrPassword(checkPassword);
 
     if (checkEmail == '' && checkPassword == '') {
       const {signIn} = useAuth();
 
-      const user = await signIn(authForm.email, authForm.password);
+      const user = await signIn(email, password);
       if (user) {
         dispatch(setUser(user));
-        console.log(user);
       } else {
-        setAuthErr({
-          email: '',
-          password:
-            'Your password is incorrect. Please check your password again.',
-        });
+        setErrPassword('Your password is incorrect.');
       }
     }
+
+    setLoadingSignIn(false);
   };
 
   return (
@@ -80,7 +65,7 @@ const SignIn: React.FC = () => {
         <View style={{width: '100%'}}>
           <UInput
             style={styles.input}
-            value={authForm.email}
+            value={email}
             onChangeText={setEmail}
             placeholder="Email"
             keyboardType="email-address">
@@ -100,11 +85,11 @@ const SignIn: React.FC = () => {
               common.small,
               {color: activedColors.error, paddingHorizontal: 15},
             ]}>
-            {authErr.email}
+            {errEmail}
           </Text>
           <UInput
             style={styles.input}
-            value={authForm.password}
+            value={password}
             onChangeText={setPassword}
             placeholder="Password"
             secureTextEntry={!showPassword}>
@@ -133,10 +118,11 @@ const SignIn: React.FC = () => {
               common.small,
               {color: activedColors.error, paddingHorizontal: 15},
             ]}>
-            {authErr.password}
+            {errPassword}
           </Text>
           <UButton
             primary
+            loading={loadingSignIn}
             style={{borderRadius: 40, marginTop: 50}}
             onPress={handleSignIn}>
             <Text style={[common.buttonText, {color: '#fff'}]}>Sign In</Text>

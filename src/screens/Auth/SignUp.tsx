@@ -3,7 +3,6 @@ import {useNavigation} from '@react-navigation/native';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useActivedColors, useAppDispatch} from '@/hooks';
 import {common} from '@/assets/styles';
-import {IAuth} from '@/types';
 import {EFontWeight} from '@/theme';
 import {AntDesign, FontAwesome, Zocial} from '@expo/vector-icons';
 import {setUser} from '@/store/user.slice';
@@ -23,49 +22,36 @@ const SignUp = () => {
   const navigation =
     useNavigation<AuthStackScreenProps<'SignUp'>['navigation']>();
 
-  const [authForm, setAuthForm] = useState<IAuth>({
-    email: '',
-    password: '',
-  });
-  const [authErr, setAuthErr] = useState<IAuth>({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errEmail, setErrEmail] = useState('');
+  const [errPassword, setErrPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loadingSign, setLoadingSign] = useState(false);
-
-  const setEmail = (value: string) => {
-    setAuthForm({...authForm, email: value});
-  };
-
-  const setPassword = (value: string) => {
-    setAuthForm({...authForm, password: value});
-  };
+  const [loadingSignup, setLoadingSignup] = useState(false);
 
   const handleSignUp = async () => {
-    // Check email/password
-    const checkEmail = validateEmail(authForm.email);
-    const checkPassword = validatePassword(authForm.password);
+    setLoadingSignup(true);
 
-    setAuthErr({
-      email: checkEmail,
-      password: checkPassword,
-    });
+    // Check email/password
+    const checkEmail = validateEmail(email);
+    const checkPassword = validatePassword(password);
+
+    setErrEmail(checkEmail);
+    setErrPassword(checkPassword);
 
     if (checkEmail == '' && checkPassword == '') {
       const {signUp} = useAuth();
 
-      setLoadingSign(true);
-
-      const {user, err} = await signUp(authForm.email, authForm.password);
+      const {user, err} = await signUp(email, password);
 
       if (err) {
-        setAuthErr(err);
+        setErrEmail(err.email);
+        setErrPassword(err.password);
       } else {
         dispatch(setUser(user));
       }
 
-      setLoadingSign(false);
+      setLoadingSignup(false);
     }
   };
 
@@ -83,7 +69,7 @@ const SignUp = () => {
         <View style={{width: '100%'}}>
           <UInput
             style={styles.input}
-            value={authForm.email}
+            value={email}
             onChangeText={setEmail}
             placeholder="Email"
             keyboardType="email-address">
@@ -103,11 +89,11 @@ const SignUp = () => {
               common.small,
               {color: activedColors.error, paddingHorizontal: 15},
             ]}>
-            {authErr.email}
+            {errEmail}
           </Text>
           <UInput
             style={styles.input}
-            value={authForm.password}
+            value={password}
             onChangeText={setPassword}
             placeholder="Password"
             secureTextEntry={!showPassword}>
@@ -136,13 +122,13 @@ const SignUp = () => {
               common.small,
               {color: activedColors.error, paddingHorizontal: 15},
             ]}>
-            {authErr.password}
+            {errPassword}
           </Text>
           <UButton
             primary
+            loading={loadingSignup}
             style={{borderRadius: 40, marginTop: 50}}
-            onPress={handleSignUp}
-            disabled={loadingSign}>
+            onPress={handleSignUp}>
             <Text style={[common.buttonText, {color: '#fff'}]}>Sign up</Text>
           </UButton>
         </View>

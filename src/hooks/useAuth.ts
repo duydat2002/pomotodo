@@ -1,4 +1,4 @@
-import {IAuth, IUser} from '@/types';
+import {IUser} from '@/types';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
@@ -30,7 +30,7 @@ export const useAuth = () => {
         err: null,
       };
     } catch (error: any) {
-      let err: IAuth = {email: '', password: ''};
+      let err = {email: '', password: ''};
       switch (error.code) {
         case 'auth/invalid-email':
           err.email = 'Email is invalid - firebase auth';

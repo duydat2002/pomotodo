@@ -153,17 +153,7 @@ const Pomodoro: React.FC = () => {
 
   return (
     <SafeView>
-      <Header title={'Pomodoro Timer'}>
-        {{
-          rightChild: (
-            <FontAwesome
-              name="plus"
-              size={20}
-              style={{color: activedColors.text, padding: 8}}
-            />
-          ),
-        }}
-      </Header>
+      <Header title={'Pomodoro Timer'} />
       <View style={[common.container, {justifyContent: 'space-around'}]}>
         <View style={{width: '100%', alignItems: 'center'}}>
           {task ? (
