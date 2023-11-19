@@ -6,14 +6,16 @@ import {
   setHasNewNotification,
   setNotifications,
 } from '@/store/notifications.slice';
-import {storeData} from './useAsyncStorage';
+import {getData, storeData} from './useAsyncStorage';
 import * as Notifications from 'expo-notifications';
 
 export const useNotification = () => {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.user);
   const {colleagues} = useAppSelector(state => state.colleagues);
-  const {notifications} = useAppSelector(state => state.notifications);
+  const {notifications, hasNewNotification} = useAppSelector(
+    state => state.notifications,
+  );
 
   const createNotification = async (notification: INotification) => {
     try {
@@ -34,6 +36,32 @@ export const useNotification = () => {
         .collection('notifications')
         .doc(notificationId)
         .update(datasTemp);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updateNotifications = async (
+    senderId: string,
+    datas: Partial<INotification>,
+  ) => {
+    try {
+      const {id, ...newDatas} = datas;
+
+      const querySnaps = await firestore()
+        .collection('notifications')
+        .where('senderId', '==', senderId)
+        .get();
+
+      if (!querySnaps.empty) {
+        const batch = firestore().batch();
+
+        querySnaps.forEach(doc => {
+          batch.update(doc.ref, newDatas);
+        });
+
+        await batch.commit();
+      }
     } catch (error) {
       console.log(error);
     }
@@ -80,14 +108,16 @@ export const useNotification = () => {
               } as INotification);
             });
             dispatch(setNotifications(notifications));
-            await storeData('notifications', notifications);
 
-            querySnapshot.docChanges().forEach(change => {
-              if (change.type === 'added') {
-                dispatch(setHasNewNotification(true));
-                return;
-              }
-            });
+            const localNotifications = (await getData('notifications')) || [];
+            if (
+              !hasNewNotification &&
+              notifications.length > localNotifications.length
+            ) {
+              dispatch(setHasNewNotification(true));
+            }
+
+            await storeData('notifications', notifications);
           }
         });
 
@@ -150,6 +180,7 @@ export const useNotification = () => {
     cancelScheduledNotification,
     createNotification,
     updateNotification,
+    updateNotifications,
     getNotificationsFS,
     listenNotifications,
     listenNotification,

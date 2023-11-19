@@ -11,13 +11,10 @@ import AppNavigator from './AppNavigator';
 import Splash from '@/screens/Splash';
 import {setUser} from '@/store/user.slice';
 import {getConnection} from '@/utils';
-import {COLLEAGUES, PROJECTS, TASKS} from '@/fakeData';
 import {setColleagues} from '@/store/colleagues.slice';
 import {setTasks} from '@/store/tasks.slice';
 import {useProject} from '@/hooks/useProject';
 import {useTask} from '@/hooks/useTask';
-import {ITask} from '@/types';
-import firestore from '@react-native-firebase/firestore';
 import {useColleague} from '@/hooks/useColleague';
 import {useNotification} from '@/hooks/useNotification';
 import {setNotifications} from '@/store/notifications.slice';
@@ -86,6 +83,7 @@ const RootNavigator: React.FC = () => {
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(async user => {
       if (user) {
+        console.log('user');
         const userTemp = await getUser(user?.uid);
         dispatch(setUser(userTemp));
       }

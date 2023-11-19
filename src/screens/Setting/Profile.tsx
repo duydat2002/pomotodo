@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {useStorage} from '@/hooks/useStorage';
 import {useUser} from '@/hooks/useUser';
 import {useColleague} from '@/hooks/useColleague';
+import {useNotification} from '@/hooks/useNotification';
 
 const Profile = () => {
   const activedColors = useActivedColors();
@@ -25,6 +26,7 @@ const Profile = () => {
 
   const {updateUser, getUserByUsername} = useUser();
   const {updateColleagues} = useColleague();
+  const {updateNotifications} = useNotification();
   const {setUserAvatar} = useStorage();
 
   useEffect(() => {
@@ -81,11 +83,17 @@ const Profile = () => {
         username: username,
         fullname: fullname,
       }),
-      updateColleagues(user!.id, {
-        colleagueAvatar: urlAvatar || user?.avatar,
-        colleagueUsername: username,
-      }),
     ]);
+
+    updateColleagues(user!.id, {
+      colleagueAvatar: urlAvatar || user?.avatar,
+      colleagueUsername: username,
+    });
+
+    updateNotifications(user!.id, {
+      senderAvatar: urlAvatar || user?.avatar,
+      senderUsername: username,
+    });
 
     setIsLoading(false);
   };
