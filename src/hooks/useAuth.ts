@@ -1,6 +1,11 @@
 import {IUser} from '@/types';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 export const useAuth = () => {
   const signUp = async (email: string, password: string) => {
@@ -78,8 +83,59 @@ export const useAuth = () => {
     }
   };
 
+  const googleSignin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      const {idToken} = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCredential =
+        await auth().signInWithCredential(googleCredential);
+
+      const doc = await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .get();
+
+      if (doc.exists) {
+        return {
+          id: doc.id,
+          ...doc.data(),
+        } as IUser;
+      } else {
+        const userData = {
+          email: userCredential.user.email,
+          fullname: userCredential.user.displayName,
+          username: 'user123',
+          avatar: userCredential.user.photoURL,
+        };
+
+        await firestore()
+          .collection('users')
+          .doc(userCredential.user.uid)
+          .set(userData);
+
+        return {
+          id: userCredential.user.uid,
+          ...userData,
+        } as IUser;
+      }
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
+      return null;
+    }
+  };
+
   return {
     signUp,
     signIn,
+    googleSignin,
   };
 };

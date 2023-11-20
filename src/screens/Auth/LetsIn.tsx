@@ -12,12 +12,27 @@ import UButton from '@/components/UI/UButton';
 import Seperator from '@/components/Layout/Seperator';
 import SafeView from '@/components/Layout/SafeView';
 import {getUniqueId} from 'react-native-device-info';
+import auth from '@react-native-firebase/auth';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {useAuth} from '@/hooks/useAuth';
+
+GoogleSignin.configure({
+  webClientId:
+    '374578291201-u0epgegr9g1igrqkb8gbhuikijut4kdn.apps.googleusercontent.com',
+  offlineAccess: true,
+});
 
 const LetsIn: React.FC = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<AuthStackScreenProps<'LetsIn'>['navigation']>();
   const dispatch = useAppDispatch();
+
+  const {googleSignin} = useAuth();
 
   const noSignIn = async () => {
     const id = await getUniqueId();
@@ -27,6 +42,13 @@ const LetsIn: React.FC = () => {
         username: `user-${id}`,
       }),
     );
+  };
+
+  const onGoogleButtonPress = async () => {
+    const user = await googleSignin();
+    if (user) {
+      dispatch(setUser(user));
+    }
   };
 
   return (
@@ -77,7 +99,8 @@ const LetsIn: React.FC = () => {
                 borderColor: activedColors.border,
                 backgroundColor: activedColors.border,
               },
-            ]}>
+            ]}
+            onPress={onGoogleButtonPress}>
             <View style={{flexDirection: 'row'}}>
               <Image
                 style={[common.buttonIcon, {marginRight: 10}]}

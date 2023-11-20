@@ -30,6 +30,7 @@ import UButton from '@/components/UI/UButton';
 import auth from '@react-native-firebase/auth';
 import {setUser} from '@/store/user.slice';
 import SelectRadioModal from '@/components/Modal/SelectRadioModal';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const Setting = () => {
   const activedColors = useActivedColors();
@@ -81,6 +82,7 @@ const Setting = () => {
   const logout = async () => {
     if (auth().currentUser) {
       await auth().signOut();
+      await GoogleSignin.signOut();
     }
     await deleteAllData(['theme', 'netInfo']);
     dispatch(setUser(null));

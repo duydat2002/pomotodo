@@ -1,18 +1,35 @@
 {
   "project_info": {
     "project_number": "374578291201",
+    "firebase_url": "https://pomotodo-99f23-default-rtdb.firebaseio.com",
     "project_id": "pomotodo-99f23",
     "storage_bucket": "pomotodo-99f23.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:374578291201:android:adab601ca3c289b40a9600",
+        "mobilesdk_app_id": "1:374578291201:android:3d74188f80daec1e0a9600",
         "android_client_info": {
           "package_name": "com.duydat2002.pomodoro"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "374578291201-havhot3cstfkvoac8f8e999ssrprgapp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.duydat2002.pomodoro",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "374578291201-oahltovegvq856jkgsev5s5i1mjvqls7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.duydat2002.pomodoro",
+            "certificate_hash": "cc8fce59990813bc623d69e1d8ee54fd58f15131"
+          }
+        },
         {
           "client_id": "374578291201-u0epgegr9g1igrqkb8gbhuikijut4kdn.apps.googleusercontent.com",
           "client_type": 3

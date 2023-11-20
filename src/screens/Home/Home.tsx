@@ -157,9 +157,26 @@ const Home: React.FC = () => {
               />
             ))
           ) : (
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <ActivityIndicator size={30} color={activedColors.textSec} />
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <Text style={[common.text, {color: activedColors.text}]}>
+                You don't have any project yet.
+              </Text>
+              <Text style={[common.text, {color: activedColors.text}]}>
+                {"Let's create a "}
+                <Text
+                  style={[
+                    common.text,
+                    {color: activedColors.primary, fontWeight: '600'},
+                  ]}
+                  onPress={() =>
+                    navigation.navigate('ProjectsStack', {
+                      screen: 'CreateProject',
+                      initial: false,
+                    })
+                  }>
+                  new project
+                </Text>
+              </Text>
             </View>
           )}
         </View>
