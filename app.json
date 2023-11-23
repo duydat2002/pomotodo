@@ -93,6 +93,15 @@
             "./src/assets/sounds/alarm1.wav"
           ]
         }
+      ],
+      [
+        "react-native-fbsdk-next",
+        {
+          "appID": "1391242344799013",
+          "clientToken": "a3269071715fcb0fe89c6a56eecb67e3",
+          "displayName": "Pomotodo",
+          "scheme": "fb1391242344799013"
+        }
       ]
     ],
     "extra": {

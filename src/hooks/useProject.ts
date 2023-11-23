@@ -50,22 +50,21 @@ export const useProject = () => {
       }
     });
 
-    await Promise.all([
-      updateProjectLocal(projectId, {
-        totalTime,
-        remainingTime,
-        elapsedTime,
-        totalTask,
-        taskComplete,
-      }),
-      updateProject(projectId, {
-        totalTime,
-        remainingTime,
-        elapsedTime,
-        totalTask,
-        taskComplete,
-      }),
-    ]);
+    updateProjectLocal(projectId, {
+      totalTime,
+      remainingTime,
+      elapsedTime,
+      totalTask,
+      taskComplete,
+    });
+
+    await updateProject(projectId, {
+      totalTime,
+      remainingTime,
+      elapsedTime,
+      totalTask,
+      taskComplete,
+    });
   };
 
   const deleteProject = async (projectId: string) => {

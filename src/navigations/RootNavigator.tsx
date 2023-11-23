@@ -215,7 +215,7 @@ const RootNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {user ? <AppNavigator /> : <AuthNavigator />}
+      {user?.username ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };

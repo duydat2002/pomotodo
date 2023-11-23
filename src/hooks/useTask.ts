@@ -75,10 +75,10 @@ export const useTask = () => {
   const createTask = async (task: ITask) => {
     try {
       const {id, ...datas} = task;
-      await createTaskLocal(task);
+      createTaskLocal(task);
       await firestore().collection('tasks').doc(id).set(datas);
       const newTasks = tasks ? [...tasks, task] : [task];
-      await updateProjectInfo(task.projectId!, newTasks!);
+      updateProjectInfo(task.projectId!, newTasks!);
     } catch (error) {
       console.log(error);
     }

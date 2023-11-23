@@ -49,6 +49,7 @@ const SignUp = () => {
         setErrPassword(err.password);
       } else {
         dispatch(setUser(user));
+        navigation.navigate('FillProfile');
       }
 
       setLoadingSignup(false);

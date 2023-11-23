@@ -204,7 +204,7 @@ const CreateProject = () => {
         }
       });
 
-      await Promise.all(promise);
+      Promise.all(promise);
       navigation.navigate('Projects');
     }
   };

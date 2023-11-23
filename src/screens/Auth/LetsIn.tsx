@@ -32,7 +32,7 @@ const LetsIn: React.FC = () => {
     useNavigation<AuthStackScreenProps<'LetsIn'>['navigation']>();
   const dispatch = useAppDispatch();
 
-  const {googleSignin} = useAuth();
+  const {googleSignin, facebookSignin} = useAuth();
 
   const noSignIn = async () => {
     const id = await getUniqueId();
@@ -51,9 +51,16 @@ const LetsIn: React.FC = () => {
     }
   };
 
+  const onFacebookButtonPress = async () => {
+    const user = await facebookSignin();
+    if (user) {
+      dispatch(setUser(user));
+    }
+  };
+
   return (
     <SafeView>
-      <Header title={'Lets In'}>
+      {/* <Header title={'Lets In'}>
         {{
           rightChild: (
             <TouchableOpacity activeOpacity={0.7} onPress={noSignIn}>
@@ -63,7 +70,8 @@ const LetsIn: React.FC = () => {
             </TouchableOpacity>
           ),
         }}
-      </Header>
+      </Header> */}
+      <Header title={'Lets In'} />
       <View style={[common.container, {justifyContent: 'space-between'}]}>
         <Text
           style={[common.title, {color: activedColors.text, marginTop: 150}]}>
@@ -77,7 +85,8 @@ const LetsIn: React.FC = () => {
                 borderColor: activedColors.border,
                 backgroundColor: activedColors.border,
               },
-            ]}>
+            ]}
+            onPress={onFacebookButtonPress}>
             <View style={{flexDirection: 'row'}}>
               <Image
                 style={[common.buttonIcon, {marginRight: 10}]}

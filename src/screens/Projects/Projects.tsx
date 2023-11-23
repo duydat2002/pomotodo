@@ -69,7 +69,7 @@ const Projects = () => {
 
     setProjectsShow(projectsTemp);
     setActiveSort(false);
-  }, [sortType, searchInput]);
+  }, [sortType, searchInput, projects]);
 
   const handleClickProjectItem = (projectId: string) => {
     if (projects) {

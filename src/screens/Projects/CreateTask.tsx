@@ -180,7 +180,7 @@ const CreateTask = () => {
         assigneeUser.id != user?.id &&
         assigneeUser.id != oldAssigneeId
       ) {
-        await createNotification({
+        createNotification({
           id: generatorId(),
           senderId: user!.id,
           senderUsername: user!.username,
@@ -204,7 +204,7 @@ const CreateTask = () => {
         oldAssigneeId != user?.id &&
         oldAssigneeId != assigneeUser?.id
       ) {
-        await createNotification({
+        createNotification({
           id: generatorId(),
           senderId: user!.id,
           senderUsername: user!.username,

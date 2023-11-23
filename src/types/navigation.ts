@@ -10,6 +10,7 @@ import {IProject} from './project';
 // Auth
 export type AuthStackParamList = {
   LetsIn: undefined;
+  FillProfile: undefined;
   SignIn: undefined;
   SignUp: undefined;
 };

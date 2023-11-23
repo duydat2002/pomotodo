@@ -5,6 +5,7 @@ import LetsIn from '@/screens/Auth/LetsIn';
 import SignIn from '@/screens/Auth/SignIn';
 import SignUp from '@/screens/Auth/SignUp';
 import {AuthStackParamList} from '@/types';
+import FillProfile from '@/screens/Auth/FillProfile';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -15,6 +16,7 @@ const AuthNavigator: React.FC = () => {
         initialRouteName="LetsIn"
         screenOptions={{headerShown: false, animation: 'none'}}>
         <Stack.Screen name="LetsIn" component={LetsIn} />
+        <Stack.Screen name="FillProfile" component={FillProfile} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="SignUp" component={SignUp} />
       </Stack.Navigator>
