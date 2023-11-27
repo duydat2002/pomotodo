@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,6 +22,7 @@ import {HomeStackScreenProps} from '@/types';
 import {common} from '@/assets/styles';
 import ProjectItemBox from '@/components/Project/ProjectItemBox';
 import {setProject} from '@/store/projects.slice';
+import moment from 'moment';
 
 const Home: React.FC = () => {
   const activedColors = useActivedColors();
@@ -31,7 +32,28 @@ const Home: React.FC = () => {
 
   const {user} = useAppSelector(state => state.user);
   const {projects} = useAppSelector(state => state.projects);
+  const {tasks} = useAppSelector(state => state.tasks);
   const {hasNewNotification} = useAppSelector(state => state.notifications);
+
+  const [totalProject, setTotalProject] = useState(0);
+  const [totalTask, setTotalTask] = useState(0);
+  const [dailyTask, setDailyTask] = useState(0);
+  const [remainingTask, setRemainingTask] = useState(0);
+
+  useEffect(() => {
+    setTotalProject(projects?.length || 0);
+    setTotalTask(tasks?.length || 0);
+
+    let dailyTaskTemp = 0;
+    let remainingTaskTemp = 0;
+    tasks?.forEach(task => {
+      if (task.deadline && moment(task.deadline).isSame(moment(), 'day'))
+        dailyTaskTemp++;
+      if (!task.isDone) remainingTaskTemp++;
+    });
+    setDailyTask(dailyTaskTemp);
+    setRemainingTask(remainingTaskTemp);
+  }, [projects, tasks]);
 
   const handleClickProjectItem = (projectId: string) => {
     if (projects) {
@@ -119,7 +141,9 @@ const Home: React.FC = () => {
                 {'Daily Task(s)'}
               </Text>
             </View>
-            <Text style={[common.text, {color: '#fff'}]}>12 tasks</Text>
+            <Text style={[common.text, {color: '#fff'}]}>
+              {dailyTask} tasks
+            </Text>
           </View>
           <View style={[styles.statBox, {backgroundColor: '#fafafa'}]}>
             <View style={{flexDirection: 'row'}}>
@@ -129,10 +153,12 @@ const Home: React.FC = () => {
                   common.text,
                   {fontWeight: '600', marginLeft: 10, color: '#000'},
                 ]}>
-                {'In Progress'}
+                {'Remaining'}
               </Text>
             </View>
-            <Text style={[common.text, {color: '#000'}]}>9 tasks</Text>
+            <Text style={[common.text, {color: '#000'}]}>
+              {remainingTask} tasks
+            </Text>
           </View>
         </View>
         <Text

@@ -21,6 +21,8 @@ import {common} from '@/assets/styles';
 import moment from 'moment';
 import {timeFromNowFormat} from '@/utils';
 import SelectRadioModal from '@/components/Modal/SelectRadioModal';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+import {useTask} from '@/hooks/useTask';
 
 const Tasks = () => {
   const activedColors = useActivedColors();
@@ -28,6 +30,8 @@ const Tasks = () => {
     useNavigation<ProjectsStackScreenProps<'Tasks'>['navigation']>();
   const route = useRoute<ProjectsStackScreenProps<'Tasks'>['route']>();
   const dispatch = useAppDispatch();
+
+  const {deleteTask} = useTask();
 
   const {user} = useAppSelector(state => state.user);
   const {projects, project} = useAppSelector(state => state.projects);
@@ -42,6 +46,8 @@ const Tasks = () => {
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const [activeSort, setActiveSort] = useState(false);
   const [sortType, setSortType] = useState('auto');
+  const [activeDeleteTask, setActiveDeleteTask] = useState(false);
+  const [taskId, setTaskId] = useState('');
 
   const sortItems = [
     {key: 'auto', value: 'Auto'},
@@ -68,7 +74,7 @@ const Tasks = () => {
       setUncompletedTasks(uncompleteTasksTemp);
     }
     setIsLoading(false);
-  }, [project]);
+  }, [project, tasks]);
 
   useEffect(() => {
     if (uncompletedTasks.length > 0) {
@@ -79,6 +85,11 @@ const Tasks = () => {
 
   const clickCreateTask = () => {
     navigation.navigate('CreateTask', {projectId: project!.id, taskId: null});
+  };
+
+  const handleConfirmDelete = async () => {
+    await deleteTask(taskId);
+    setActiveDeleteTask(false);
   };
 
   const sortUncompletedTasks = (uncompletedTasks: ITask[]) => {
@@ -193,6 +204,10 @@ const Tasks = () => {
                         taskId: task.id,
                       });
                     }}
+                    onDelete={() => {
+                      setTaskId(task.id);
+                      setActiveDeleteTask(true);
+                    }}
                   />
                 ))}
                 {Object.keys(groupCompletedTasks).length > 0 && (
@@ -232,6 +247,10 @@ const Tasks = () => {
                                   taskId: task.id,
                                 });
                               }}
+                              onDelete={() => {
+                                setTaskId(task.id);
+                                setActiveDeleteTask(true);
+                              }}
                             />
                           ))}
                         </View>
@@ -249,6 +268,16 @@ const Tasks = () => {
               items={sortItems}
               onSelect={selected => setSortType(selected)}
               onClose={() => setActiveSort(false)}
+            />
+            <ConfirmModal
+              visible={activeDeleteTask}
+              title="Are you sure?"
+              desc="Are you sure you want to delete this task?"
+              comfirmText="Delete"
+              onConfirm={handleConfirmDelete}
+              onClose={() => {
+                setActiveDeleteTask(false);
+              }}
             />
           </View>
           {isOwner && (

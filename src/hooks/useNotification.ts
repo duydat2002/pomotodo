@@ -162,7 +162,7 @@ export const useNotification = () => {
     await Notifications.scheduleNotificationAsync({
       identifier,
       content: {
-        sound: 'daydiongchauoi.wav',
+        sound: 'archivo.wav',
         vibrate: [0, 250, 250, 250],
         priority: 'max',
         ...content,

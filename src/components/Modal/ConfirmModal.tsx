@@ -40,8 +40,17 @@ const ConfirmModal: React.FC<IProps> = ({
             backgroundColor: activedColors.input,
           },
         ]}>
-        <Text style={[common.subTitle, {marginBottom: 10}]}>{title}</Text>
-        <Text style={[common.text, {marginBottom: 20}]}>{desc}</Text>
+        <Text
+          style={[
+            common.subTitle,
+            {marginBottom: 10, color: activedColors.text},
+          ]}>
+          {title}
+        </Text>
+        <Text
+          style={[common.text, {marginBottom: 20, color: activedColors.text}]}>
+          {desc}
+        </Text>
         <View style={{flexDirection: 'row', alignSelf: 'flex-end', gap: 20}}>
           <UButton style={{flex: 1, backgroundColor: '#fff'}} onPress={onClose}>
             <Text style={[common.text, {color: activedColors.error}]}>

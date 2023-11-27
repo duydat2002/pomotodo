@@ -100,7 +100,7 @@ export const useTask = () => {
 
   const deleteTask = async (taskId: string) => {
     try {
-      await deleteTaskLocal(taskId);
+      deleteTaskLocal(taskId);
       await firestore().collection('tasks').doc(taskId).delete();
     } catch (error) {
       console.log(error);
@@ -197,7 +197,14 @@ export const useTask = () => {
 
   const deleteTaskLocal = async (taskId: string) => {
     if (tasks) {
+      const projectId = tasks.find(task => task.id == taskId)?.projectId;
+
       const newTasks = tasks.filter(item => item.id != taskId);
+
+      if (projectId) {
+        await updateProjectInfo(projectId, newTasks);
+      }
+
       dispatch(setTasks(newTasks));
       await storeData('tasks', newTasks);
     }

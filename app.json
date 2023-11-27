@@ -14,9 +14,7 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -90,7 +88,7 @@
           "color": "#ffffff",
           "sounds": [
             "./src/assets/sounds/daydiongchauoi.wav",
-            "./src/assets/sounds/alarm1.wav"
+            "./src/assets/sounds/archivo.wav"
           ]
         }
       ],

@@ -25,13 +25,17 @@ import {AppStackScreenProps} from '@/types';
 import {useTask} from '@/hooks/useTask';
 import {useUser} from '@/hooks/useUser';
 import {timeFromNowFormat} from '@/utils';
+import SwipeableItem, {
+  useSwipeableItemParams,
+} from 'react-native-swipeable-item';
 
 interface IProps {
   task: ITask;
   onPress?: () => void;
+  onDelete: () => void;
 }
 
-const TaskItem: React.FC<IProps> = ({task, onPress}) => {
+const TaskItem: React.FC<IProps> = ({task, onPress, onDelete}) => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<AppStackScreenProps<'ProjectsStack'>['navigation']>();
@@ -45,7 +49,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   const [assigneeUser, setAssigneeUser] = useState<IUser | null>(null);
   const [compeletedUser, setCompeletedUser] = useState<IUser | null>(null);
   const [taskDone, setTaskDone] = useState(task.isDone);
-  const [hasPemistion, setHasPemisstion] = useState(true);
+  const [hasPermistion, setHasPemisstion] = useState(true);
 
   useEffect(() => {
     setHasPemisstion(
@@ -64,7 +68,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   }, [task]);
 
   const checkTask = async () => {
-    if (hasPemistion) {
+    if (hasPermistion) {
       setTaskDone(!taskDone);
 
       const updatedTask: ITask = {
@@ -84,7 +88,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   };
 
   const clickPlayTask = () => {
-    if (hasPemistion) {
+    if (hasPermistion) {
       navigation.navigate('Pomodoro', {task: task});
     } else {
       ToastAndroid.show(
@@ -95,139 +99,177 @@ const TaskItem: React.FC<IProps> = ({task, onPress}) => {
   };
 
   return (
-    <TouchableOpacity
-      style={[styles.item, {backgroundColor: activedColors.backgroundLight}]}
-      activeOpacity={0.8}
-      onPress={onPress}>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={checkTask}
-        style={[
-          styles.check,
-          {
-            borderColor: PRIORITY_COLORS[task.priority].default,
-            backgroundColor: PRIORITY_COLORS[task.priority].light,
-          },
-        ]}>
-        {taskDone && (
-          <Feather name="check" size={16} color={activedColors.primary} />
-        )}
-      </TouchableOpacity>
-      <View style={{flex: 1, marginLeft: 16}}>
-        <Text style={[common.text, {color: activedColors.text}]}>
-          {task.name}
-        </Text>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <MaterialCommunityIcons
-            name="clock-time-four"
-            size={14}
-            color={activedColors.primary}
-          />
-          <Text style={[common.small, {color: activedColors.primary}]}>
-            {task.pomodoroCount} /
-          </Text>
-          <MaterialCommunityIcons
-            name="clock-time-four"
-            size={14}
-            color={activedColors.primaryLight}
-          />
-          <Text style={[common.small, {color: activedColors.primaryLight}]}>
-            {task.totalPomodoro}
-          </Text>
-          {assigneeUser && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginHorizontal: 10,
-              }}>
-              <Text style={[common.small, {color: activedColors.textSec}]}>
-                <FontAwesome5
-                  name="user-tag"
-                  size={12}
-                  color={activedColors.primary}
-                />
-                {': '}
-              </Text>
-              <Image
-                source={
-                  assigneeUser.avatar
-                    ? {
-                        uri: assigneeUser.avatar,
-                      }
-                    : require('@/assets/images/default-avatar.png')
-                }
-                style={{width: 15, height: 15, borderRadius: 15}}
-              />
-              <Text
-                style={{
-                  marginLeft: 4,
-                  color: activedColors.primary,
-                }}>
-                {assigneeUser.username}
-              </Text>
-            </View>
-          )}
-          {compeletedUser && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginLeft: 10,
-              }}>
-              <Text style={[common.small, {color: activedColors.textSec}]}>
-                <AntDesign
-                  name="checkcircle"
-                  size={13}
-                  color={activedColors.secondary}
-                />
-                {': '}
-              </Text>
-              <Image
-                source={
-                  compeletedUser.avatar
-                    ? {
-                        uri: compeletedUser.avatar,
-                      }
-                    : require('@/assets/images/default-avatar.png')
-                }
-                style={{width: 15, height: 15, borderRadius: 15}}
-              />
-              <Text
-                style={{
-                  marginLeft: 4,
-                  color: activedColors.secondary,
-                }}>
-                {compeletedUser.username}
-              </Text>
-            </View>
-          )}
-        </View>
-        {task.deadline && (
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <AntDesign name="calendar" size={14} color={activedColors.error} />
-            <Text
-              style={[
-                common.small,
-                {marginLeft: 1, color: activedColors.error},
-              ]}>
-              {timeFromNowFormat(task.deadline)}
+    <View>
+      <SwipeableItem
+        key={task.id}
+        item={task}
+        renderUnderlayLeft={() => <UnderlayLeft onDelete={onDelete} />}
+        snapPointsLeft={[user?.id == project?.ownerId ? 50 : 0]}>
+        <TouchableOpacity
+          style={[
+            styles.item,
+            {backgroundColor: activedColors.backgroundLight},
+          ]}
+          activeOpacity={0.8}
+          onPress={onPress}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={checkTask}
+            style={[
+              styles.check,
+              {
+                borderColor: PRIORITY_COLORS[task.priority].default,
+                backgroundColor: PRIORITY_COLORS[task.priority].light,
+              },
+            ]}>
+            {taskDone && (
+              <Feather name="check" size={16} color={activedColors.primary} />
+            )}
+          </TouchableOpacity>
+          <View style={{flex: 1, marginLeft: 16}}>
+            <Text style={[common.text, {color: activedColors.text}]}>
+              {task.name}
             </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <MaterialCommunityIcons
+                name="clock-time-four"
+                size={14}
+                color={activedColors.primary}
+              />
+              <Text style={[common.small, {color: activedColors.primary}]}>
+                {task.pomodoroCount} /
+              </Text>
+              <MaterialCommunityIcons
+                name="clock-time-four"
+                size={14}
+                color={activedColors.primaryLight}
+              />
+              <Text style={[common.small, {color: activedColors.primaryLight}]}>
+                {task.totalPomodoro}
+              </Text>
+              {assigneeUser && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginHorizontal: 10,
+                  }}>
+                  <Text style={[common.small, {color: activedColors.textSec}]}>
+                    <FontAwesome5
+                      name="user-tag"
+                      size={12}
+                      color={activedColors.primary}
+                    />
+                    {': '}
+                  </Text>
+                  <Image
+                    source={
+                      assigneeUser.avatar
+                        ? {
+                            uri: assigneeUser.avatar,
+                          }
+                        : require('@/assets/images/default-avatar.png')
+                    }
+                    style={{width: 15, height: 15, borderRadius: 15}}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 4,
+                      color: activedColors.primary,
+                    }}>
+                    {assigneeUser.username}
+                  </Text>
+                </View>
+              )}
+              {compeletedUser && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 10,
+                  }}>
+                  <Text style={[common.small, {color: activedColors.textSec}]}>
+                    <AntDesign
+                      name="checkcircle"
+                      size={13}
+                      color={activedColors.secondary}
+                    />
+                    {': '}
+                  </Text>
+                  <Image
+                    source={
+                      compeletedUser.avatar
+                        ? {
+                            uri: compeletedUser.avatar,
+                          }
+                        : require('@/assets/images/default-avatar.png')
+                    }
+                    style={{width: 15, height: 15, borderRadius: 15}}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 4,
+                      color: activedColors.secondary,
+                    }}>
+                    {compeletedUser.username}
+                  </Text>
+                </View>
+              )}
+            </View>
+            {task.deadline && (
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <AntDesign
+                  name="calendar"
+                  size={14}
+                  color={activedColors.error}
+                />
+                <Text
+                  style={[
+                    common.small,
+                    {marginLeft: 1, color: activedColors.error},
+                  ]}>
+                  {timeFromNowFormat(task.deadline)}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={[styles.play, {backgroundColor: activedColors.primaryLight}]}
+            onPress={clickPlayTask}>
+            <Ionicons
+              name="play"
+              size={12}
+              color={activedColors.primaryDark}
+              style={{paddingLeft: 2}}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </SwipeableItem>
+    </View>
+  );
+};
+
+interface IUnderlayLeftProps {
+  onDelete: () => void;
+}
+const UnderlayLeft: React.FC<IUnderlayLeftProps> = ({onDelete}) => {
+  const activedColors = useActivedColors();
+  const {close} = useSwipeableItemParams<IProps>();
+
+  const handleDelete = () => {
+    onDelete();
+    close();
+  };
+
+  return (
+    <View style={{alignSelf: 'flex-end'}}>
+      <View style={styles.underleftWrapper}>
+        <TouchableOpacity style={[styles.button]} onPress={handleDelete}>
+          <FontAwesome name="trash-o" size={20} color={activedColors.text} />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        style={[styles.play, {backgroundColor: activedColors.primaryLight}]}
-        onPress={clickPlayTask}>
-        <Ionicons
-          name="play"
-          size={12}
-          color={activedColors.primaryDark}
-          style={{paddingLeft: 2}}
-        />
-      </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -255,6 +297,18 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  underleftWrapper: {
+    width: 50,
+    height: '100%',
+    flexDirection: 'row',
+  },
+  button: {
+    flex: 1,
+    width: 50,
+    marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
