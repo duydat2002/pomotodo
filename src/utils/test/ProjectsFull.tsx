@@ -15,7 +15,7 @@ import {setProject} from '@/store/projects.slice';
 import SelectRadioModal from '@/components/Modal/SelectRadioModal';
 import UInput from '@/components/UI/UInput';
 
-const Projects = () => {
+const ProjectsFull = () => {
   const activedColors = useActivedColors();
   const navigation =
     useNavigation<ProjectsStackScreenProps<'Projects'>['navigation']>();
@@ -34,19 +34,31 @@ const Projects = () => {
   const [sortType, setSortType] = useState('name-asc');
 
   const sortItems = [
-    {key: 'name-asc', value: 'Alphabetically ASC'},
-    {key: 'time-desc', value: 'Latest'},
+    {key: 'name-asc', value: 'Alphabetically ASC'}, // Tên tăng dần
+    {key: 'name-desc', value: 'Alphabetically DESC'}, // Tên giảm dần
+    {key: 'time-asc', value: 'Oldest'}, // Thời gian tạo cũ nhất lên đầu
+    {key: 'time-desc', value: 'Latest'}, // Thời gian tạo mới nhất lên đầu
+    {key: 'tasks-asc', value: 'Total tasks ASC'}, // Tổng số task tăng dần
+    {key: 'tasks-desc', value: 'Total tasks DESC'}, // Tổng số task giảm dần
+    {key: 'totaltime-asc', value: 'Total time ASC'}, // Tổng số thời gian của dự án tăng dần
+    {key: 'totaltime-desc', value: 'Total time DESC'}, // Tổng số thời gian của dự án giảm dần
   ];
 
   useEffect(() => {
     let projectsTemp = projects?.slice() || null;
 
+    //Tìm kiếm theo tên project
     projectsTemp =
       projectsTemp?.filter(item =>
         item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase()),
       ) || null;
 
     switch (sortType) {
+      case 'time-asc':
+        projectsTemp?.sort(
+          (p1, p2) => Date.parse(p1.createdAt) - Date.parse(p2.createdAt),
+        );
+        break;
       case 'time-desc':
         projectsTemp?.sort(
           (p1, p2) => Date.parse(p2.createdAt) - Date.parse(p1.createdAt),
@@ -54,6 +66,21 @@ const Projects = () => {
         break;
       case 'name-asc':
         projectsTemp?.sort((p1, p2) => p1.name.localeCompare(p2.name));
+        break;
+      case 'name-desc':
+        projectsTemp?.sort((p1, p2) => p2.name.localeCompare(p1.name));
+        break;
+      case 'tasks-asc':
+        projectsTemp?.sort((p1, p2) => p1.totalTask - p2.totalTask);
+        break;
+      case 'tasks-desc':
+        projectsTemp?.sort((p1, p2) => p2.totalTask - p1.totalTask);
+        break;
+      case 'totaltime-asc':
+        projectsTemp?.sort((p1, p2) => p1.totalTime - p2.totalTime);
+        break;
+      case 'totaltime-desc':
+        projectsTemp?.sort((p1, p2) => p2.totalTime - p1.totalTime);
         break;
     }
 
@@ -138,8 +165,7 @@ const Projects = () => {
               }}
               onDelete={() => {
                 setProjectId(item.id);
-                // setActiveDeleteProject(true);
-                handleConfirmDelete();
+                setActiveDeleteProject(true);
               }}
             />
           )}
@@ -170,7 +196,7 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default ProjectsFull;
 
 const styles = StyleSheet.create({
   searchButton: {

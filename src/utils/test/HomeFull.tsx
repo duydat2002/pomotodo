@@ -41,8 +41,8 @@ const Home: React.FC = () => {
   const [remainingTask, setRemainingTask] = useState(0);
 
   useEffect(() => {
-    setTotalProject(projects?.length || 0);
-    setTotalTask(tasks?.length || 0);
+    setTotalProject(projects?.length || 0); //Tổng số project
+    setTotalTask(tasks?.length || 0); //Tổng số task
 
     let dailyTaskTemp = 0;
     let remainingTaskTemp = 0;
@@ -51,8 +51,8 @@ const Home: React.FC = () => {
         dailyTaskTemp++;
       if (!task.isDone) remainingTaskTemp++;
     });
-    setDailyTask(dailyTaskTemp);
-    setRemainingTask(remainingTaskTemp);
+    setDailyTask(dailyTaskTemp); // Số task có deadline hôm nay
+    setRemainingTask(remainingTaskTemp); //Số task chưa hoàn thành
   }, [projects, tasks]);
 
   const handleClickProjectItem = (projectId: string) => {
@@ -129,20 +129,39 @@ const Home: React.FC = () => {
       </Header>
       <ScrollView
         style={{flex: 1, width: '100%', marginTop: 20, paddingHorizontal: 16}}>
+        {/* Thêm tổng số project, tổng số task */}
         <View style={{flexDirection: 'row', gap: 10}}>
           <View style={[styles.statBox, {backgroundColor: '#bacfff'}]}>
             <Text style={[common.text, {fontWeight: '600', color: '#fff'}]}>
-              {'Daily Task(s)'}
+              {'Total Projects'}
             </Text>
             <Text style={[common.text, {color: '#fff'}]}>
-              {dailyTask} tasks
+              {totalProject} projects
             </Text>
           </View>
           <View style={[styles.statBox, {backgroundColor: '#fafafa'}]}>
             <Text style={[common.text, {fontWeight: '600', color: '#000'}]}>
-              {'Remaining'}
+              {'Total Tasks'}
             </Text>
             <Text style={[common.text, {color: '#000'}]}>
+              {totalTask} tasks
+            </Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', gap: 10, marginTop: 15}}>
+          <View style={[styles.statBox, {backgroundColor: '#fafafa'}]}>
+            <Text style={[common.text, {fontWeight: '600', color: '#000'}]}>
+              {'Daily Task(s)'}
+            </Text>
+            <Text style={[common.text, {color: '#000'}]}>
+              {dailyTask} tasks
+            </Text>
+          </View>
+          <View style={[styles.statBox, {backgroundColor: '#bacfff'}]}>
+            <Text style={[common.text, {fontWeight: '600', color: '#fff'}]}>
+              {'Remaining'}
+            </Text>
+            <Text style={[common.text, {color: '#fff'}]}>
               {remainingTask} tasks
             </Text>
           </View>

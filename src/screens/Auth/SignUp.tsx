@@ -107,15 +107,15 @@ const SignUp = () => {
                   color={activedColors.text}
                 />
               ),
-              rightChild: (
-                <FontAwesome
-                  style={{marginLeft: 10}}
-                  name={showPassword ? 'eye' : 'eye-slash'}
-                  size={20}
-                  color={activedColors.text}
-                  onPress={() => setShowPassword(!showPassword)}
-                />
-              ),
+              // rightChild: (
+              //   <FontAwesome
+              //     style={{marginLeft: 10}}
+              //     name={showPassword ? 'eye' : 'eye-slash'}
+              //     size={20}
+              //     color={activedColors.text}
+              //     onPress={() => setShowPassword(!showPassword)}
+              //   />
+              // ),
             }}
           </UInput>
           <Text
