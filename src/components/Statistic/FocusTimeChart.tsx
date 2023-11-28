@@ -1,9 +1,9 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {BarChart, LineChart, PieChart} from 'react-native-gifted-charts';
+import {BarChart} from 'react-native-gifted-charts';
 
 const FocusTimeChart = () => {
-  const data = [{value: 50}, {value: 80}, {value: 90}, {value: 70}];
+  const data = [{value: 50}];
 
   return (
     <View>

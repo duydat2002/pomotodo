@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   TouchableHighlight,
+  ToastAndroid,
 } from 'react-native';
 import {useActivedColors, useAppSelector} from '@/hooks';
 import {common} from '@/assets/styles';
@@ -14,6 +15,7 @@ import SwipeableItem, {
 } from 'react-native-swipeable-item';
 import {IProject, IUser} from '@/types';
 import {AntDesign, FontAwesome} from '@expo/vector-icons';
+import {useProject} from '@/hooks/useProject';
 
 interface IProps {
   project: IProject;
@@ -29,6 +31,8 @@ const ProjectItem: React.FC<IProps> = ({
   onDelete,
 }) => {
   const activedColors = useActivedColors();
+
+  const {createProjectLike} = useProject();
 
   const {user} = useAppSelector(state => state.user);
   const {colleagues} = useAppSelector(state => state.colleagues);
@@ -56,6 +60,14 @@ const ProjectItem: React.FC<IProps> = ({
       setTeamText(`${ownerUsername} and ${project.team.length - 1} other(s)`);
     }
   }, [project]);
+
+  const likeProject = async () => {
+    await createProjectLike({
+      userId: user!.id,
+      projectId: project.id,
+    });
+    ToastAndroid.show('Create like project!', ToastAndroid.SHORT);
+  };
 
   return (
     <SwipeableItem

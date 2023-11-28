@@ -5,6 +5,7 @@ import {setTasks} from '@/store/tasks.slice';
 import {useProject} from '@/hooks/useProject';
 import firestore from '@react-native-firebase/firestore';
 import {storeData} from './useAsyncStorage';
+import {ITaskLike} from '@/types/taskLike';
 
 export const useTask = () => {
   const dispatch = useAppDispatch();
@@ -79,6 +80,39 @@ export const useTask = () => {
       await firestore().collection('tasks').doc(id).set(datas);
       const newTasks = tasks ? [...tasks, task] : [task];
       updateProjectInfo(task.projectId!, newTasks!);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const createTaskLike = async (taskLike: Partial<ITaskLike>) => {
+    try {
+      const {id, ...datas} = taskLike;
+      await firestore().collection('taskLikes').add(datas);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getTaskLikes = async (userId: string) => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('taskLikes')
+        .where('userId', '==', userId)
+        .get();
+
+      if (querySnapshot.empty) {
+        return null;
+      } else {
+        const taskLikes: ITaskLike[] = [];
+        querySnapshot.forEach(doc => {
+          taskLikes.push({
+            id: doc.id,
+            ...doc.data(),
+          } as ITaskLike);
+        });
+        return taskLikes;
+      }
     } catch (error) {
       console.log(error);
     }
@@ -218,5 +252,7 @@ export const useTask = () => {
     deleteTask,
     listenTasks,
     listenTasksByProjectId,
+    createTaskLike,
+    getTaskLikes,
   };
 };

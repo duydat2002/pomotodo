@@ -13,7 +13,7 @@ import {ITask} from '@/types';
 import SafeView from '@/components/Layout/SafeView';
 import Header from '@/components/Layout/Header';
 import {useActivedColors, useAppDispatch, useAppSelector} from '@/hooks';
-import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
 import ProjectInfoCard from '@/components/Project/ProjectInfoCard';
 import TaskItem from '@/components/Task/TaskItem';
 import {ProjectsStackScreenProps} from '@/types';
@@ -144,15 +144,23 @@ const Tasks = () => {
       <Header title={project.name} hasBack>
         {{
           rightChild: (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setActiveSort(true)}>
-              <MaterialCommunityIcons
-                name="sort"
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <AntDesign
+                name="heart"
                 size={24}
-                color={activedColors.text}
+                color="black"
+                onPress={() => navigation.navigate('TaskLike')}
               />
-            </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setActiveSort(true)}>
+                <MaterialCommunityIcons
+                  name="sort"
+                  size={24}
+                  color={activedColors.text}
+                />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       </Header>

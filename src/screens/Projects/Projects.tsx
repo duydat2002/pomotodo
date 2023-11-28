@@ -84,12 +84,20 @@ const Projects = () => {
       <Header title="Your Projects">
         {{
           rightChild: (
-            <MaterialCommunityIcons
-              name="sort"
-              size={24}
-              color={activedColors.text}
-              onPress={() => setActiveSort(true)}
-            />
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <AntDesign
+                name="heart"
+                size={24}
+                color="black"
+                onPress={() => navigation.navigate('ProjectLike')}
+              />
+              <MaterialCommunityIcons
+                name="sort"
+                size={24}
+                color={activedColors.text}
+                onPress={() => setActiveSort(true)}
+              />
+            </View>
           ),
         }}
       </Header>

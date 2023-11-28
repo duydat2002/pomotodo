@@ -6,6 +6,8 @@ import Tasks from '@/screens/Projects/Tasks';
 import CreateTask from '@/screens/Projects/CreateTask';
 import CreateProject from '@/screens/Projects/CreateProject';
 import {ProjectsStackParamList} from '@/types';
+import ProjectLike from '@/screens/Projects/ProjectLike';
+import TaskLike from './../screens/Projects/TaskLike';
 
 const Stack = createNativeStackNavigator<ProjectsStackParamList>();
 
@@ -31,6 +33,8 @@ const ProjectNavigator = () => {
       <Stack.Screen name="Tasks" component={Tasks} />
       <Stack.Screen name="CreateTask" component={CreateTask} />
       <Stack.Screen name="CreateProject" component={CreateProject} />
+      <Stack.Screen name="ProjectLike" component={ProjectLike} />
+      <Stack.Screen name="TaskLike" component={TaskLike} />
     </Stack.Navigator>
   );
 };

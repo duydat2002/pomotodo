@@ -44,7 +44,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress, onDelete}) => {
   const {project} = useAppSelector(state => state.projects);
 
   const {getLocalUserById} = useUser();
-  const {updateTask} = useTask();
+  const {updateTask, createTaskLike} = useTask();
 
   const [assigneeUser, setAssigneeUser] = useState<IUser | null>(null);
   const [compeletedUser, setCompeletedUser] = useState<IUser | null>(null);
@@ -96,6 +96,14 @@ const TaskItem: React.FC<IProps> = ({task, onPress, onDelete}) => {
         ToastAndroid.SHORT,
       );
     }
+  };
+
+  const clickLikeTask = async () => {
+    await createTaskLike({
+      userId: user!.id,
+      taskId: task.id,
+    });
+    ToastAndroid.show('Create like task!', ToastAndroid.SHORT);
   };
 
   return (
@@ -236,7 +244,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress, onDelete}) => {
           <TouchableOpacity
             activeOpacity={0.7}
             style={[styles.play, {backgroundColor: activedColors.primaryLight}]}
-            onPress={clickPlayTask}>
+            onPress={clickLikeTask}>
             <Ionicons
               name="play"
               size={12}

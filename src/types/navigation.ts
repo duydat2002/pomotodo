@@ -50,6 +50,8 @@ export type ProjectsStackParamList = {
   Tasks: {projectId: string};
   CreateTask: {projectId: string; taskId: string | null};
   CreateProject: {projectId: string} | undefined;
+  ProjectLike: undefined;
+  TaskLike: undefined;
 };
 
 export type ProjectsStackScreenProps<T extends keyof ProjectsStackParamList> =

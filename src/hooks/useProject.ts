@@ -5,6 +5,7 @@ import {useAppSelector, useAppDispatch} from './useStore';
 import {setProject, setProjects} from '@/store/projects.slice';
 import {storeData} from './useAsyncStorage';
 import {setTasks} from '@/store/tasks.slice';
+import {IProjectLike} from '@/types/projectLike';
 
 export const useProject = () => {
   const dispatch = useAppDispatch();
@@ -213,6 +214,39 @@ export const useProject = () => {
     }
   };
 
+  const createProjectLike = async (projectLike: Partial<IProjectLike>) => {
+    try {
+      const {id, ...datas} = projectLike;
+      await firestore().collection('projectLikes').add(datas);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getProjectLikes = async (userId: string) => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('projectLikes')
+        .where('userId', '==', userId)
+        .get();
+
+      if (querySnapshot.empty) {
+        return null;
+      } else {
+        const projectLikes: IProjectLike[] = [];
+        querySnapshot.forEach(doc => {
+          projectLikes.push({
+            id: doc.id,
+            ...doc.data(),
+          } as IProjectLike);
+        });
+        return projectLikes;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return {
     listenProjects,
     createProject,
@@ -220,5 +254,7 @@ export const useProject = () => {
     updateProjectInfo,
     deleteProject,
     getProjectsFS,
+    createProjectLike,
+    getProjectLikes,
   };
 };
