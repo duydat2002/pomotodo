@@ -244,7 +244,7 @@ const TaskItem: React.FC<IProps> = ({task, onPress, onDelete}) => {
           <TouchableOpacity
             activeOpacity={0.7}
             style={[styles.play, {backgroundColor: activedColors.primaryLight}]}
-            onPress={clickLikeTask}>
+            onPress={clickPlayTask}>
             <Ionicons
               name="play"
               size={12}
